@@ -758,6 +758,9 @@ writeSolutionL ( const FluidMesh& Mesh, const paralution::LocalVector<double>& s
                  std::string& outName )
 {
   double uval, vval, wval;
+  int nNodes;
+  int nEls;
+  int horizCount = 0;
   std::ofstream flowrun;
   flowrun.open ( outName.c_str() );
   flowrun << "Title = Stokes Solution\n";
@@ -765,45 +768,290 @@ writeSolutionL ( const FluidMesh& Mesh, const paralution::LocalVector<double>& s
   {
     case 2 :
     {
+      nNodes = Mesh.Nodes.size() / 2;
+      nEls = Mesh.DOF[0];
       flowrun << "VARIABLES = X, Y, P, U, V, IB\n";
-      flowrun << "ZONE I=" << Mesh.NX << ", J=" << Mesh.NY << ", K=1, F=Point\n";
-      for (int row = 0; row < Mesh.DOF[0]; row++)
+      flowrun << "ZONE N=" << nNodes << ", E=" << nEls << ", DATAPACKING=BLOCK, ZONETYPE=FEQuadrilateral\n";
+      flowrun << "VARLOCATION=( [3-6]=CELLCENTERED)\n";
+      for (int row = 0; row < nNodes; row++)
+      {
+        horizCount++;
+        if (horizCount < 1000)
+        {
+          flowrun << Mesh.Nodes[ idx2( row, 0, 2 ) ] << "\t";
+        }
+        else
+        {
+          flowrun << "\n" << Mesh.Nodes[ idx2( row, 0, 2 ) ] << "\t";
+          horizCount = 1;
+        }
+      }
+      horizCount = 0;
+      flowrun << "\n";
+      for (int row = 0; row < nNodes; row++)
+      {
+        horizCount++;
+        if (horizCount < 1000)
+        {
+          flowrun << Mesh.Nodes[ idx2( row, 1, 2 ) ] << "\t";
+        }
+        else
+        {
+          flowrun << "\n" << Mesh.Nodes[ idx2( row, 1, 2 ) ] << "\t";
+          horizCount = 1;
+        }
+      }
+      horizCount = 0;
+      flowrun << "\n";
+      for (int row = 0; row < nEls; row++)
+      {
+        horizCount++;
+        if (horizCount < 1000)
+        {
+          flowrun << sol[ row  + Mesh.DOF[1] + Mesh.DOF[2] ] << "\t";
+        }
+        else
+        {
+          flowrun << "\n" << sol[ row + Mesh.DOF[1] + Mesh.DOF[2] ] << "\t";
+          horizCount = 1;
+        }
+      }
+      horizCount = 0;
+      flowrun << "\n";
+      for (int row = 0; row < nEls; row++)
       {
         uval = 0.5 * (sol[ Mesh.PressureCellUNeighbor[ idx2( row, 0, 2 ) ] ] \
                     + sol[ Mesh.PressureCellUNeighbor[ idx2( row, 1, 2 ) ] ] );
+        horizCount++;
+        if (horizCount < 1000)
+        {
+          flowrun << uval << "\t";
+        }
+        else
+        {
+          flowrun << "\n" << uval << "\t";
+          horizCount = 1;
+        }
+      }
+      horizCount = 0;
+      flowrun << "\n";
+      for (int row = 0; row < nEls; row++)
+      {
         vval = 0.5 * (sol[ Mesh.PressureCellVNeighbor[ idx2( row, 0, 2 ) ] + Mesh.DOF[1] ] \
                     + sol[ Mesh.PressureCellVNeighbor[ idx2( row, 1, 2 ) ] + Mesh.DOF[1] ] );
-        flowrun << Mesh.PCellCenters[ idx2( row, 0, Mesh.CellCentersLDI ) ] << "\t";
-        flowrun << Mesh.PCellCenters[ idx2( row, 1, Mesh.CellCentersLDI ) ] << "\t";
-        flowrun << sol[ row + Mesh.DOF[1] + Mesh.DOF[2] ] << "\t";
-        flowrun << uval << "\t";
-        flowrun << vval << "\t";
-        flowrun << Mesh.ImmersedBoundary[ row ] << "\n";
+        horizCount++;
+        if (horizCount < 1000)
+        {
+          flowrun << vval << "\t";
+        }
+        else
+        {
+          flowrun << "\n" << vval << "\t";
+          horizCount = 1;
+        }
+      }
+      horizCount = 0;
+      flowrun << "\n";
+      for (int row = 0; row < nEls; row++)
+      {
+        horizCount++;
+        if (horizCount < 1000)
+        {
+          flowrun << Mesh.ImmersedBoundary[ row ] << "\t";
+        }
+        else
+        {
+          flowrun << "\n" << Mesh.ImmersedBoundary[ row ] << "\t";
+          horizCount = 1;
+        }
+      }
+      horizCount = 0;
+      flowrun << "\n";
+      for (int row = 0; row < nEls; row++)
+      {
+        horizCount++;
+        if (horizCount < 200)
+        {
+          flowrun << Mesh.mv[ idx2( row, 0, 4 ) ] + 1 << "\t";
+          flowrun << Mesh.mv[ idx2( row, 1, 4 ) ] + 1 << "\t";
+          flowrun << Mesh.mv[ idx2( row, 2, 4 ) ] + 1 << "\t";
+          flowrun << Mesh.mv[ idx2( row, 3, 4 ) ] + 1 << "\t";
+          horizCount = horizCount + 4;
+        }
+        else
+        {
+          flowrun << "\n";
+          flowrun << Mesh.mv[ idx2( row, 0, 4 ) ] + 1 << "\t";
+          flowrun << Mesh.mv[ idx2( row, 1, 4 ) ] + 1 << "\t";
+          flowrun << Mesh.mv[ idx2( row, 2, 4 ) ] + 1 << "\t";
+          flowrun << Mesh.mv[ idx2( row, 3, 4 ) ] + 1 << "\t";
+          horizCount = 4;
+        }
       }
       break;
     }
     case 3 :
     {
+      nNodes = Mesh.Nodes.size() / 3;
+      nEls = Mesh.DOF[0];
       flowrun << "VARIABLES = X, Y, Z, P, U, V, W, IB\n";
-      flowrun << "ZONE I=" << Mesh.NX << ", J=" << Mesh.NY << ", K=" << Mesh.NZ << ", F=Point\n";
-      for (int row = 0; row < Mesh.DOF[0]; row++)
+      flowrun << "ZONE N=" << nNodes << ", E=" << nEls << ", DATAPACKING=BLOCK, ZONETYPE=FEBrick\n";
+      flowrun << "VARLOCATION=( [4-8]=CELLCENTERED)\n";
+      for (int row = 0; row < nNodes; row++)
+      {
+        horizCount++;
+        if (horizCount < 1000)
+        {
+          flowrun << Mesh.Nodes[ idx2( row, 0, 3 ) ] << "\t";
+        }
+        else
+        {
+          flowrun << "\n" << Mesh.Nodes[ idx2( row, 0, 3 ) ] << "\t";
+          horizCount = 1;
+        }
+      }
+      horizCount = 0;
+      flowrun << "\n";
+      for (int row = 0; row < nNodes; row++)
+      {
+        horizCount++;
+        if (horizCount < 1000)
+        {
+          flowrun << Mesh.Nodes[ idx2( row, 1, 3 ) ] << "\t";
+        }
+        else
+        {
+          flowrun << "\n" << Mesh.Nodes[ idx2( row, 1, 3 ) ] << "\t";
+          horizCount = 1;
+        }
+      }
+      horizCount = 0;
+      flowrun << "\n";
+      for (int row = 0; row < nNodes; row++)
+      {
+        horizCount++;
+        if (horizCount < 1000)
+        {
+          flowrun << Mesh.Nodes[ idx2( row, 2, 3 ) ] << "\t";
+        }
+        else
+        {
+          flowrun << "\n" << Mesh.Nodes[ idx2( row, 2, 3 ) ] << "\t";
+          horizCount = 1;
+        }
+      }
+      horizCount = 0;
+      flowrun << "\n";
+      for (int row = 0; row < nEls; row++)
+      {
+        horizCount++;
+        if (horizCount < 1000)
+        {
+          flowrun << sol[ row  + Mesh.DOF[1] + Mesh.DOF[2] + Mesh.DOF[3] ] << "\t";
+        }
+        else
+        {
+          flowrun << "\n" << sol[ row + Mesh.DOF[1] + Mesh.DOF[2] + Mesh.DOF[3]  ] << "\t";
+          horizCount = 1;
+        }
+      }
+      horizCount = 0;
+      flowrun << "\n";
+      for (int row = 0; row < nEls; row++)
       {
         uval = 0.5 * (sol[ Mesh.PressureCellUNeighbor[ idx2( row, 0, 2 ) ] ] \
                     + sol[ Mesh.PressureCellUNeighbor[ idx2( row, 1, 2 ) ] ] );
+        horizCount++;
+        if (horizCount < 1000)
+        {
+          flowrun << uval << "\t";
+        }
+        else
+        {
+          flowrun << "\n" << uval << "\t";
+          horizCount = 1;
+        }
+      }
+      horizCount = 0;
+      flowrun << "\n";
+      for (int row = 0; row < nEls; row++)
+      {
         vval = 0.5 * (sol[ Mesh.PressureCellVNeighbor[ idx2( row, 0, 2 ) ] + Mesh.DOF[1] ] \
                     + sol[ Mesh.PressureCellVNeighbor[ idx2( row, 1, 2 ) ] + Mesh.DOF[1] ] );
-        wval = 0.5 * (sol[ Mesh.PressureCellWNeighbor[ idx2( row, 0, 2 ) ] \
-                           + Mesh.DOF[1] + Mesh.DOF[2] ] \
-                    + sol[ Mesh.PressureCellWNeighbor[ idx2( row, 1, 2 ) ] \
-                           + Mesh.DOF[1] + Mesh.DOF[2] ] );
-        flowrun << Mesh.PCellCenters[ idx2( row, 0, Mesh.CellCentersLDI ) ] << "\t";
-        flowrun << Mesh.PCellCenters[ idx2( row, 1, Mesh.CellCentersLDI ) ] << "\t";
-        flowrun << Mesh.PCellCenters[ idx2( row, 2, Mesh.CellCentersLDI ) ] << "\t";
-        flowrun << sol[ row + Mesh.DOF[1] + Mesh.DOF[2] + Mesh.DOF[3] ] << "\t";
-        flowrun << uval << "\t";
-        flowrun << vval << "\t";
-        flowrun << wval << "\t";
-        flowrun << Mesh.ImmersedBoundary[ row ] << "\n";
+        horizCount++;
+        if (horizCount < 1000)
+        {
+          flowrun << vval << "\t";
+        }
+        else
+        {
+          flowrun << "\n" << vval << "\t";
+          horizCount = 1;
+        }
+      }
+      horizCount = 0;
+      flowrun << "\n";
+      for (int row = 0; row < nEls; row++)
+      {
+        wval = 0.5 * (sol[ Mesh.PressureCellVNeighbor[ idx2( row, 0, 2 ) ] + Mesh.DOF[1] + Mesh.DOF[2] ] \
+                    + sol[ Mesh.PressureCellVNeighbor[ idx2( row, 1, 2 ) ] + Mesh.DOF[1] + Mesh.DOF[2] ] );
+        horizCount++;
+        if (horizCount < 1000)
+        {
+          flowrun << wval << "\t";
+        }
+        else
+        {
+          flowrun << "\n" << wval << "\t";
+          horizCount = 1;
+        }
+      }
+      horizCount = 0;
+      flowrun << "\n";
+
+      for (int row = 0; row < nEls; row++)
+      {
+        horizCount++;
+        if (horizCount < 1000)
+        {
+          flowrun << Mesh.ImmersedBoundary[ row ] << "\t";
+        }
+        else
+        {
+          flowrun << "\n" << Mesh.ImmersedBoundary[ row ] << "\t";
+          horizCount = 1;
+        }
+      }
+      horizCount = 0;
+      flowrun << "\n";
+      for (int row = 0; row < nEls; row++)
+      {
+        horizCount++;
+        if (horizCount < 200)
+        {
+          flowrun << Mesh.mv[ idx2( row, 0, 8 ) ] + 1 << "\t";
+          flowrun << Mesh.mv[ idx2( row, 1, 8 ) ] + 1 << "\t";
+          flowrun << Mesh.mv[ idx2( row, 2, 8 ) ] + 1 << "\t";
+          flowrun << Mesh.mv[ idx2( row, 3, 8 ) ] + 1 << "\t";
+          flowrun << Mesh.mv[ idx2( row, 7, 8 ) ] + 1 << "\t";
+          flowrun << Mesh.mv[ idx2( row, 6, 8 ) ] + 1 << "\t";
+          flowrun << Mesh.mv[ idx2( row, 5, 8 ) ] + 1 << "\t";
+          flowrun << Mesh.mv[ idx2( row, 4, 8 ) ] + 1 << "\t";
+          horizCount = horizCount + 8;
+        }
+        else
+        {
+          flowrun << "\n";
+          flowrun << Mesh.mv[ idx2( row, 0, 8 ) ] + 1 << "\t";
+          flowrun << Mesh.mv[ idx2( row, 1, 8 ) ] + 1 << "\t";
+          flowrun << Mesh.mv[ idx2( row, 2, 8 ) ] + 1 << "\t";
+          flowrun << Mesh.mv[ idx2( row, 3, 8 ) ] + 1 << "\t";
+          flowrun << Mesh.mv[ idx2( row, 7, 8 ) ] + 1 << "\t";
+          flowrun << Mesh.mv[ idx2( row, 6, 8 ) ] + 1 << "\t";
+          flowrun << Mesh.mv[ idx2( row, 5, 8 ) ] + 1 << "\t";
+          flowrun << Mesh.mv[ idx2( row, 4, 8 ) ] + 1 << "\t";
+          horizCount = 8;
+        }
       }
       break;
     }

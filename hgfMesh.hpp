@@ -8,6 +8,7 @@ class FluidMesh
 {
   public:
     // Public data
+    std::vector<unsigned long> mv;
     std::vector<double> Nodes, PCellCenters, UCellCenters, VCellCenters;
     std::vector<double> WCellCenters;
     std::vector<double> PCellWidths, UCellWidths, VCellWidths, WCellWidths;

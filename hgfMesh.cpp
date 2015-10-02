@@ -58,7 +58,7 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
       double dy = width / ny;
       double dz = 0;
       int countCell = -1;
-      int *mv  = new int [ (numPCells * 4) ];
+      mv.resize( (numPCells * 4) );
       double cellVert [ 8 ];
 
       // First we buil FullGrid, ImmersedBoundary, and Nodes.
@@ -324,7 +324,6 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
         VCellWidths[ idx2( cl, 1, CellWidthsLDI ) ] = dy;
       }
 
-      delete[] mv;
       break;
     }
     default : // 3D problem
@@ -359,7 +358,7 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
       double dy = width / ny;
       double dz = height / nz;
       int countCell = -1;
-      int *mv  = new int [ (numPCells * 8) ];
+      mv.resize( (numPCells * 8) );
       double cellVert [ 24 ];
 
       // First we buil FullGrid, ImmersedBoundary, and Nodes.
@@ -763,7 +762,6 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
         WCellWidths[ idx2( cl, 2, CellWidthsLDI ) ] = dz;
       }
 
-      delete[] mv;
       break;
   } // End of dimension switch
 }
