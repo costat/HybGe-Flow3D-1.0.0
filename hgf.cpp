@@ -84,22 +84,16 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
           std::vector<double> matValsY = matValsX;
           std::vector<double> matValsZ = matValsX;
           std::vector<double> forceY, forceZ;
-
-          std::cout << "\n Check 1 \n";
+          forceY.resize( dofTotal );
+          forceZ.resize( dofTotal );
 
           // Boundary Conditions & Force
           BoundaryConditions( \
             Mesh, visc, matIsX, matJsX, matValsX, forceX, 0 );
-
-          std::cout << "\n Check 2 \n";
           BoundaryConditions( \
             Mesh, visc, matIsY, matJsY, matValsY, forceY, 1 );
-
-          std::cout << "\n Check 3 \n";
           BoundaryConditions( \
             Mesh, visc, matIsZ, matJsZ, matValsZ, forceZ, 2 );
-
-          std::cout << "\n Check 4 \n";
 
           // Array timer
           array_duration = ( std::clock() - array_start ) / (double) CLOCKS_PER_SEC;
@@ -217,6 +211,7 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
           std::vector<int> matJsY = matJsX;
           std::vector<double> matValsY = matValsX;
           std::vector<double> forceY;
+          forceY.resize( dofTotal );
           // Boundary Conditions & Force
           BoundaryConditions( \
             Mesh, visc, matIsX, matJsX, matValsX, forceX, 0 );
