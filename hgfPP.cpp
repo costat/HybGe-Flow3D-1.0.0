@@ -993,8 +993,8 @@ writeSolutionL ( const FluidMesh& Mesh, const paralution::LocalVector<double>& s
       flowrun << "\n";
       for (int row = 0; row < nEls; row++)
       {
-        wval = 0.5 * (sol[ Mesh.PressureCellVNeighbor[ idx2( row, 0, 2 ) ] - 1 + Mesh.DOF[1] + Mesh.DOF[2] ] \
-                    + sol[ Mesh.PressureCellVNeighbor[ idx2( row, 1, 2 ) ] - 1 + Mesh.DOF[1] + Mesh.DOF[2] ] );
+        wval = 0.5 * (sol[ Mesh.PressureCellWNeighbor[ idx2( row, 0, 2 ) ] - 1 + Mesh.DOF[1] + Mesh.DOF[2] ] \
+                    + sol[ Mesh.PressureCellWNeighbor[ idx2( row, 1, 2 ) ] - 1 + Mesh.DOF[1] + Mesh.DOF[2] ] );
         horizCount++;
         if (horizCount < 1000)
         {
