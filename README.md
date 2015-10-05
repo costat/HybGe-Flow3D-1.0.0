@@ -31,3 +31,8 @@ Publications making use of HybGe-Flow3D should cite this software package. An ex
 ### Contact ###
 
 Timothy B. Costa, costat@math.oregonstate.edu
+
+### Known Issues ###
+
+1. Boundary conditions for complex geometry enforced by '1' in grid producing errors.
+Will be resolved soon.
