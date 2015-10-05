@@ -1756,7 +1756,7 @@ vcartflow2D ( const FluidMesh& Mesh, std::vector<int>& matIs, \
   double maxin = 1.0;
   double xmin = 0;
   double xmax = 0;
-  int cl, cl2, fc, colId[3], nbrfaces[4];
+  int cl, cl2, fc, colId[4], nbrfaces[4];
   double val[4], dx[4], dy[4];
 
   /* If the problem is flow along the y axis, need to track min and max

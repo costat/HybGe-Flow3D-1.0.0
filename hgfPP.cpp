@@ -772,7 +772,7 @@ writeSolutionL ( const FluidMesh& Mesh, const paralution::LocalVector<double>& s
       nEls = Mesh.DOF[0];
       flowrun << "VARIABLES = X, Y, P, U, V, IB\n";
       flowrun << "ZONE N=" << nNodes << ", E=" << nEls << ", DATAPACKING=BLOCK, ZONETYPE=FEQuadrilateral\n";
-      flowrun << "VARLOCATION=( [3-6]=CELLCENTERED)\n";
+      flowrun << "VARLOCATION=( [3-6]=CELLCENTERED )\n";
       for (int row = 0; row < nNodes; row++)
       {
         horizCount++;
@@ -820,8 +820,8 @@ writeSolutionL ( const FluidMesh& Mesh, const paralution::LocalVector<double>& s
       flowrun << "\n";
       for (int row = 0; row < nEls; row++)
       {
-        uval = 0.5 * (sol[ Mesh.PressureCellUNeighbor[ idx2( row, 0, 2 ) ] ] \
-                    + sol[ Mesh.PressureCellUNeighbor[ idx2( row, 1, 2 ) ] ] );
+        uval = 0.5 * (sol[ Mesh.PressureCellUNeighbor[ idx2( row, 0, 2 ) ] - 1 ] \
+                    + sol[ Mesh.PressureCellUNeighbor[ idx2( row, 1, 2 ) ] - 1] );
         horizCount++;
         if (horizCount < 1000)
         {
@@ -837,8 +837,8 @@ writeSolutionL ( const FluidMesh& Mesh, const paralution::LocalVector<double>& s
       flowrun << "\n";
       for (int row = 0; row < nEls; row++)
       {
-        vval = 0.5 * (sol[ Mesh.PressureCellVNeighbor[ idx2( row, 0, 2 ) ] + Mesh.DOF[1] ] \
-                    + sol[ Mesh.PressureCellVNeighbor[ idx2( row, 1, 2 ) ] + Mesh.DOF[1] ] );
+        vval = 0.5 * (sol[ Mesh.PressureCellVNeighbor[ idx2( row, 0, 2 ) ] - 1 + Mesh.DOF[1] ] \
+                    + sol[ Mesh.PressureCellVNeighbor[ idx2( row, 1, 2 ) ] - 1 + Mesh.DOF[1] ] );
         horizCount++;
         if (horizCount < 1000)
         {
@@ -959,8 +959,8 @@ writeSolutionL ( const FluidMesh& Mesh, const paralution::LocalVector<double>& s
       flowrun << "\n";
       for (int row = 0; row < nEls; row++)
       {
-        uval = 0.5 * (sol[ Mesh.PressureCellUNeighbor[ idx2( row, 0, 2 ) ] ] \
-                    + sol[ Mesh.PressureCellUNeighbor[ idx2( row, 1, 2 ) ] ] );
+        uval = 0.5 * (sol[ Mesh.PressureCellUNeighbor[ idx2( row, 0, 2 ) ] - 1 ] \
+                    + sol[ Mesh.PressureCellUNeighbor[ idx2( row, 1, 2 ) ] - 1 ] );
         horizCount++;
         if (horizCount < 1000)
         {
@@ -976,8 +976,8 @@ writeSolutionL ( const FluidMesh& Mesh, const paralution::LocalVector<double>& s
       flowrun << "\n";
       for (int row = 0; row < nEls; row++)
       {
-        vval = 0.5 * (sol[ Mesh.PressureCellVNeighbor[ idx2( row, 0, 2 ) ] + Mesh.DOF[1] ] \
-                    + sol[ Mesh.PressureCellVNeighbor[ idx2( row, 1, 2 ) ] + Mesh.DOF[1] ] );
+        vval = 0.5 * (sol[ Mesh.PressureCellVNeighbor[ idx2( row, 0, 2 ) ] - 1 + Mesh.DOF[1] ] \
+                    + sol[ Mesh.PressureCellVNeighbor[ idx2( row, 1, 2 ) ] - 1 + Mesh.DOF[1] ] );
         horizCount++;
         if (horizCount < 1000)
         {
@@ -993,8 +993,8 @@ writeSolutionL ( const FluidMesh& Mesh, const paralution::LocalVector<double>& s
       flowrun << "\n";
       for (int row = 0; row < nEls; row++)
       {
-        wval = 0.5 * (sol[ Mesh.PressureCellVNeighbor[ idx2( row, 0, 2 ) ] + Mesh.DOF[1] + Mesh.DOF[2] ] \
-                    + sol[ Mesh.PressureCellVNeighbor[ idx2( row, 1, 2 ) ] + Mesh.DOF[1] + Mesh.DOF[2] ] );
+        wval = 0.5 * (sol[ Mesh.PressureCellVNeighbor[ idx2( row, 0, 2 ) ] - 1 + Mesh.DOF[1] + Mesh.DOF[2] ] \
+                    + sol[ Mesh.PressureCellVNeighbor[ idx2( row, 1, 2 ) ] - 1 + Mesh.DOF[1] + Mesh.DOF[2] ] );
         horizCount++;
         if (horizCount < 1000)
         {
