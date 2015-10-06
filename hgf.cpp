@@ -46,7 +46,7 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
 
       // Mesh Timer
       mesh_duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-      std::cout << "\n Mesh constructed in " << mesh_duration << "seconds\n\n";
+      std::cout << "Mesh constructed in " << mesh_duration << "seconds\n";
       array_start = std::clock();
 
       // Compute total degrees of freedom and maximum # of nonzero values in matrix.
@@ -97,7 +97,7 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
 
           // Array timer
           array_duration = ( std::clock() - array_start ) / (double) CLOCKS_PER_SEC;
-          std::cout << " Arrays constructed in " << array_duration << "seconds\n\n";
+          std::cout << "Arrays constructed in " << array_duration << "seconds\n";
           solve_start = std::clock();
 
           init_paralution();
@@ -177,8 +177,8 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
 
           // Linear solve timer
           solve_duration = ( std::clock() - solve_start ) / (double) CLOCKS_PER_SEC;
-          std::cout << "\n Linear system solved in ";
-          std::cout  << solve_duration << "seconds\n\n";
+          std::cout << "Linear system solved in ";
+          std::cout  << solve_duration << "seconds\n";
 
           // Write solution to file
           writeSolutionL ( Mesh, solX, outNameX );
@@ -201,7 +201,7 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
 
           // Total timers
           total_duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-          std::cout << " Total time: " << total_duration << "seconds\n\n";
+          std::cout << "Total time: " << total_duration << "seconds\n";
           break;
         }
         case 2 :
@@ -220,7 +220,7 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
 
           // Array timer
           array_duration = ( std::clock() - array_start ) / (double) CLOCKS_PER_SEC;
-          std::cout << " Arrays constructed in " << array_duration << "seconds\n\n";
+          std::cout << "Arrays constructed in " << array_duration << "seconds\n";
           solve_start = std::clock();
 
           init_paralution();
@@ -283,8 +283,8 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
 
           // Linear solve timer
           solve_duration = ( std::clock() - solve_start ) / (double) CLOCKS_PER_SEC;
-          std::cout << "\n Linear system solved in " << solve_duration;
-          std::cout  << "seconds\n\n";
+          std::cout << "Linear system solved in " << solve_duration;
+          std::cout  << "seconds\n";
 
           // Write solution to file
           writeSolutionL ( Mesh, solX, outNameX );
@@ -304,7 +304,7 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
 
           // Total timers
           total_duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-          std::cout << " Total time: " << total_duration << "seconds\n\n";
+          std::cout << "Total time: " << total_duration << "seconds\n";
           break;
         }
       }
@@ -325,7 +325,7 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
 
       // Mesh Timer
       mesh_duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-      std::cout << "\n Mesh constructed in " << mesh_duration << "seconds\n\n";
+      std::cout << "Mesh constructed in " << mesh_duration << "seconds\n";
       array_start = std::clock();
 
       // Compute total degrees of freedom and maximum # of nonzero values in matrix.
@@ -357,7 +357,7 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
 
       // Array timer
       array_duration = ( std::clock() - array_start ) / (double) CLOCKS_PER_SEC;
-      std::cout << " Arrays constructed in " << array_duration << "seconds\n\n";
+      std::cout << "Arrays constructed in " << array_duration << "seconds\n";
       solve_start = std::clock();
 
       init_paralution();
@@ -389,6 +389,7 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
       // Setup a GMRES solver object and an ILU preconditioner.
       GMRES<LocalMatrix<double>, LocalVector<double>, double > ls;
       ILU<LocalMatrix<double>, LocalVector<double>, double> p;
+      p.Set(2);
 
       // Pass the matrix and preconditioner to the solver.
       ls.SetOperator(mat);
@@ -402,7 +403,7 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
 
       // Linear solve timer
       solve_duration = ( std::clock() - solve_start ) / (double) CLOCKS_PER_SEC;
-      std::cout << "\n Linear system solved in " << solve_duration << "seconds\n\n";
+      std::cout << "Linear system solved in " << solve_duration << "seconds\n";
 
       // Write solution to file
       writeSolutionL ( Mesh, sol, outName );
@@ -417,7 +418,7 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
 
       // Total timers
       total_duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-      std::cout << " Total time: " << total_duration << "seconds\n\n";
+      std::cout << "Total time: " << total_duration << "seconds\n";
       break;
     }
   }
