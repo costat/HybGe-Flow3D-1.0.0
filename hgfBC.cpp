@@ -38,7 +38,8 @@ ucartflow ( const FluidMesh& Mesh, std::vector<int>& matIs, \
     cl = Mesh.UBoundaryCells[arrayIndex];
     if (!Mesh.UFaceConnectivity[ idx2( cl, 1, Mesh.FaceConnectivityLDI ) ]) {
       // Right boundary
-      if (direction == 0 && Mesh.UCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] == xmax) { // Outflow condition for x principal flow direction
+      if (direction == 0 && (Mesh.UCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] \
+                             + 0.5 * Mesh.UCellCenters[ cl ]) > xmax) { // Outflow condition for x principal flow direction
         val[0] = -1. / Mesh.UCellWidths[ idx2( 0, cl, Mesh.CellWidthsLDI ) ];
         val[1] = 1. / Mesh.UCellWidths[ idx2( 0, cl, Mesh.CellWidthsLDI ) ];
         colId[0] = Mesh.UFaceConnectivity[ idx2( cl, 3, Mesh.FaceConnectivityLDI ) ] - 1;
@@ -62,7 +63,8 @@ ucartflow ( const FluidMesh& Mesh, std::vector<int>& matIs, \
       matIs.push_back(cl);
       matJs.push_back(cl);
       matVals.push_back(1);
-      if (direction == 0 && Mesh.UCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] == xmin) {
+      if (direction == 0 && (Mesh.UCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] \
+                             - 0.5 * Mesh.UCellWidths[ cl ]) <  xmin) {
         force[cl] = maxin \
           * (Mesh.UCellCenters[ idx2( cl, 1, Mesh.CellCentersLDI ) ] - ymin) \
           * (Mesh.UCellCenters[ idx2( cl, 1, Mesh.CellCentersLDI ) ] - ymax) \
@@ -549,7 +551,8 @@ vcartflow ( const FluidMesh& Mesh, std::vector<int>& matIs, \
     cl2 = cl + Mesh.DOF[1];
     if (!Mesh.VFaceConnectivity[ idx2( cl, 4, Mesh.FaceConnectivityLDI ) ]) {
       // back boundary, outflow or noslip
-      if (direction == 1 && Mesh.VCellCenters[ idx2( cl, 1, Mesh.CellCentersLDI ) ] == ymax) { // Outflow boundary
+      if (direction == 1 && (Mesh.VCellCenters[ idx2( cl, 1, Mesh.CellCentersLDI ) ] \
+                             + 0.5 * Mesh.VCellCenters[ cl ]) > ymax) { // Outflow boundary
         val[0] = -1. / Mesh.VCellWidths[ idx2( 1, cl, Mesh.CellWidthsLDI ) ];
         val[1] = 1. / Mesh.VCellWidths[ idx2( 1, cl, Mesh.CellWidthsLDI ) ];
         colId[0] = Mesh.VFaceConnectivity[ idx2( cl, 5, Mesh.FaceConnectivityLDI ) ] \
@@ -574,7 +577,8 @@ vcartflow ( const FluidMesh& Mesh, std::vector<int>& matIs, \
       matIs.push_back(cl2);
       matJs.push_back(cl2);
       matVals.push_back(1);
-      if (direction == 1 && Mesh.VCellCenters[ idx2( cl, 1, Mesh.CellCentersLDI ) ] == ymin) { // inflow for yflow problem
+      if (direction == 1 && (Mesh.VCellCenters[ idx2( cl, 1, Mesh.CellCentersLDI ) ] \
+                             - 0.5 * Mesh.VCellWidths[ cl ]) < ymin) { // inflow for yflow problem
         force[cl2] = maxin * (Mesh.VCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] - xmin) \
                          * (Mesh.VCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] - xmax) \
                          * (Mesh.VCellCenters[ idx2( cl, 2, Mesh.CellCentersLDI ) ] - zmin) \
@@ -1052,7 +1056,8 @@ wcartflow ( const FluidMesh& Mesh, std::vector<int>& matIs, \
       matIs.push_back(cl2);
       matJs.push_back(cl2);
       matVals.push_back(1);
-      if (direction == 2 && Mesh.WCellCenters[ idx2( cl, 2, Mesh.CellWidthsLDI ) ] == zmin) { // inflow force for z flow problem
+      if (direction == 2 && (Mesh.WCellCenters[ idx2( cl, 2, Mesh.CellWidthsLDI ) ] \
+                             - 0.5 * Mesh.WCellWidths[ cl ]) < zmin) { // inflow force for z flow problem
         force[cl2] = maxin * (Mesh.WCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] - xmin) \
                                * (Mesh.WCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] - xmax) \
                                * (Mesh.WCellCenters[ idx2( cl, 1, Mesh.CellCentersLDI ) ] - ymin) \
@@ -1061,7 +1066,8 @@ wcartflow ( const FluidMesh& Mesh, std::vector<int>& matIs, \
     }
     else if (!Mesh.WFaceConnectivity[ idx2( cl, 2, Mesh.FaceConnectivityLDI ) ]) {
       // top boundary, outflow or no slip
-      if (direction == 2 && Mesh.WCellCenters[ idx2( cl, 2, Mesh.CellWidthsLDI ) ] == zmax) { // outflow
+      if (direction == 2 && (Mesh.WCellCenters[ idx2( cl, 2, Mesh.CellWidthsLDI ) ] \
+                             + 0.5 * Mesh.WCellWidths[ cl ]) > zmax) { // outflow
         val[0] = -1. / Mesh.WCellWidths[ idx2( 2, cl, Mesh.CellWidthsLDI ) ];
         val[1] = 1. / Mesh.WCellWidths[ idx2( 2, cl, Mesh.CellWidthsLDI ) ];
         colId[0] = Mesh.WFaceConnectivity[ idx2( cl, 0, Mesh.FaceConnectivityLDI ) ] \
@@ -1546,7 +1552,8 @@ ucartflow2D ( const FluidMesh& Mesh, std::vector<int>& matIs, \
     cl = Mesh.UBoundaryCells[arrayIndex];
     if (!Mesh.UFaceConnectivity[ idx2( cl, 1, Mesh.FaceConnectivityLDI) ]) {
       // right boundary
-      if (direction == 0 && Mesh.UCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] == xmax) { // xflow problem, this is an outflow boundary
+      if (direction == 0 && (Mesh.UCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] \
+                             + 0.5 * Mesh.UCellWidths[ cl ]) > xmax) { // xflow problem, this is an outflow boundary
         val[0] = -1. / Mesh.UCellWidths[ idx2( 0, cl, Mesh.CellWidthsLDI ) ];
         val[1] = 1. / Mesh.UCellWidths[ idx2( 0, cl, Mesh.CellWidthsLDI ) ];
         colId[0] = Mesh.UFaceConnectivity[ idx2( cl, 3, Mesh.FaceConnectivityLDI ) ] - 1;
@@ -1570,7 +1577,8 @@ ucartflow2D ( const FluidMesh& Mesh, std::vector<int>& matIs, \
       matIs.push_back(cl);
       matJs.push_back(cl);
       matVals.push_back(1);
-      if (direction == 0 && Mesh.UCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] == xmin) { // xflow problem, force is nonzero here
+      if (direction == 0 && (Mesh.UCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ]
+                             - 0.5 * Mesh.UCellWidths[ cl ]) < xmin) { // xflow problem, force is nonzero here
         force[cl] = -maxin * (Mesh.UCellCenters[ idx2( cl, 1, Mesh.CellCentersLDI ) ] - ymin) \
                                    * (Mesh.UCellCenters[ idx2( cl, 1, Mesh.CellCentersLDI ) ] - ymax);
       }
@@ -1702,14 +1710,16 @@ vcartflow2D ( const FluidMesh& Mesh, std::vector<int>& matIs, \
       matIs.push_back(cl2);
       matJs.push_back(cl2);
       matVals.push_back(1);
-      if (direction == 1 && Mesh.VCellCenters[ idx2( cl, 1, Mesh.CellCentersLDI ) ] == ymin) { // yflow problem, force is nonzero here
+      if (direction == 1 && (Mesh.VCellCenters[ idx2( cl, 1, Mesh.CellCentersLDI ) ] \
+                             - 0.5 * Mesh.VCellWidths[ cl ]) < ymin) { // yflow problem, force is nonzero here
         force[cl2] = -maxin * (Mesh.VCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] - xmin) \
                                  * (Mesh.VCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] - xmax);
       }
     }
     else if (!Mesh.VFaceConnectivity[ idx2(cl, 2, Mesh.FaceConnectivityLDI) ]) {
       // top boundary
-      if (direction == 1 && Mesh.VCellCenters[ idx2( cl, 1, Mesh.CellCentersLDI ) ] == ymax) { // outflow boundary for yflow problem
+      if (direction == 1 && (Mesh.VCellCenters[ idx2( cl, 1, Mesh.CellCentersLDI ) ] \
+                             + 0.5 * Mesh.VCellWidths[ cl ]) > ymax) { // outflow boundary for yflow problem
         val[0] = -1. / Mesh.VCellWidths[ idx2( 1, cl, Mesh.CellWidthsLDI ) ];
         val[1] = 1. / Mesh.VCellWidths[ idx2( 1, cl, Mesh.CellWidthsLDI ) ];
         colId[0] = Mesh.VFaceConnectivity[ idx2( cl, 0, Mesh.FaceConnectivityLDI ) ] - 1 + Mesh.DOF[1];

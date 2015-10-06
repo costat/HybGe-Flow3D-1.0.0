@@ -422,19 +422,37 @@ conductivities from each solution, and the upscaled conductivity tensor, respect
 
 \noindent The following examples are found in the included directory /path/to/hgf/grids/.\\
 
-\noindent We begin with a simple problem: Poiseuille flow in a pipe. Figure~\ref{fig:2dpflow}
-shows the pressure and x-component of the velocity for the 2d case. Figure~\ref{fig:3dpflow}
-shows the pressure and x-component of the velocity for the 3d case.
+\section{Examples in 2D}
 
+\noindent We begin with a simple problem: Poiseuille flow in a 2D pipe. This
+example is found at /path/to/hgf/grids/pflow2d.dat. Figure~\ref{fig:2dpflow}
+shows the pressure and x-component of the velocity.\\
 \begin{figure}
   \centering
   \includegraphics[width=.9\textwidth]{images/pflow2dP.png}\\
   \includegraphics[width=.9\textwidth]{images/pflow2dU.png}
   \caption{\label{fig:2dpflow}Poiseuille flow in a 2D pipe.}
 \end{figure}
+
+\noindent Next we simulate on a simple 2d pore geometry, found at /path/to/hgf/grids/ellipse.dat.
+Figure~\ref{fig:2dellipse} shows the pressure and x-component of the velocity.
 \begin{figure}
   \centering
+  \includegraphics[width=.7\textwidth]{images/ellipse2dP.png}\\
+  \includegraphics[width=.7\textwidth]{images/ellipse2dU.png}
+  \caption{\label{fig:2dellipse}2D ellipse geometry.}
+\end{figure}
 
+\section{Examples in 3D}
+
+Next we show Poiseuille flow in a 3D pipe. This
+example is found at /path/to/hgf/grids/pflow3d.dat. Figure~\ref{fig:3dpflow}
+shows the pressure and x-component of the velocity.\\
+\begin{figure}
+  \centering
+  \includegraphics[width=.7\textwidth]{images/pflow3dP.png}\\
+  \includegraphics[width=.7\textwidth]{images/pflow3dU.png}
   \caption{\label{fig:3dpflow}Poiseuille flow in a 3D pipe.}
 \end{figure}
+
 \end{document}
