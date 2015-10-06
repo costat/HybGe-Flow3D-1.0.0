@@ -22,6 +22,12 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
 {
   int maxPNodes, checkVert;
   int numPCells = 0;
+  xLim[0] = 0;
+  xLim[1] = length;
+  yLim[0] = 0;
+  yLim[1] = width;
+  zLim[0] = 0;
+  zLim[1] = height;
 
   switch ( nz )
   {
@@ -877,8 +883,8 @@ void FluidMesh::innerFaceConnectivity( \
             }
             if (fabs(zr) < epsz) {
               if (fabs(yr) < ytol) {
-                if (yr < 0) ComponentFaceConnectivity[ idx2(cl, 4, 6) ] = incr;
-                else if (yr > 0) ComponentFaceConnectivity[ idx2(cl, 5, 6)] = incr;
+                if (yr < 0) ComponentFaceConnectivity[ idx2(cl, 5, 6) ] = incr;
+                else if (yr > 0) ComponentFaceConnectivity[ idx2(cl, 4, 6)] = incr;
               }
             }
           }

@@ -8,10 +8,10 @@ import re
 ### PROBLEM SETUP, USER DEFINES GRID, VISCOSITY, AND NUMBER OF OMP THREADS ###
 ##############################################################################
 
-# GRID INFORMATION. USER PROVIDES PATH TO EITHER 1) .DAT FILE CONTAINING
-# VOXEL ARRAY OF 0S 1S AND 2S OR 2) .NPZ FILE CONTAINING GRID ALREADY
-# COMPUTED AND SAVED BY HGF. ALSO,USER PROVIDES TOTAL GRID LENGTHS IN EACH DIRECTION.
-gridfiles = './grids/test2d.dat'
+# GRID INFORMATION. USER PROVIDES PATH .DAT FILE CONTAINING
+# VOXEL ARRAY OF 0S 1S AND 2S.
+# ALSO, USER PROVIDES TOTAL GRID LENGTHS IN EACH DIRECTION.
+gridfiles = './grids/2dsquare.dat'
 L = 1.
 W = 1.
 H = 1.
@@ -19,13 +19,13 @@ H = 1.
 # PRINCIPAL FLOW DIRECTION, 0 - X, 1 - Y, 2 - Z, SINGLE FLOW DIRECTION SOLVES,
 # PRODUCES CONSTANT K FOR USE IN PORE-NETWORK THROATS
 # 3 - ALL DIRECTIONS, PRODUCES UPSCALED K TENSOR
-direction = 0
+direction = 0;
 
 # SET VISCOSITY
-visc = 1.
+visc = 1
 
 # NUMBER OF OMP THREADS FOR USE IN PARALUTION LINEAR ALGEBRA
-nThreads = 1
+nThreads = 4
 
 ##########################################################
 ### SWIG TRANSLATION, USER SHOULD NOT EDIT BELOW HERE ####
@@ -56,7 +56,7 @@ elif not nz:
 gridin_len = gridin.size
 
 totalStart = time.time()
-print '\nSolving the stationary Stokes problem...\n'
+print 'Solving the stationary Stokes problem...\n'
 
 #################
 ### SWIG CALL ###

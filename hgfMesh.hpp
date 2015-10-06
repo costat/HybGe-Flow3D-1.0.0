@@ -24,6 +24,7 @@ class FluidMesh
     int NodesLDI, CellCentersLDI, CellWidthsLDI, FaceConnectivityLDI;
     int PressureCellVelocityNeighborLDI, VelocityCellPressureNeighborLDI;
     int DIM, NX, NY, NZ;
+    double xLim[2], yLim[2], zLim[2];
     // Public functions
     int TotalDOF( void );
     int VelocityDOF( void );
