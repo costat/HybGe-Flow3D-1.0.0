@@ -58,7 +58,6 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
         }
       }
       maxPNodes = numPCells * 4;
-
       int nNodes = 0;
       double dx = length / nx;
       double dy = width / ny;
@@ -329,7 +328,6 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
         VCellWidths[ idx2( cl, 0, CellWidthsLDI ) ] = dx;
         VCellWidths[ idx2( cl, 1, CellWidthsLDI ) ] = dy;
       }
-
       break;
     }
     default : // 3D problem
@@ -863,6 +861,7 @@ void FluidMesh::innerFaceConnectivity( \
           }
         }
       }
+      break;
     default :
       for (int cl = 0; cl < nCells; cl++) {
         for (int nl = 0; nl < nCells; nl++) {
@@ -898,6 +897,7 @@ void FluidMesh::innerFaceConnectivity( \
           }
         }
       }
+      break;
   }
 }
 // Compute total DOF
