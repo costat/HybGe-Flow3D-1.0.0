@@ -28,91 +28,111 @@ immersedBoundary ( const FluidMesh& Mesh, std::vector<int>& matIs, \
     case 3 :
     {
       /* Immersed boundary voxels are tracked from the original grid, which
-         is given by pressure cells. Loop through pressure nodes to check IB status */
+         is given by pressure cells. Loop through pressure nodes
+         to check IB status */
       for (int cl = 0; cl < Mesh.DOF[0]; cl++) {
         // Check if pressure cell is an IB voxel
         if (Mesh.ImmersedBoundary[cl] == 2) {
-          /* Find the global node numbers of velocity cells associated
-             to the IB pressure cell, then add entries in the COO matrix storage
+          /* Add entries in the COO matrix storage
              vectors. Note these will be repeated indices. Paralution handles
              this by summing repeated entries. If a different solver is used that
              does not allow repeated entries, care should be taken to
              overcome this issue. */
           matIs.push_back( \
-            Mesh.PressureCellUNeighbor[ idx2( cl, 0, Mesh.PressureCellVelocityNeighborLDI ) ] );
+            Mesh.PressureCellUNeighbor[ \
+              idx2( cl, 0, Mesh.PressureCellVelocityNeighborLDI ) ] );
           matJs.push_back( \
-            Mesh.PressureCellUNeighbor[ idx2( cl, 0, Mesh.PressureCellVelocityNeighborLDI ) ] );
+            Mesh.PressureCellUNeighbor[ \
+              idx2( cl, 0, Mesh.PressureCellVelocityNeighborLDI ) ] );
           matVals.push_back(pen);
           matIs.push_back( \
-            Mesh.PressureCellUNeighbor[ idx2( cl, 1, Mesh.PressureCellVelocityNeighborLDI ) ] );
+            Mesh.PressureCellUNeighbor[ \
+              idx2( cl, 1, Mesh.PressureCellVelocityNeighborLDI ) ] );
           matJs.push_back( \
-            Mesh.PressureCellUNeighbor[ idx2( cl, 1, Mesh.PressureCellVelocityNeighborLDI ) ] );
+            Mesh.PressureCellUNeighbor[ \
+              idx2( cl, 1, Mesh.PressureCellVelocityNeighborLDI ) ] );
           matVals.push_back(pen);
           matIs.push_back( \
-            Mesh.PressureCellVNeighbor[ idx2( cl, 0, Mesh.PressureCellVelocityNeighborLDI ) ] \
-            + Mesh.DOF[1]);
+            Mesh.PressureCellVNeighbor[ \
+              idx2( cl, 0, Mesh.PressureCellVelocityNeighborLDI ) ] \
+              + Mesh.DOF[1]);
           matJs.push_back( \
-            Mesh.PressureCellVNeighbor[ idx2( cl, 0, Mesh.PressureCellVelocityNeighborLDI ) ] \
-            + Mesh.DOF[1]);
+            Mesh.PressureCellVNeighbor[ \
+              idx2( cl, 0, Mesh.PressureCellVelocityNeighborLDI ) ] \
+              + Mesh.DOF[1]);
           matVals.push_back(pen);
           matIs.push_back( \
-            Mesh.PressureCellVNeighbor[ idx2( cl, 1, Mesh.PressureCellVelocityNeighborLDI ) ] \
-            + Mesh.DOF[1]);
+            Mesh.PressureCellVNeighbor[ \
+              idx2( cl, 1, Mesh.PressureCellVelocityNeighborLDI ) ] \
+              + Mesh.DOF[1]);
           matJs.push_back( \
-            Mesh.PressureCellVNeighbor[ idx2( cl, 1, Mesh.PressureCellVelocityNeighborLDI ) ] \
-            + Mesh.DOF[1]);
+            Mesh.PressureCellVNeighbor[ \
+              idx2( cl, 1, Mesh.PressureCellVelocityNeighborLDI ) ] \
+              + Mesh.DOF[1]);
           matVals.push_back(pen);
           matIs.push_back( \
-            Mesh.PressureCellVNeighbor[ idx2( cl, 0, Mesh.PressureCellVelocityNeighborLDI ) ] \
-            + Mesh.DOF[1] + Mesh.DOF[2]);
+            Mesh.PressureCellVNeighbor[ \
+              idx2( cl, 0, Mesh.PressureCellVelocityNeighborLDI ) ] \
+              + Mesh.DOF[1] + Mesh.DOF[2]);
           matJs.push_back( \
-            Mesh.PressureCellVNeighbor[ idx2( cl, 0, Mesh.PressureCellVelocityNeighborLDI ) ] \
-            + Mesh.DOF[1] + Mesh.DOF[2]);
+            Mesh.PressureCellVNeighbor[ \
+              idx2( cl, 0, Mesh.PressureCellVelocityNeighborLDI ) ] \
+              + Mesh.DOF[1] + Mesh.DOF[2]);
           matIs.push_back( \
-            Mesh.PressureCellVNeighbor[ idx2( cl, 1, Mesh.PressureCellVelocityNeighborLDI ) ] \
-            + Mesh.DOF[1] + Mesh.DOF[2]);
+            Mesh.PressureCellVNeighbor[ \
+              idx2( cl, 1, Mesh.PressureCellVelocityNeighborLDI ) ] \
+              + Mesh.DOF[1] + Mesh.DOF[2]);
           matJs.push_back( \
-            Mesh.PressureCellVNeighbor[ idx2( cl, 1, Mesh.PressureCellVelocityNeighborLDI ) ] \
-            + Mesh.DOF[1] + Mesh.DOF[2]);
+            Mesh.PressureCellVNeighbor[ \
+              idx2( cl, 1, Mesh.PressureCellVelocityNeighborLDI ) ] \
+              + Mesh.DOF[1] + Mesh.DOF[2]);
         }
       }
     }
     case 2 :
     {
       /* Immersed boundary voxels are tracked from the original grid, which
-         is given by pressure cells. Loop through pressure nodes to check IB status */
+         is given by pressure cells. Loop through pressure nodes
+         to check IB status */
       for (int cl = 0; cl < Mesh.DOF[0]; cl++) {
         // Check if pressure cell is an IB voxel
         if (Mesh.ImmersedBoundary[cl] == 2) {
-          /* Find the global node numbers of velocity cells associated
-             to the IB pressure cell, then add entries in the COO matrix storage
+          /* Add entries in the COO matrix storage
              vectors. Note these will be repeated indices. Paralution handles
              this by summing repeated entries. If a different solver is used that
              does not allow repeated entries, care should be taken to
              overcome this issue. */
           matIs.push_back( \
-            Mesh.PressureCellUNeighbor[ idx2( cl, 0, Mesh.PressureCellVelocityNeighborLDI ) ] );
+            Mesh.PressureCellUNeighbor[ \
+              idx2( cl, 0, Mesh.PressureCellVelocityNeighborLDI ) ] );
           matJs.push_back( \
-            Mesh.PressureCellUNeighbor[ idx2( cl, 0, Mesh.PressureCellVelocityNeighborLDI ) ] );
+            Mesh.PressureCellUNeighbor[ \
+              idx2( cl, 0, Mesh.PressureCellVelocityNeighborLDI ) ] );
           matVals.push_back(pen);
           matIs.push_back( \
-            Mesh.PressureCellUNeighbor[ idx2( cl, 1, Mesh.PressureCellVelocityNeighborLDI ) ] );
+            Mesh.PressureCellUNeighbor[ \
+              idx2( cl, 1, Mesh.PressureCellVelocityNeighborLDI ) ] );
           matJs.push_back( \
-            Mesh.PressureCellUNeighbor[ idx2( cl, 1, Mesh.PressureCellVelocityNeighborLDI ) ] );
+            Mesh.PressureCellUNeighbor[ \
+              idx2( cl, 1, Mesh.PressureCellVelocityNeighborLDI ) ] );
           matVals.push_back(pen);
           matIs.push_back( \
-            Mesh.PressureCellVNeighbor[ idx2( cl, 0, Mesh.PressureCellVelocityNeighborLDI ) ] \
-            + Mesh.DOF[1]);
+            Mesh.PressureCellVNeighbor[ \
+              idx2( cl, 0, Mesh.PressureCellVelocityNeighborLDI ) ] \
+              + Mesh.DOF[1]);
           matJs.push_back( \
-            Mesh.PressureCellVNeighbor[ idx2( cl, 0, Mesh.PressureCellVelocityNeighborLDI ) ] \
-            + Mesh.DOF[1]);
+            Mesh.PressureCellVNeighbor[ \
+              idx2( cl, 0, Mesh.PressureCellVelocityNeighborLDI ) ] \
+              + Mesh.DOF[1]);
           matVals.push_back(pen);
           matIs.push_back( \
-            Mesh.PressureCellVNeighbor[ idx2( cl, 1, Mesh.PressureCellVelocityNeighborLDI ) ] \
-            + Mesh.DOF[1]);
+            Mesh.PressureCellVNeighbor[ \
+              idx2( cl, 1, Mesh.PressureCellVelocityNeighborLDI ) ] \
+              + Mesh.DOF[1]);
           matJs.push_back( \
-            Mesh.PressureCellVNeighbor[ idx2( cl, 1, Mesh.PressureCellVelocityNeighborLDI ) ] \
-            + Mesh.DOF[1]);
+            Mesh.PressureCellVNeighbor[ \
+              idx2( cl, 1, Mesh.PressureCellVelocityNeighborLDI ) ] \
+              + Mesh.DOF[1]);
           matVals.push_back(pen);
         }
       }

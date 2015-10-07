@@ -124,11 +124,13 @@ diffusionArrays( const FluidMesh& Mesh, std::vector<int>& matIs, \
   }
 }
 
+/* diffusionDrive organizes mesh information for each component
+   call to diffusionArrays */
 void
 diffusionDrive ( const FluidMesh& Mesh, std::vector<int>& matIs, \
-                  std::vector<int>& matJs, \
-                  std::vector<double>& matVals, \
-                  int Shift, double visc )
+                 std::vector<int>& matJs, \
+                 std::vector<double>& matVals, \
+                 int Shift, double visc )
 {
   int velShift;
 
@@ -168,7 +170,6 @@ diffusionDrive ( const FluidMesh& Mesh, std::vector<int>& matIs, \
     }
   }
 }
-
 
 /* pressureGrad computes a finite volume discretization of the pressure
    gradient term in the Stokes and Navier-Stokes equations. */
@@ -237,6 +238,8 @@ pressureGrad ( const FluidMesh& Mesh, std::vector<int>& matIs, \
   }
 }
 
+/* pressureGradDrive organizes mesh information for each component
+   call to pressureGrad */
 void
 pressureGradDrive ( const FluidMesh& Mesh, std::vector<int>& matIs, \
                     std::vector<int>& matJs, \
@@ -286,6 +289,8 @@ pressureGradDrive ( const FluidMesh& Mesh, std::vector<int>& matIs, \
   }
 }
 
+/* continuityEq performs a finite volume discretization
+   of the continuity equation */
 void
 continuityEq ( const FluidMesh& Mesh, std::vector<int>& matIs, \
                std::vector<int>& matJs, std::vector<double>& matVals, \
@@ -341,8 +346,8 @@ continuityEq ( const FluidMesh& Mesh, std::vector<int>& matIs, \
   }
 }
 
-/* continuityVel computes a finite volume discretization of the
-   continuity equation in the Stokes or Navier-Stokes equations. */
+/* continuityDrive organizes mesh information for each component
+   call to continuityEq */
 void
 continuityDrive ( const FluidMesh& Mesh, std::vector<int>& matIs, \
                   std::vector<int>& matJs, \
@@ -387,14 +392,11 @@ continuityDrive ( const FluidMesh& Mesh, std::vector<int>& matIs, \
 }
 
 
-/* arrayDrive organizes the call to the previously defined functions
+/* StokesArray organizes the call to the previously defined functions
    to set up a finite volume discretization of the Stokes equations or
    the linear part of the Navier-Stokes equations in 2 or 3D.
    Boundary conditions for the velocity variables are not imposed, and
-   the immersed boundary is not imposed. These should are handled in separate
-   function calls
-   so that when the user wants to solve many problems on one parent domain,
-   work is not repeated. */
+   the immersed boundary is not imposed. */
 void
 StokesArray ( const FluidMesh& Mesh, double visc, std::vector<int>& matIs, \
               std::vector<int>& matJs, std::vector<double>& matVals )

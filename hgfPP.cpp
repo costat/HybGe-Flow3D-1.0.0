@@ -13,7 +13,8 @@
 #define idx2(i, j, ldi) ((i * ldi) + j)
 
 using namespace paralution;
-
+/* computeKTensorL computes an upscaled conductivity tensor using
+   flow solutions in each principal axis direction */
 void
 computeKTensorL ( const FluidMesh& Mesh, \
                   const paralution::LocalVector<double>& xSolution, \
@@ -177,6 +178,10 @@ computeKTensorL ( const FluidMesh& Mesh, \
   }
 }
 
+/* computeAveragesX computes appropriate pressure and velocity averages
+   for upscaling conductivity in the X direction.
+   If requested a constant upscaled conductivity
+   is computed and written to an output file */
 void
 computeAveragesX ( const FluidMesh& Mesh, \
                    const paralution::LocalVector<double>& Solution, \
@@ -224,8 +229,10 @@ computeAveragesX ( const FluidMesh& Mesh, \
       // Compute averages
       for (int cl = 0; cl < Mesh.DOF[1]; cl++)
       {
-        pNode1 = Mesh.UCellPressureNeighbor[ idx2( cl, 0, Mesh.VelocityCellPressureNeighborLDI ) ] + 1;
-        pNode2 = Mesh.UCellPressureNeighbor[ idx2( cl, 1, Mesh.VelocityCellPressureNeighborLDI ) ] + 1;
+        pNode1 = Mesh.UCellPressureNeighbor[ /
+                   idx2( cl, 0, Mesh.VelocityCellPressureNeighborLDI ) ] + 1;
+        pNode2 = Mesh.UCellPressureNeighbor[ \
+                   idx2( cl, 1, Mesh.VelocityCellPressureNeighborLDI ) ] + 1;
         if (!Mesh.ImmersedBoundary[ pNode1 ] && !Mesh.ImmersedBoundary[ pNode2 ])
         {
           if (Mesh.UCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] > xmin)
@@ -240,7 +247,8 @@ computeAveragesX ( const FluidMesh& Mesh, \
                   {
                     if (Mesh.UCellCenters[ idx2( cl, 2, Mesh.CellCentersLDI ) ] < zmax) // Inside z limits
                     {
-                      pressure = 0.5 * (Solution[ pNode1 + vDOF ] + Solution[ pNode2 + vDOF ] );
+                      pressure = 0.5 * (Solution[ pNode1 + vDOF ] \
+                                 + Solution[ pNode2 + vDOF ] );
                       if (Mesh.UCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] < xmid)
                       {
                         P1 = P1 + pressure;
@@ -355,6 +363,10 @@ computeAveragesX ( const FluidMesh& Mesh, \
 
 }
 
+/* computeAveragesY computes appropriate pressure and velocity averages
+   for upscaling conductivity in the Y direction.
+   If requested a constant upscaled conductivity
+   is computed and written to an output file */
 void
 computeAveragesY ( const FluidMesh& Mesh, \
                    const paralution::LocalVector<double>& Solution, \
@@ -532,6 +544,10 @@ computeAveragesY ( const FluidMesh& Mesh, \
   }
 }
 
+/* computeAveragesZ computes appropriate pressure and velocity averages
+   for upscaling conductivity in the Z direction.
+   If requested a constant upscaled conductivity
+   is computed and written to an output file */
 void
 computeAveragesZ ( const FluidMesh& Mesh, \
                     const paralution::LocalVector<double>& Solution, \
@@ -630,6 +646,8 @@ computeAveragesZ ( const FluidMesh& Mesh, \
   }
 }
 
+/* computeKConstantDrive drives the computation and write
+   of a constant upscaled conductivity */
 void
 computeKConstantDrive ( const FluidMesh & Mesh, \
                         const paralution::LocalVector<double>& Solution,
@@ -650,7 +668,8 @@ computeKConstantDrive ( const FluidMesh & Mesh, \
   }
 }
 
-
+/* writeSolutionL writes the solution to an output file appropriate for tecplot
+   visualization */
 void
 writeSolutionL ( const FluidMesh& Mesh, const paralution::LocalVector<double>& sol, \
                  std::string& outName )

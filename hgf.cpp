@@ -20,7 +20,9 @@
 using namespace paralution;
 
 /* hgfStokesDrive solves the Stokes equations on a cartesian grid
-   with an immersed boundary. */
+   with an immersed boundary. The model is solved in 2d or 3d, either
+   once for upscaling a constant conductivity, or 2/3 times for
+   upscaling a conductivity tensor. */
 void
 hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
                 int nx, int ny, int nz, \
