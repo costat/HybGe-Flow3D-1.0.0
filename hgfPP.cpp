@@ -229,7 +229,7 @@ computeAveragesX ( const FluidMesh& Mesh, \
       // Compute averages
       for (int cl = 0; cl < Mesh.DOF[1]; cl++)
       {
-        pNode1 = Mesh.UCellPressureNeighbor[ /
+        pNode1 = Mesh.UCellPressureNeighbor[ \
                    idx2( cl, 0, Mesh.VelocityCellPressureNeighborLDI ) ] + 1;
         pNode2 = Mesh.UCellPressureNeighbor[ \
                    idx2( cl, 1, Mesh.VelocityCellPressureNeighborLDI ) ] + 1;
