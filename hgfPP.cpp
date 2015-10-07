@@ -200,42 +200,14 @@ computeAveragesX ( const FluidMesh& Mesh, \
     {
       int vDOF = Mesh.DOF[1] + Mesh.DOF[2] + Mesh.DOF[3];
       // Geometric properties for volume averaging
-      xmin = Mesh.PCellCenters[ idx2( 0, 0, Mesh.CellCentersLDI ) ];
-      xmax = xmin;
-      ymin = Mesh.PCellCenters[ idx2( 0, 1, Mesh.CellCentersLDI ) ];
-      ymax = ymin;
-      zmin = Mesh.PCellCenters[ idx2( 0, 2, Mesh.CellCentersLDI ) ];
-      zmax = zmin;
-
-      for (int cl = 0; cl < Mesh.DOF[1]; cl++)
-      {
-        if (Mesh.UCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] < xmin) {
-          xmin = Mesh.UCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ];
-        }
-        if (Mesh.UCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] > xmax) {
-          xmax = Mesh.UCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ];
-        }
-      }
+      xmin = Mesh.xLim[0];
+      xmax = Mesh.xLim[1];
+      ymin = Mesh.yLim[0];
+      ymax = Mesh.yLim[1];
+      zmin = Mesh.zLim[0];
+      zmax = Mesh.zLim[1];
       double L = xmax - xmin;
-      for (int cl = 0; cl < Mesh.DOF[2]; cl++)
-      {
-        if (Mesh.VCellCenters[ idx2( cl, 1, Mesh.CellCentersLDI ) ] < ymin) {
-          ymin = Mesh.VCellCenters[ idx2( cl, 1, Mesh.CellCentersLDI ) ];
-        }
-        if (Mesh.VCellCenters[ idx2( cl, 1, Mesh.CellCentersLDI ) ] > ymax) {
-          ymax = Mesh.VCellCenters[ idx2( cl, 1, Mesh.CellCentersLDI ) ];
-        }
-      }
       double W = ymax - ymin;
-      for (int cl = 0; cl < Mesh.DOF[3]; cl++)
-      {
-        if (Mesh.WCellCenters[ idx2( cl, 2, Mesh.CellCentersLDI ) ] < zmin) {
-          zmin = Mesh.WCellCenters[ idx2( cl, 2, Mesh.CellCentersLDI ) ];
-        }
-        if (Mesh.WCellCenters[ idx2( cl, 2, Mesh.CellCentersLDI ) ] > zmax) {
-          zmax = Mesh.WCellCenters[ idx2( cl, 2, Mesh.CellCentersLDI ) ];
-        }
-      }
       double H = zmax - zmin;
 
       // Adjust min and max to avoid potential recirculation near boundaries.
@@ -252,8 +224,8 @@ computeAveragesX ( const FluidMesh& Mesh, \
       // Compute averages
       for (int cl = 0; cl < Mesh.DOF[1]; cl++)
       {
-        pNode1 = Mesh.UCellPressureNeighbor[ idx2( cl, 0, Mesh.VelocityCellPressureNeighborLDI ) ];
-        pNode2 = Mesh.UCellPressureNeighbor[ idx2( cl, 1, Mesh.VelocityCellPressureNeighborLDI ) ];
+        pNode1 = Mesh.UCellPressureNeighbor[ idx2( cl, 0, Mesh.VelocityCellPressureNeighborLDI ) ] + 1;
+        pNode2 = Mesh.UCellPressureNeighbor[ idx2( cl, 1, Mesh.VelocityCellPressureNeighborLDI ) ] + 1;
         if (!Mesh.ImmersedBoundary[ pNode1 ] && !Mesh.ImmersedBoundary[ pNode2 ])
         {
           if (Mesh.UCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] > xmin)
@@ -268,18 +240,20 @@ computeAveragesX ( const FluidMesh& Mesh, \
                   {
                     if (Mesh.UCellCenters[ idx2( cl, 2, Mesh.CellCentersLDI ) ] < zmax) // Inside z limits
                     {
-                      V = V + Solution[ cl ];
-                      vInd++;
                       pressure = 0.5 * (Solution[ pNode1 + vDOF ] + Solution[ pNode2 + vDOF ] );
                       if (Mesh.UCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] < xmid)
                       {
                         P1 = P1 + pressure;
                         p1Ind++;
+                        V = V + Solution[ cl ];
+                        vInd++;
                       }
                       else if (Mesh.UCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] > xmid)
                       {
                         P2 = P2 + pressure;
                         p2Ind++;
+                        V = V + Solution[ cl ];
+                        vInd++;
                       }
                     }
                   }
@@ -307,30 +281,11 @@ computeAveragesX ( const FluidMesh& Mesh, \
     {
       int vDOF = Mesh.DOF[1] + Mesh.DOF[2];
       // Geometric properties for volume averaging
-      xmin = Mesh.PCellCenters[ idx2( 0, 0, Mesh.CellCentersLDI ) ];
-      xmax = xmin;
-      ymin = Mesh.PCellCenters[ idx2( 0, 1, Mesh.CellCentersLDI ) ];
-      ymax = ymin;
-
-      for (int cl = 0; cl < Mesh.DOF[1]; cl++)
-      {
-        if (Mesh.UCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] < xmin) {
-          xmin = Mesh.UCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ];
-        }
-        if (Mesh.UCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] > xmax) {
-          xmax = Mesh.UCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ];
-        }
-      }
+      xmin = Mesh.xLim[0];
+      xmax = Mesh.xLim[1];
+      ymin = Mesh.yLim[0];
+      ymax = Mesh.yLim[1];
       double L = xmax - xmin;
-      for (int cl = 0; cl < Mesh.DOF[2]; cl++)
-      {
-        if (Mesh.VCellCenters[ idx2( cl, 1, Mesh.CellCentersLDI ) ] < ymin) {
-          ymin = Mesh.VCellCenters[ idx2( cl, 1, Mesh.CellCentersLDI ) ];
-        }
-        if (Mesh.VCellCenters[ idx2( cl, 1, Mesh.CellCentersLDI ) ] > ymax) {
-          ymax = Mesh.VCellCenters[ idx2( cl, 1, Mesh.CellCentersLDI ) ];
-        }
-      }
       double W = ymax - ymin;
 
       // Adjust min and max to avoid potential recirculation near boundaries.
@@ -345,8 +300,8 @@ computeAveragesX ( const FluidMesh& Mesh, \
       // Compute averages
       for (int cl = 0; cl < Mesh.DOF[1]; cl++)
       {
-        pNode1 = Mesh.UCellPressureNeighbor[ idx2( cl, 0, Mesh.VelocityCellPressureNeighborLDI ) ];
-        pNode2 = Mesh.UCellPressureNeighbor[ idx2( cl, 1, Mesh.VelocityCellPressureNeighborLDI ) ];
+        pNode1 = Mesh.UCellPressureNeighbor[ idx2( cl, 0, Mesh.VelocityCellPressureNeighborLDI ) ] + 1;
+        pNode2 = Mesh.UCellPressureNeighbor[ idx2( cl, 1, Mesh.VelocityCellPressureNeighborLDI ) ] + 1;
         if (!Mesh.ImmersedBoundary[ pNode1 ] && !Mesh.ImmersedBoundary[ pNode2 ])
         {
           if (Mesh.UCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] > xmin)
@@ -357,18 +312,20 @@ computeAveragesX ( const FluidMesh& Mesh, \
               {
                 if (Mesh.UCellCenters[ idx2( cl, 1, Mesh.CellCentersLDI ) ] < ymax) // Inside y limits
                 {
-                  V = V + Solution[ cl ];
-                  vInd++;
                   pressure = 0.5 * (Solution[ pNode1 + vDOF ] + Solution[ pNode2 + vDOF ] );
                   if (Mesh.UCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] < xmid)
                   {
                     P1 = P1 + pressure;
                     p1Ind++;
+                    V = V + Solution[ cl ];
+                    vInd++;
                   }
                   else if (Mesh.UCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] > xmid)
                   {
                     P2 = P2 + pressure;
                     p2Ind++;
+                    V = V + Solution[ cl ];
+                    vInd++;
                   }
                 }
               }
@@ -417,42 +374,14 @@ computeAveragesY ( const FluidMesh& Mesh, \
     {
       int vDOF = Mesh.DOF[1] + Mesh.DOF[2] + Mesh.DOF[3];
       // Geometric properties for volume averaging
-      xmin = Mesh.PCellCenters[ idx2( 0, 0, Mesh.CellCentersLDI ) ];
-      xmax = xmin;
-      ymin = Mesh.PCellCenters[ idx2( 0, 1, Mesh.CellCentersLDI ) ];
-      ymax = ymin;
-      zmin = Mesh.PCellCenters[ idx2( 0, 2, Mesh.CellCentersLDI ) ];
-      zmax = zmin;
-
-      for (int cl = 0; cl < Mesh.DOF[1]; cl++)
-      {
-        if (Mesh.UCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] < xmin) {
-          xmin = Mesh.UCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ];
-        }
-        if (Mesh.UCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] > xmax) {
-          xmax = Mesh.UCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ];
-        }
-      }
+      xmin = Mesh.xLim[0];
+      xmax = Mesh.xLim[1];
+      ymin = Mesh.yLim[0];
+      ymax = Mesh.yLim[1];
+      zmin = Mesh.zLim[0];
+      zmax = Mesh.zLim[1];
       double L = xmax - xmin;
-      for (int cl = 0; cl < Mesh.DOF[2]; cl++)
-      {
-        if (Mesh.VCellCenters[ idx2( cl, 1, Mesh.CellCentersLDI ) ] < ymin) {
-          ymin = Mesh.VCellCenters[ idx2( cl, 1, Mesh.CellCentersLDI ) ];
-        }
-        if (Mesh.VCellCenters[ idx2( cl, 1, Mesh.CellCentersLDI ) ] > ymax) {
-          ymax = Mesh.VCellCenters[ idx2( cl, 1, Mesh.CellCentersLDI ) ];
-        }
-      }
       double W = ymax - ymin;
-      for (int cl = 0; cl < Mesh.DOF[3]; cl++)
-      {
-        if (Mesh.WCellCenters[ idx2( cl, 2, Mesh.CellCentersLDI ) ] < zmin) {
-          zmin = Mesh.VCellCenters[ idx2( cl, 2, Mesh.CellCentersLDI ) ];
-        }
-        if (Mesh.VCellCenters[ idx2( cl, 2, Mesh.CellCentersLDI ) ] > zmax) {
-          zmax = Mesh.VCellCenters[ idx2( cl, 2, Mesh.CellCentersLDI ) ];
-        }
-      }
       double H = zmax - zmin;
 
       // Adjust min and max to avoid potential recirculation near boundaries.
@@ -469,8 +398,8 @@ computeAveragesY ( const FluidMesh& Mesh, \
       // Compute averages
       for (int cl = 0; cl < Mesh.DOF[2]; cl++)
       {
-        pNode1 = Mesh.VCellPressureNeighbor[ idx2( cl, 0, Mesh.VelocityCellPressureNeighborLDI ) ];
-        pNode2 = Mesh.VCellPressureNeighbor[ idx2( cl, 1, Mesh.VelocityCellPressureNeighborLDI ) ];
+        pNode1 = Mesh.VCellPressureNeighbor[ idx2( cl, 0, Mesh.VelocityCellPressureNeighborLDI ) ] + 1;
+        pNode2 = Mesh.VCellPressureNeighbor[ idx2( cl, 1, Mesh.VelocityCellPressureNeighborLDI ) ] + 1;
         if (!Mesh.ImmersedBoundary[ pNode1 ] && !Mesh.ImmersedBoundary[ pNode2 ])
         {
           if (Mesh.VCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] > xmin)
@@ -485,18 +414,20 @@ computeAveragesY ( const FluidMesh& Mesh, \
                  {
                     if (Mesh.VCellCenters[ idx2( cl, 2, Mesh.CellCentersLDI ) ] < zmax) // Inside z limits
                     {
-                      V = V + Solution[ cl ];
-                      vInd++;
                       pressure = 0.5 * (Solution[ pNode1 + vDOF ] + Solution[ pNode2 + vDOF ] );
                       if (Mesh.VCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] < ymid)
                       {
                         P1 = P1 + pressure;
                         p1Ind++;
+                        V = V + Solution[ cl ];
+                        vInd++;
                       }
                       else if (Mesh.VCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] > ymid)
                       {
                         P2 = P2 + pressure;
                         p2Ind++;
+                        V = V + Solution[ cl ];
+                        vInd++;
                       }
                     }
                   }
@@ -524,30 +455,11 @@ computeAveragesY ( const FluidMesh& Mesh, \
     {
       int vDOF = Mesh.DOF[1] + Mesh.DOF[2];
       // Geometric properties for volume averaging
-      xmin = Mesh.PCellCenters[ idx2( 0, 0, Mesh.CellCentersLDI ) ];
-      xmax = xmin;
-      ymin = Mesh.PCellCenters[ idx2( 0, 1, Mesh.CellCentersLDI ) ];
-      ymax = ymin;
-
-      for (int cl = 0; cl < Mesh.DOF[1]; cl++)
-      {
-        if (Mesh.UCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] < xmin) {
-          xmin = Mesh.UCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ];
-        }
-        if (Mesh.UCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] > xmax) {
-          xmax = Mesh.UCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ];
-        }
-      }
+      xmin = Mesh.xLim[0];
+      xmax = Mesh.xLim[1];
+      ymin = Mesh.yLim[0];
+      ymax = Mesh.yLim[1];
       double L = xmax - xmin;
-      for (int cl = 0; cl < Mesh.DOF[2]; cl++)
-      {
-        if (Mesh.VCellCenters[ idx2( cl, 1, Mesh.CellCentersLDI ) ] < ymin) {
-          ymin = Mesh.VCellCenters[ idx2( cl, 1, Mesh.CellCentersLDI ) ];
-        }
-        if (Mesh.VCellCenters[ idx2( cl, 1, Mesh.CellCentersLDI ) ] > ymax) {
-          ymax = Mesh.VCellCenters[ idx2( cl, 1, Mesh.CellCentersLDI ) ];
-        }
-      }
       double W = ymax - ymin;
 
       // Adjust min and max to avoid potential recirculation near boundaries.
@@ -562,8 +474,8 @@ computeAveragesY ( const FluidMesh& Mesh, \
       // Compute averages
       for (int cl = 0; cl < Mesh.DOF[2]; cl++)
       {
-        pNode1 = Mesh.VCellPressureNeighbor[ idx2( cl, 0, Mesh.VelocityCellPressureNeighborLDI ) ];
-        pNode2 = Mesh.VCellPressureNeighbor[ idx2( cl, 1, Mesh.VelocityCellPressureNeighborLDI ) ];
+        pNode1 = Mesh.VCellPressureNeighbor[ idx2( cl, 0, Mesh.VelocityCellPressureNeighborLDI ) ] + 1;
+        pNode2 = Mesh.VCellPressureNeighbor[ idx2( cl, 1, Mesh.VelocityCellPressureNeighborLDI ) ] + 1;
         if (!Mesh.ImmersedBoundary[ pNode1 ] && !Mesh.ImmersedBoundary[ pNode2 ])
         {
           if (Mesh.VCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] > xmin)
@@ -574,18 +486,20 @@ computeAveragesY ( const FluidMesh& Mesh, \
               {
                 if (Mesh.VCellCenters[ idx2( cl, 1, Mesh.CellCentersLDI ) ] < ymax) // Inside y limits
                 {
-                  V = V + Solution[ cl ];
-                  vInd++;
                   pressure = 0.5 * (Solution[ pNode1 + vDOF ] + Solution[ pNode2 + vDOF ] );
                   if (Mesh.VCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] < ymid)
                   {
                     P1 = P1 + pressure;
                     p1Ind++;
+                    V = V + Solution[ cl ];
+                    vInd++;
                   }
                   else if (Mesh.VCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] > ymid)
                   {
                     P2 = P2 + pressure;
                     p2Ind++;
+                    V = V + Solution[ cl ];
+                    vInd++;
                   }
                 }
               }
@@ -629,42 +543,14 @@ computeAveragesZ ( const FluidMesh& Mesh, \
 
   int vDOF = Mesh.DOF[1] + Mesh.DOF[2] + Mesh.DOF[3];
   // Geometric properties for volume averaging
-  xmin = Mesh.PCellCenters[ idx2( 0, 0, Mesh.CellCentersLDI ) ];
-  xmax = xmin;
-  ymin = Mesh.PCellCenters[ idx2( 0, 1, Mesh.CellCentersLDI ) ];
-  ymax = ymin;
-  zmin = Mesh.PCellCenters[ idx2( 0, 2, Mesh.CellCentersLDI ) ];
-  zmax = zmin;
-
-  for (int cl = 0; cl < Mesh.DOF[1]; cl++)
-  {
-    if (Mesh.UCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] < xmin) {
-      xmin = Mesh.UCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ];
-    }
-    if (Mesh.UCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] > xmax) {
-      xmax = Mesh.UCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ];
-    }
-  }
+  xmin = Mesh.xLim[0];
+  xmax = Mesh.xLim[1];
+  ymin = Mesh.yLim[0];
+  ymax = Mesh.yLim[1];
+  zmin = Mesh.zLim[0];
+  zmax = Mesh.zLim[1];
   double L = xmax - xmin;
-  for (int cl = 0; cl < Mesh.DOF[2]; cl++)
-  {
-    if (Mesh.VCellCenters[ idx2( cl, 1, Mesh.CellCentersLDI ) ] < ymin) {
-      ymin = Mesh.VCellCenters[ idx2( cl, 1, Mesh.CellCentersLDI ) ];
-    }
-    if (Mesh.VCellCenters[ idx2( cl, 1, Mesh.CellCentersLDI ) ] > ymax) {
-      ymax = Mesh.VCellCenters[ idx2( cl, 1, Mesh.CellCentersLDI ) ];
-    }
-  }
   double W = ymax - ymin;
-  for (int cl = 0; cl < Mesh.DOF[3]; cl++)
-  {
-    if (Mesh.WCellCenters[ idx2( cl, 2, Mesh.CellCentersLDI ) ] < zmin) {
-      zmin = Mesh.VCellCenters[ idx2( cl, 2, Mesh.CellCentersLDI ) ];
-    }
-    if (Mesh.VCellCenters[ idx2( cl, 2, Mesh.CellCentersLDI ) ] > zmax) {
-      zmax = Mesh.VCellCenters[ idx2( cl, 2, Mesh.CellCentersLDI ) ];
-    }
-  }
   double H = zmax - zmin;
 
   // Adjust min and max to avoid potential recirculation near boundaries.
@@ -681,8 +567,8 @@ computeAveragesZ ( const FluidMesh& Mesh, \
   // Compute averages
   for (int cl = 0; cl < Mesh.DOF[3]; cl++)
   {
-    pNode1 = Mesh.WCellPressureNeighbor[ idx2( cl, 0, Mesh.VelocityCellPressureNeighborLDI ) ];
-    pNode2 = Mesh.WCellPressureNeighbor[ idx2( cl, 1, Mesh.VelocityCellPressureNeighborLDI ) ];
+    pNode1 = Mesh.WCellPressureNeighbor[ idx2( cl, 0, Mesh.VelocityCellPressureNeighborLDI ) ] + 1;
+    pNode2 = Mesh.WCellPressureNeighbor[ idx2( cl, 1, Mesh.VelocityCellPressureNeighborLDI ) ] + 1;
     if (!Mesh.ImmersedBoundary[ pNode1 ] && !Mesh.ImmersedBoundary[ pNode2 ])
     {
       if (Mesh.WCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] > xmin)
@@ -697,18 +583,20 @@ computeAveragesZ ( const FluidMesh& Mesh, \
               {
                 if (Mesh.WCellCenters[ idx2( cl, 2, Mesh.CellCentersLDI ) ] < zmax) // Inside z limits
                 {
-                  V = V + Solution[ cl ];
-                  vInd++;
                   pressure = 0.5 * (Solution[ pNode1 + vDOF ] + Solution[ pNode2 + vDOF ] );
                   if (Mesh.WCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] < zmid)
                   {
                     P1 = P1 + pressure;
                     p1Ind++;
+                    V = V + Solution[ cl ];
+                    vInd++;
                   }
                   else if (Mesh.WCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] > zmid)
                   {
                     P2 = P2 + pressure;
                     p2Ind++;
+                    V = V + Solution[ cl ];
+                    vInd++;
                   }
                 }
               }
