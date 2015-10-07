@@ -248,6 +248,8 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
           forcePY.Zeros();
           solY.Allocate("solution", dofTotal);
           solY.Zeros();
+          solZ.Allocate("solutin", dofTotal);
+          solZ.Zeros();
 
           // Assemble paralution arrays from previously built COO arrays.
           matX.Assemble(&matIsX[0], &matJsX[0], &matValsX[0], matIsX.size(), \

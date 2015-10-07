@@ -53,15 +53,15 @@ computeKTensorL ( const FluidMesh& Mesh, \
       }
 
       // Compute averages
-      computeAveragesX ( Mesh, xSolution, Vels[0], GVals[0] );
-      computeAveragesY ( Mesh, xSolution, Vels[1], GVals[1] );
-      computeAveragesZ ( Mesh, xSolution, Vels[2], GVals[2] );
-      computeAveragesX ( Mesh, ySolution, Vels[3], GVals[3] );
-      computeAveragesY ( Mesh, ySolution, Vels[4], GVals[4] );
-      computeAveragesZ ( Mesh, ySolution, Vels[5], GVals[5] );
-      computeAveragesX ( Mesh, zSolution, Vels[6], GVals[6] );
-      computeAveragesY ( Mesh, zSolution, Vels[7], GVals[7] );
-      computeAveragesZ ( Mesh, zSolution, Vels[8], GVals[8] );
+      computeAveragesX ( Mesh, xSolution, Vels[0], GVals[0], 1 );
+      computeAveragesY ( Mesh, xSolution, Vels[1], GVals[1], 0 );
+      computeAveragesZ ( Mesh, xSolution, Vels[2], GVals[2], 0 );
+      computeAveragesX ( Mesh, ySolution, Vels[3], GVals[3], 0 );
+      computeAveragesY ( Mesh, ySolution, Vels[4], GVals[4], 1 );
+      computeAveragesZ ( Mesh, ySolution, Vels[5], GVals[5], 0 );
+      computeAveragesX ( Mesh, zSolution, Vels[6], GVals[6], 0 );
+      computeAveragesY ( Mesh, zSolution, Vels[7], GVals[7], 0 );
+      computeAveragesZ ( Mesh, zSolution, Vels[8], GVals[8], 1 );
 
       for (int i = 0; i < 9; i++) {
         GVals[i+9] = GVals[i];
@@ -127,10 +127,10 @@ computeKTensorL ( const FluidMesh& Mesh, \
       }
 
       // Compute averages
-      computeAveragesX ( Mesh, xSolution, Vels[0], GVals[0] );
-      computeAveragesY ( Mesh, xSolution, Vels[1], GVals[1] );
-      computeAveragesX ( Mesh, ySolution, Vels[3], GVals[3] );
-      computeAveragesY ( Mesh, ySolution, Vels[4], GVals[4] );
+      computeAveragesX ( Mesh, xSolution, Vels[0], GVals[0], 1 );
+      computeAveragesY ( Mesh, xSolution, Vels[1], GVals[1], 0 );
+      computeAveragesX ( Mesh, ySolution, Vels[2], GVals[2], 0 );
+      computeAveragesY ( Mesh, ySolution, Vels[3], GVals[3], 1 );
 
       for (int i = 0; i < 4; i++) {
         GVals[i+4] = GVals[i];
@@ -142,11 +142,11 @@ computeKTensorL ( const FluidMesh& Mesh, \
       LocalMatrix<double> MacroPresGrads;
 
       // Conductivity tensor
-      K.Allocate("conductivity tensor", 9);
+      K.Allocate("conductivity tensor", 4);
       K.Zeros();
 
       // Macro velocities
-      MacroVels.Allocate("macroscopic velocities", 9);
+      MacroVels.Allocate("macroscopic velocities", 4);
       MacroVels.Zeros();
       for (int i = 0; i < 4; i++) {
         MacroVels[i] = Vels[i];
@@ -180,7 +180,7 @@ computeKTensorL ( const FluidMesh& Mesh, \
 void
 computeAveragesX ( const FluidMesh& Mesh, \
                    const paralution::LocalVector<double>& Solution, \
-                   double& V, double& G )
+                   double& V, double& G, int print )
 {
   double xmin, xmax, xmid, midRangex, ymin, ymax, zmin, zmax, K, pNode1, pNode2;
   double P1 = 0;
@@ -268,13 +268,15 @@ computeAveragesX ( const FluidMesh& Mesh, \
       P2 = P2 / p2Ind;
       G = (P1 - P2) / midRangex;
 
-      K = V / G;
-
-      // Write out K
-      std::ofstream KConstantX;
-      KConstantX.open("KConstantX.dat");
-      KConstantX << K;
-      KConstantX.close();
+      if (print)
+      {
+        K = V / G;
+        // Write out K
+        std::ofstream KConstantX;
+        KConstantX.open("KConstantX.dat");
+        KConstantX << K;
+        KConstantX.close();
+      }
       break;
     }
     case 2 :
@@ -338,13 +340,15 @@ computeAveragesX ( const FluidMesh& Mesh, \
       P2 = P2 / p2Ind;
       G = (P1 - P2) / midRangex;
 
-      K = V / G;
-
-      // Write out K
-      std::ofstream KConstantX;
-      KConstantX.open("KConstantX.dat");
-      KConstantX << K;
-      KConstantX.close();
+      if (print)
+      {
+        K = V / G;
+        // Write out K
+        std::ofstream KConstantX;
+        KConstantX.open("KConstantX.dat");
+        KConstantX << K;
+        KConstantX.close();
+      }
       break;
     }
   }
@@ -354,7 +358,7 @@ computeAveragesX ( const FluidMesh& Mesh, \
 void
 computeAveragesY ( const FluidMesh& Mesh, \
                    const paralution::LocalVector<double>& Solution, \
-                   double& V, double& G )
+                   double& V, double& G, int print )
 {
   double xmin, xmax, midRangey, ymin, ymax, ymid, zmin, zmax, K, pNode1, pNode2;
   double P1 = 0;
@@ -415,18 +419,18 @@ computeAveragesY ( const FluidMesh& Mesh, \
                     if (Mesh.VCellCenters[ idx2( cl, 2, Mesh.CellCentersLDI ) ] < zmax) // Inside z limits
                     {
                       pressure = 0.5 * (Solution[ pNode1 + vDOF ] + Solution[ pNode2 + vDOF ] );
-                      if (Mesh.VCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] < ymid)
+                      if (Mesh.VCellCenters[ idx2( cl, 1, Mesh.CellCentersLDI ) ] < ymid)
                       {
                         P1 = P1 + pressure;
                         p1Ind++;
-                        V = V + Solution[ cl ];
+                        V = V + Solution[ cl + Mesh.DOF[1] ];
                         vInd++;
                       }
-                      else if (Mesh.VCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] > ymid)
+                      else if (Mesh.VCellCenters[ idx2( cl, 1, Mesh.CellCentersLDI ) ] > ymid)
                       {
                         P2 = P2 + pressure;
                         p2Ind++;
-                        V = V + Solution[ cl ];
+                        V = V + Solution[ cl + Mesh.DOF[1] ];
                         vInd++;
                       }
                     }
@@ -442,13 +446,15 @@ computeAveragesY ( const FluidMesh& Mesh, \
       P2 = P2 / p2Ind;
       G = (P1 - P2) / midRangey;
 
-      K = V / G;
-
-      // Write out K
-      std::ofstream KConstantY;
-      KConstantY.open("KConstantY.dat");
-      KConstantY << K;
-      KConstantY.close();
+      if (print)
+      {
+        K = V / G;
+        // Write out K
+        std::ofstream KConstantY;
+        KConstantY.open("KConstantY.dat");
+        KConstantY << K;
+        KConstantY.close();
+      }
       break;
     }
     case 2 :
@@ -487,18 +493,18 @@ computeAveragesY ( const FluidMesh& Mesh, \
                 if (Mesh.VCellCenters[ idx2( cl, 1, Mesh.CellCentersLDI ) ] < ymax) // Inside y limits
                 {
                   pressure = 0.5 * (Solution[ pNode1 + vDOF ] + Solution[ pNode2 + vDOF ] );
-                  if (Mesh.VCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] < ymid)
+                  if (Mesh.VCellCenters[ idx2( cl, 1, Mesh.CellCentersLDI ) ] < ymid)
                   {
                     P1 = P1 + pressure;
                     p1Ind++;
-                    V = V + Solution[ cl ];
+                    V = V + Solution[ cl + Mesh.DOF[1] ];
                     vInd++;
                   }
-                  else if (Mesh.VCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] > ymid)
+                  else if (Mesh.VCellCenters[ idx2( cl, 1, Mesh.CellCentersLDI ) ] > ymid)
                   {
                     P2 = P2 + pressure;
                     p2Ind++;
-                    V = V + Solution[ cl ];
+                    V = V + Solution[ cl + Mesh.DOF[1] ];
                     vInd++;
                   }
                 }
@@ -512,13 +518,15 @@ computeAveragesY ( const FluidMesh& Mesh, \
       P2 = P2 / p2Ind;
       G = (P1 - P2) / midRangey;
 
-      K = V / G;
-
-      // Write out K
-      std::ofstream KConstantY;
-      KConstantY.open("KConstantY.dat");
-      KConstantY << K;
-      KConstantY.close();
+      if (print)
+      {
+        K = V / G;
+        // Write out K
+        std::ofstream KConstantY;
+        KConstantY.open("KConstantY.dat");
+        KConstantY << K;
+        KConstantY.close();
+      }
       break;
     }
   }
@@ -527,7 +535,7 @@ computeAveragesY ( const FluidMesh& Mesh, \
 void
 computeAveragesZ ( const FluidMesh& Mesh, \
                     const paralution::LocalVector<double>& Solution, \
-                    double& V, double& G )
+                    double& V, double& G, int print )
 {
   double xmin, xmax, midRangez, ymin, ymax, zmid, zmin, zmax, K, pNode1, pNode2;
   double P1 = 0;
@@ -584,18 +592,18 @@ computeAveragesZ ( const FluidMesh& Mesh, \
                 if (Mesh.WCellCenters[ idx2( cl, 2, Mesh.CellCentersLDI ) ] < zmax) // Inside z limits
                 {
                   pressure = 0.5 * (Solution[ pNode1 + vDOF ] + Solution[ pNode2 + vDOF ] );
-                  if (Mesh.WCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] < zmid)
+                  if (Mesh.WCellCenters[ idx2( cl, 2, Mesh.CellCentersLDI ) ] < zmid)
                   {
                     P1 = P1 + pressure;
                     p1Ind++;
-                    V = V + Solution[ cl ];
+                    V = V + Solution[ cl + Mesh.DOF[1] + Mesh.DOF[2] ];
                     vInd++;
                   }
-                  else if (Mesh.WCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] > zmid)
+                  else if (Mesh.WCellCenters[ idx2( cl, 2, Mesh.CellCentersLDI ) ] > zmid)
                   {
                     P2 = P2 + pressure;
                     p2Ind++;
-                    V = V + Solution[ cl ];
+                    V = V + Solution[ cl + Mesh.DOF[1] + Mesh.DOF[2] ];
                     vInd++;
                   }
                 }
@@ -611,13 +619,15 @@ computeAveragesZ ( const FluidMesh& Mesh, \
   P2 = P2 / p2Ind;
   G = (P1 - P2) / midRangez;
 
-  K = V / G;
-
-  // Write out K
-  std::ofstream KConstantZ;
-  KConstantZ.open("KConstantZ.dat");
-  KConstantZ << K;
-  KConstantZ.close();
+  if (print)
+  {
+    K = V / G;
+    // Write out K
+    std::ofstream KConstantZ;
+    KConstantZ.open("KConstantZ.dat");
+    KConstantZ << K;
+    KConstantZ.close();
+  }
 }
 
 void
@@ -629,13 +639,13 @@ computeKConstantDrive ( const FluidMesh & Mesh, \
   switch ( direction )
   {
     case 0 :
-      computeAveragesX ( Mesh, Solution, V, G );
+      computeAveragesX ( Mesh, Solution, V, G, 1 );
       break;
     case 1 :
-      computeAveragesY ( Mesh, Solution, V, G );
+      computeAveragesY ( Mesh, Solution, V, G, 1 );
       break;
     case 2 :
-      computeAveragesZ ( Mesh, Solution, V, G );
+      computeAveragesZ ( Mesh, Solution, V, G, 1 );
       break;
   }
 }

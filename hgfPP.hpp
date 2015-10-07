@@ -10,17 +10,17 @@ computeKTensorL ( const FluidMesh& Mesh, \
 void
 computeAveragesX ( const FluidMesh& Mesh, \
                    const paralution::LocalVector<double>& Solution,
-                   double& V, double& G );
+                   double& V, double& G, int print );
 
 void
 computeAveragesY ( const FluidMesh& Mesh, \
                    const paralution::LocalVector<double>& Solution, \
-                   double& V, double& G );
+                   double& V, double& G, int print );
 
 void
 computeAveragesZ ( const FluidMesh& Mesh, \
                    const paralution::LocalVector<double>& Solution, \
-                   double& V, double& G );
+                   double& V, double& G, int print );
 
 void
 computeKConstantDrive ( const FluidMesh& Mesh, \
