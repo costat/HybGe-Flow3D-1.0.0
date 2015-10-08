@@ -166,6 +166,9 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
           lsY.SetPreconditioner(pY);
           lsZ.SetOperator(matZ);
           lsZ.SetPreconditioner(pZ);
+          lsX.Verbose(2);
+          lsY.Verbose(2);
+          lsZ.Verbose(2);
 
           // Build the solver.
           lsX.Build();
@@ -276,6 +279,8 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
           lsX.SetPreconditioner(pX);
           lsY.SetOperator(matY);
           lsY.SetPreconditioner(pY);
+          lsX.Verbose(2);
+          lsY.Verbose(2);
 
           // Build the solver.
           lsX.Build();
@@ -398,6 +403,7 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
       // Pass the matrix and preconditioner to the solver.
       ls.SetOperator(mat);
       ls.SetPreconditioner(p);
+      ls.Verbose(2);
 
       // Build the solver.
       ls.Build();
