@@ -4,6 +4,8 @@ import numpy as np
 import sys
 import hgf
 import re
+import os
+import shutil
 
 gridfolder = '/media/basis1/global/research/hybrid/kfactory/ranThroats/'
 L = 1.
@@ -14,16 +16,19 @@ direction = 0
 visc = 0.001
 nThreads = 4
 
+nGrids = 0
+
 ## Cycle through grids in directory ##
 for root, dirs, filenames in os.walk(gridfolder):
   for f in filenames:
+    nGrids = nGrids + 1
     gridF = open(os.path.join(root, f), 'r')
     gridF.seek(0)
     geoData = gridF.readline()
     gridin1 = np.genfromtxt(gridF, dtype = int)
     gridF.close()
     nxyz = re.findall(r'\d+', geoData)
-    nx = int(nxzy[0])
+    nx = int(nxyz[0])
     ny = int(nxyz[1])
     nz = int(nxyz[2])
 
@@ -50,7 +55,20 @@ for root, dirs, filenames in os.walk(gridfolder):
     hgf.hgfStokesDrive ( gridin, gridin_ldi2, gridin_ldi3, nx, ny, nz, \
                      L, W, H, direction, visc, nThreads )
 
-    ### Grab computed K and append to file to hold all Ks ###
+    ### Grab computed K ###
+    KLoc = gridfolder + 'Ks.dat'
+    KFile = open('KConstantX.dat', 'r')
+    KFile.seek(0)
+    KStr = KFile.readline()
+    KFlo = float(KStr)
+    KFile.close()
+    KOut = open(KLoc, 'a+')
+    KOut.write('%f\t' % (KFlo))
+    KOut.write(f)
+    KOut.write('\n')
+    KOut.close()
 
     ### Move flow solution file so not overwritten ###
-
+    tarend = 'SOL' + f + '.dat'
+    tarloc = gridfolder + tarend
+    shutil.copy('flowrun.dat', tarloc)
