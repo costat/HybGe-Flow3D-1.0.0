@@ -27,8 +27,11 @@ void
 hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
                 int nx, int ny, int nz, \
                 double length, double width, double height, int direction, \
-                double visc, int nThreads )
+                double visc, int nThreads, int numSims, int simNum )
 {
+
+  if (simNum == 1) init_paralution();
+
   switch ( direction )
   {
     case 3 : // Solve all 3 flow directions for upscaled tensor
@@ -102,12 +105,7 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
           std::cout << "Arrays constructed in " << array_duration << "seconds\n";
           solve_start = std::clock();
 
-          init_paralution();
-
           set_omp_threads_paralution(nThreads);
-
-          // Prints threads and accelerator info to console
-          info_paralution();
 
           // Declare paralution vector and matrix objects
           LocalVector<double> solX;
@@ -202,8 +200,6 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
           forcePZ.Clear();
           solZ.Clear();
 
-          stop_paralution();
-
           // Total timers
           total_duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
           std::cout << "Total time: " << total_duration << "seconds\n";
@@ -228,12 +224,7 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
           std::cout << "Arrays constructed in " << array_duration << "seconds\n";
           solve_start = std::clock();
 
-          init_paralution();
-
           set_omp_threads_paralution(nThreads);
-
-          // Prints threads and accelerator info to console
-          info_paralution();
 
           // Declare paralution vector and matrix objects
           LocalVector<double> solX;
@@ -309,8 +300,6 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
           solY.Clear();
           solZ.Clear();
 
-          stop_paralution();
-
           // Total timers
           total_duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
           std::cout << "Total time: " << total_duration << "seconds\n";
@@ -369,12 +358,7 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
       std::cout << "Arrays constructed in " << array_duration << "seconds\n";
       solve_start = std::clock();
 
-      init_paralution();
-
       set_omp_threads_paralution(nThreads);
-
-      // Prints threads and accelerator info to console
-      info_paralution();
 
       // Declare paralution vector and matrix objects
       LocalVector<double> sol;
@@ -398,7 +382,7 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
       // Setup a GMRES solver object and an ILU preconditioner.
       GMRES<LocalMatrix<double>, LocalVector<double>, double > ls;
       ILU<LocalMatrix<double>, LocalVector<double>, double> p;
-      p.Set(2);
+      p.Set(4);
 
       // Pass the matrix and preconditioner to the solver.
       ls.SetOperator(mat);
@@ -420,11 +404,11 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
       computeKConstantDrive ( Mesh, sol, direction );
 
       // Clear arrays no longer in use.
+      ls.Clear();
       mat.Clear();
       forceP.Clear();
       sol.Clear();
-
-      stop_paralution();
+      p.Clear();
 
       // Total timers
       total_duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
@@ -432,4 +416,6 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
       break;
     }
   }
+
+  if (simNum == numSims) stop_paralution();
 }

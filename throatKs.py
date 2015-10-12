@@ -7,21 +7,23 @@ import re
 import os
 import shutil
 
-gridfolder = '/media/basis1/global/research/hybrid/kfactory/ranThroats/'
+gridfolder = '/media/basis1/global/research/hybrid/kfactory/ranThroats1-100/'
+gridout = '/media/basis1/global/research/hybrid/kfactory/RTOUT1-100/'
 L = 1.
 W = 1.
 H = 1.
 
 direction = 0
 visc = 0.001
-nThreads = 4
+nThreads = 1
 
-nGrids = 0
+gridCount = 0
+nGrids = len([name for name in os.listdir(gridfolder) if os.path.isfile(os.path.join(gridfolder, name))])
 
 ## Cycle through grids in directory ##
 for root, dirs, filenames in os.walk(gridfolder):
   for f in filenames:
-    nGrids = nGrids + 1
+    gridCount = gridCount + 1
     gridF = open(os.path.join(root, f), 'r')
     gridF.seek(0)
     geoData = gridF.readline()
@@ -53,10 +55,10 @@ for root, dirs, filenames in os.walk(gridfolder):
     #################
 
     hgf.hgfStokesDrive ( gridin, gridin_ldi2, gridin_ldi3, nx, ny, nz, \
-                     L, W, H, direction, visc, nThreads )
+                         L, W, H, direction, visc, nThreads, nGrids, gridCount )
 
     ### Grab computed K ###
-    KLoc = gridfolder + 'Ks.dat'
+    KLoc = gridout + 'Ks.dat'
     KFile = open('KConstantX.dat', 'r')
     KFile.seek(0)
     KStr = KFile.readline()
@@ -70,5 +72,5 @@ for root, dirs, filenames in os.walk(gridfolder):
 
     ### Move flow solution file so not overwritten ###
     tarend = 'SOL' + f + '.dat'
-    tarloc = gridfolder + tarend
+    tarloc = gridout + tarend
     shutil.copy('flowrun.dat', tarloc)

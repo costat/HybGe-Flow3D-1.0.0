@@ -10,7 +10,7 @@ import re
 # GRID INFORMATION. USER PROVIDES PATH .DAT FILE CONTAINING
 # VOXEL ARRAY OF 0S 1S AND 2S.
 # ALSO, USER PROVIDES TOTAL GRID LENGTHS IN EACH DIRECTION.
-gridfiles = './grids/pflow3d1.dat'
+gridfiles = './grids/pflow2d.dat'
 L = 1.
 W = 1.
 H = 1.
@@ -60,5 +60,6 @@ print 'Solving the stationary Stokes problem...\n'
 ### SWIG CALL ###
 #################
 
-hgf.hgfStokesDrive ( gridin, gridin_ldi2, gridin_ldi3, nx, ny, nz, L, W, H, direction, visc, nThreads )
+hgf.hgfStokesDrive ( gridin, gridin_ldi2, gridin_ldi3, nx, ny, nz, \
+                     L, W, H, direction, visc, nThreads, 1, 1 )
 
