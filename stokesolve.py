@@ -10,7 +10,7 @@ import re
 # GRID INFORMATION. USER PROVIDES PATH .DAT FILE CONTAINING
 # VOXEL ARRAY OF 0S 1S AND 2S.
 # ALSO, USER PROVIDES TOTAL GRID LENGTHS IN EACH DIRECTION.
-gridfiles = './grids/pflow2d.dat'
+gridfiles = './grids/2dsquare.dat'
 L = 1.
 W = 1.
 H = 1.
@@ -25,6 +25,9 @@ visc = 1
 
 # NUMBER OF OMP THREADS FOR USE IN PARALUTION LINEAR ALGEBRA
 nThreads = 4
+
+# SET ILU PRECONDITIONER LEVEL
+prec = 2
 
 ##########################################################
 ### SWIG TRANSLATION, USER SHOULD NOT EDIT BELOW HERE ####
@@ -61,5 +64,5 @@ print 'Solving the stationary Stokes problem...\n'
 #################
 
 hgf.hgfStokesDrive ( gridin, gridin_ldi2, gridin_ldi3, nx, ny, nz, \
-                     L, W, H, direction, visc, nThreads, 1, 1 )
+                     L, W, H, direction, visc, nThreads, prec, 1, 1 )
 

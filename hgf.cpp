@@ -27,7 +27,7 @@ void
 hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
                 int nx, int ny, int nz, \
                 double length, double width, double height, int direction, \
-                double visc, int nThreads, int numSims, int simNum )
+                double visc, int nThreads, int prec, int numSims, int simNum )
 {
 
   if (simNum == 1) init_paralution();
@@ -157,6 +157,11 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
           GMRES<LocalMatrix<double>, LocalVector<double>, double > lsZ;
           ILU<LocalMatrix<double>, LocalVector<double>, double> pZ;
 
+          // ILU Level
+          pX.Set(prec);
+          pY.Set(prec);
+          pZ.Set(prec);
+
           // Pass the matrix and preconditioner to the solver.
           lsX.SetOperator(matX);
           lsX.SetPreconditioner(pX);
@@ -264,6 +269,10 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
           ILU<LocalMatrix<double>, LocalVector<double>, double> pX;
           GMRES<LocalMatrix<double>, LocalVector<double>, double > lsY;
           ILU<LocalMatrix<double>, LocalVector<double>, double> pY;
+
+          // ILU Level
+          pX.Set(prec);
+          pY.Set(prec);
 
           // Pass the matrix and preconditioner to the solver.
           lsX.SetOperator(matX);
@@ -379,19 +388,17 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
         forceP[cl] = force[cl];
       }
 
-      // Setup a GMRES solver object and an ILU preconditioner.
+      // Setup a GMRES solver object.
       GMRES<LocalMatrix<double>, LocalVector<double>, double > ls;
-      ILU<LocalMatrix<double>, LocalVector<double>, double> p;
-      p.Set(4);
-
-      // Pass the matrix and preconditioner to the solver.
       ls.SetOperator(mat);
-      ls.SetPreconditioner(p);
       ls.Verbose(2);
+
+      ILU<LocalMatrix<double>, LocalVector<double>, double> p;
+      p.Set(prec);
+      ls.SetPreconditioner(p);
 
       // Build the solver.
       ls.Build();
-
       // Solve the problem
       ls.Solve(forceP, &sol);
 
@@ -406,9 +413,9 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
       // Clear arrays no longer in use.
       ls.Clear();
       mat.Clear();
+      p.Clear();
       forceP.Clear();
       sol.Clear();
-      p.Clear();
 
       // Total timers
       total_duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
