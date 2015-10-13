@@ -7,21 +7,42 @@ import re
 import os
 import shutil
 
-gridfolder = '/media/basis1/global/research/hybrid/kfactory/ranThroats1-100/'
-gridout = '/media/basis1/global/research/hybrid/kfactory/RTOUT1-100/'
+####################################################################
+### PROBLEM SETUP, USER DEFINES INPUT/OUTPUT FOLDERS, VISCOSITY, ###
+### NUMBER OF OMP THREADS, BOUNDARY CONDITIONS, GRID DIMENSIONS, ###
+### AND SETS P-LEVEL FOR ILU PRECONDITIONER ########################
+####################################################################
+
+# FOLDER CONTAINING GRIDS
+infolder = '/media/basis1/global/research/hybrid/kfactory/ranThroats1-100/'
+# DESTINATION FOR OUTPUTS
+outfolder = '/media/basis1/global/research/hybrid/kfactory/RTOUT1-100/'
+# GRID DIMENSIONS
 L = 1.
 W = 1.
 H = 1.
 
+# PRINCIPAL FLOW DIRECTION, 0 - X, 1 - Y, 2 - Z
 direction = 0
+
+# SET VISCOSITY
 visc = 0.001
+
+# NUMBER OF OMP THREADS FOR USE IN PARALUTION LINEAR ALGEBRA
 nThreads = 1
 
+# SET ILU PRECONDITIONER LEVEL
+prec = 4
+
+####################################################################
+### SETUP AND SWIG TRANSLATION, USER SHOULD NOT EDIT BELOW HERE ####
+####################################################################
+
 gridCount = 0
-nGrids = len([name for name in os.listdir(gridfolder) if os.path.isfile(os.path.join(gridfolder, name))])
+nGrids = len([name for name in os.listdir(infolder) if os.path.isfile(os.path.join(infolder, name))])
 
 ## Cycle through grids in directory ##
-for root, dirs, filenames in os.walk(gridfolder):
+for root, dirs, filenames in os.walk(infolder):
   for f in filenames:
     gridCount = gridCount + 1
     gridF = open(os.path.join(root, f), 'r')
@@ -55,10 +76,10 @@ for root, dirs, filenames in os.walk(gridfolder):
     #################
 
     hgf.hgfStokesDrive ( gridin, gridin_ldi2, gridin_ldi3, nx, ny, nz, \
-                         L, W, H, direction, visc, nThreads, nGrids, gridCount )
+                         L, W, H, direction, visc, nThreads, prec, nGrids, gridCount )
 
     ### Grab computed K ###
-    KLoc = gridout + 'Ks.dat'
+    KLoc = outfolder + 'Ks.dat'
     KFile = open('KConstantX.dat', 'r')
     KFile.seek(0)
     KStr = KFile.readline()
@@ -72,5 +93,5 @@ for root, dirs, filenames in os.walk(gridfolder):
 
     ### Move flow solution file so not overwritten ###
     tarend = 'SOL' + f + '.dat'
-    tarloc = gridout + tarend
+    tarloc = outfolder + tarend
     shutil.copy('flowrun.dat', tarloc)
