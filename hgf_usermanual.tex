@@ -190,21 +190,24 @@ Finally, execute the compile script.
 \chapter{Running HybGe-Flow3D}
 
 The user needs to interact with two files to simulate a problem.
-First, a geometry file needs to be provided. Second,
-the boundary conditions and requested output
-are handled in the top section of the file stokesolve.py:
+First, a geometry file needs to be provided. Second, a python script
+detailing various simulation parameters needs to be edited and executed.
+
+\section{Single Simulation}
+
+For a single simulation the python script stokesolve.py is provided.
 
 \lstset{style=custom}
 \begin{lstlisting}
 import numpy as np
-import time
 import sys
 import hgf
 import re
 
-##############################################################################
-### PROBLEM SETUP, USER DEFINES GRID, VISCOSITY, AND NUMBER OF OMP THREADS ###
-##############################################################################
+##########################################################################
+### PROBLEM SETUP, USER DEFINES GRID, VISCOSITY, NUMBER OF OMP THREADS ###
+### AND P-LEVEL FOR PRECONDITIONER #######################################
+##########################################################################
 
 # GRID INFORMATION. USER PROVIDES PATH TO .DAT FILE CONTAINING
 # VOXEL ARRAY OF 0S 1S AND 2S.
@@ -225,6 +228,9 @@ visc = 0.001
 # NUMBER OF OMP THREADS FOR USE IN PARALUTION LINEAR ALGEBRA
 nThreads = 4
 
+# SET ILU PRECONDITIONER LEVEL
+prec = 4
+
 ##########################################################
 ### SWIG TRANSLATIONS, USER SHOULD NOT EDIT BELOW HERE ###
 ##########################################################
@@ -236,12 +242,12 @@ nThreads = 4
 
 \noindent We see here that the user needs to provide a grid data file,
 select total grid dimensions, choose a boundary condition
-problem type, set the viscocity, and choose the number of openMP
-threads available to Paralution.
+problem type, set the viscocity, choose the number of openMP
+threads available to Paralution, and declare the p-level for an ILU preconditioner.
 In the next two sections we review the details of these choices, beginning
 with describing the grid data file.
 
-\section{Problem Geometry}
+\subsection{Problem Geometry}
 
 Solving a problem on a new geometry requires the creation
 of a file $<$geometryname$>$.dat. The file contains
@@ -282,14 +288,15 @@ corresponds to the immersed boundary. So, the example
 above correponds to a simple pore geometry with an object blocking
 the flow in the center that is enforced by the immersed boundary term.
 
-\section{Problem Selection}
+\subsection{Problem Selection}
 
 After a geometry file has been created the user must
 edit the top section of the file stokesolve.py.
 \begin{lstlisting}
-##############################################################################
-### PROBLEM SETUP, USER DEFINES GRID, VISCOSITY, AND NUMBER OF OMP THREADS ###
-##############################################################################
+##########################################################################
+### PROBLEM SETUP, USER DEFINES GRID, VISCOSITY, NUMBER OF OMP THREADS ###
+### AND P-LEVEL FOR PRECONDITIONER #######################################
+##########################################################################
 
 # GRID INFORMATION. USER PROVIDES PATH TO .DAT FILE CONTAINING
 # VOXEL ARRAY OF 0S 1S AND 2S.
@@ -310,9 +317,12 @@ visc = 0.001
 # NUMBER OF OMP THREADS FOR USE IN PARALUTION LINEAR ALGEBRA
 nThreads = 4
 
+# SET ILU PRECONDITIONER LEVEL
+prec = 4
+
 \end{lstlisting}
 
-\noindent First, the geometry file location is given in line 16,
+\noindent First, the geometry file location is given in line 14,
 \begin{lstlisting}
   gridfiles = './path/to/<geometryname>.dat'
 \end{lstlisting}
@@ -338,10 +348,11 @@ of 0, 1, 2, or 3, which corresponds to the following flow problems:
         so that a full upscaled hydraulic conductivity tensor can be computed.
 \end{itemize}
 
-\noindent Next the user sets the fluid viscosity in line 27. Finally, the user tells
+\noindent Next the user sets the fluid viscosity in line 25. In line 28, the user tells
 the software how many openMP threads to use in the Paralution package.
+Finally, in line 31 the p-level of an ILU preconditioner is determined.
 
-\section{Simulation \& Output}
+\subsection{Simulation \& Output}
 
 Now that the top section of stokesolve.py has been set up, the code
 is executed simply by
@@ -417,6 +428,69 @@ computed from the solution.\\
 KConstant$\langle$X,Y,Z$\rangle$.dat and
 KTensor.dat. These files contains the solutions from each solution, the constant
 conductivities from each solution, and the upscaled conductivity tensor, respectively.
+
+\section{Simulating on a Batch of Grids}
+
+\noindent In order to faciliate the computation of empirical distributions for absolute permeability
+tensors on stochastic geometries, the script stokesManyGrids.py is provided.
+
+\begin{lstlisting}
+
+import numpy as np
+import sys
+import hgf
+import re
+import os
+import shutil
+
+####################################################################
+### PROBLEM SETUP, USER DEFINES INPUT/OUTPUT FOLDERS, VISCOSITY, ###
+### NUMBER OF OMP THREADS, BOUNDARY CONDITIONS, GRID DIMENSIONS, ###
+### AND SETS P-LEVEL FOR ILU PRECONDITIONER ########################
+####################################################################
+
+# FOLDER CONTAINING GRIDS
+infolder = '/path/to/grids/in/'
+# DESTINATION FOR OUTPUTS
+outfolder = '/path/to/output/'
+# GRID DIMENSIONS
+L = 1.
+W = 1.
+H = 1.
+
+# PRINCIPAL FLOW DIRECTION, 0 - X, 1 - Y, 2 - Z
+direction = 0
+
+# SET VISCOSITY
+visc = 0.001
+
+# NUMBER OF OMP THREADS FOR USE IN PARALUTION LINEAR ALGEBRA
+nThreads = 1
+
+# SET ILU PRECONDITIONER LEVEL
+prec = 4
+
+####################################################################
+### SETUP AND SWIG TRANSLATION, USER SHOULD NOT EDIT BELOW HERE ####
+####################################################################
+.
+.
+.
+\end{lstlisting}
+
+\noindent As we see above, the primary difference for the user is that
+two paths much be provided: (1) in line 15 the folder containing
+the batch of grids must be provided, and (2) in line 17 the
+path to an output folder must be provided. Note that this functionality
+is not yet set up for tensor computations, and only constant conductivities
+should be computed.\\
+
+\noindent When this script is run, HGF simulates the flow problem
+on all grids in the infolder location. HGF then collects the
+constant conductivity from each simulation and lists these values along
+with the name of the grid file in a file named "Ks.dat" in the output
+destination. Additionally, the flow solution file for each simulations is
+saved in the output folder.
 
 \chapter{Examples}
 

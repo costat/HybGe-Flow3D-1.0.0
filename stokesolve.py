@@ -5,13 +5,14 @@ import re
 
 ##############################################################################
 ### PROBLEM SETUP, USER DEFINES GRID, VISCOSITY, AND NUMBER OF OMP THREADS ###
+### AND P-LEVEL FOR PRECONDITIONER ###########################################
 ##############################################################################
 
 # GRID INFORMATION. USER PROVIDES PATH .DAT FILE CONTAINING
 # VOXEL ARRAY OF 0S 1S AND 2S.
 # ALSO, USER PROVIDES TOTAL GRID LENGTHS IN EACH DIRECTION.
-gridfiles = './grids/2dsquare.dat'
-L = 1.
+gridfiles = './grids/pflow2d.dat'
+L = 10.
 W = 1.
 H = 1.
 
@@ -24,10 +25,10 @@ direction = 0
 visc = 1
 
 # NUMBER OF OMP THREADS FOR USE IN PARALUTION LINEAR ALGEBRA
-nThreads = 4
+nThreads = 1
 
 # SET ILU PRECONDITIONER LEVEL
-prec = 2
+prec = 4
 
 ##########################################################
 ### SWIG TRANSLATION, USER SHOULD NOT EDIT BELOW HERE ####

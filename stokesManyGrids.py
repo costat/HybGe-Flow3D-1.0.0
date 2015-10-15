@@ -1,5 +1,3 @@
-## Script to compute constant Ks (x direction) for all geometries in a directory ###
-
 import numpy as np
 import sys
 import hgf
