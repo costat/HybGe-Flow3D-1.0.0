@@ -19,18 +19,18 @@ main( int argc, const char* argv[] )
   int nx, ny, nz, nThreads, prec, numSims, simNum, size1, ldi1, ldi2, direction;
   double length, width, height, visc;
 
-  nx = 30;
-  ny = 30;
-  nz = 30;
+  nx = atoi(argv[1]);
+  ny = atoi(argv[2]);
+  nz = atoi(argv[3]);
 
   ldi1 = ny;
   ldi2 = nz;
 
-  prec = 1;
-  nThreads = 4;
   numSims = 1;
   simNum = 1;
-  direction = 0;
+  direction = atoi(argv[4]);
+  nThreads = atoi(argv[5]);
+  prec = atoi(argv[6]);
 
   length = 1;
   width = 1;
