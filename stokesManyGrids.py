@@ -12,9 +12,9 @@ import shutil
 ####################################################################
 
 # FOLDER CONTAINING GRIDS
-infolder = '/media/basis1/global/research/hybrid/kfactory/ranThroats1-100/'
+infolder = '/path/to/in/'
 # DESTINATION FOR OUTPUTS
-outfolder = '/media/basis1/global/research/hybrid/kfactory/RTOUT1-100/'
+outfolder = '/path/to/out/'
 # GRID DIMENSIONS
 L = 1.
 W = 1.
