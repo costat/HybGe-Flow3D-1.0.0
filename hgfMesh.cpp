@@ -20,7 +20,8 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
                                   int nx, int ny, int nz, \
                                   double length, double width, double height )
 {
-  int maxPNodes, checkVert;
+  int checkVert;
+  int maxPNodes;
   int numPCells = 0;
   xLim[0] = 0;
   xLim[1] = length;
@@ -46,7 +47,8 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
       NZ = nz;
 
       // Max pressure nodes
-      double nodeHold [2];
+      std::vector<double> nodeHold;
+      nodeHold.resize(2);
       for (int yi = 0; yi < ny; yi++)
       {
         for (int xi = 0; xi < nx; xi++)
@@ -331,6 +333,7 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
       break;
     }
     default : // 3D problem
+    {
       // Constants determined by dimension alone
       DIM = 3;
       NodesLDI = 3;
@@ -341,7 +344,8 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
       VelocityCellPressureNeighborLDI = 2;
 
       // Max pressure nodes
-      double nodeHold [3];
+      std::vector<double> nodeHold;
+      nodeHold.resize(3);
       for (int yi = 0; yi < ny; yi++)
       {
         for (int xi = 0; xi < nx; xi++)
@@ -767,26 +771,30 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
       }
 
       break;
+    }
   } // End of dimension switch
 }
 
-int FluidMesh::isNear( double *Vector1, std::vector<double> Vector2, \
+int FluidMesh::isNear( std::vector<double>& Vector1, std::vector<double>& Vector2, \
                        double dx, double dy, double dz, int nNodes, int DIM )
 {
-  double xr, yr, zr, epsx, epsy, epsz;
-  int cl = -1;
+  int cl = nNodes;
   int prox = -1;
 
-  epsx = 0.2 * dx;
-  epsy = 0.2 * dy;
-  epsz = 0.2 * dz;
+  double xr = 0;
+  double yr = 0;
+  double zr = 0;
+  double epsx = 0.2 * dx;
+  double epsy = 0.2 * dy;
+  double epsz = 0.2 * dz;
 
   switch ( DIM )
   {
     case 2 :
+    {
       do
       {
-        cl++;
+        cl--;
         xr = fabs( Vector1[0] - Vector2[ idx2( cl, 0, 2 ) ]);
         yr = fabs( Vector1[1] - Vector2[ idx2( cl, 1, 2 ) ]);
         if (xr < epsx)
@@ -796,12 +804,14 @@ int FluidMesh::isNear( double *Vector1, std::vector<double> Vector2, \
             prox = cl;
           }
         }
-      } while (prox == -1 && cl < nNodes);
+      } while (prox == -1 && cl > 0);
       break;
+    }
     default :
+    {
       do
       {
-        cl++;
+        cl--;
         xr = fabs( Vector1[0] - Vector2[ idx2( cl, 0, 3 ) ]);
         yr = fabs( Vector1[1] - Vector2[ idx2( cl, 1, 3 ) ]);
         zr = fabs( Vector1[2] - Vector2[ idx2( cl, 2, 3 ) ]);
@@ -815,8 +825,9 @@ int FluidMesh::isNear( double *Vector1, std::vector<double> Vector2, \
             }
           }
         }
-      } while (prox == -1 && cl < nNodes);
+      } while (prox == -1 && cl > 0);
       break;
+    }
   }
   return prox;
 }
