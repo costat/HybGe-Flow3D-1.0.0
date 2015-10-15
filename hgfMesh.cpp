@@ -837,7 +837,7 @@ void FluidMesh::innerFaceConnectivity( \
                 std::vector<double> ComponentCellCenters, \
                 double dx, double dy, double dz, int nCells )
 {
-  int incr;
+  int incr, numNeighbors, nl;
   double xr, yr, zr, epsx, epsy, epsz, xtol, ytol, ztol;
 
   epsx = 0.2 * dx;
@@ -851,7 +851,9 @@ void FluidMesh::innerFaceConnectivity( \
   {
     case 2 :
       for (int cl = 0; cl < nCells; cl++) {
-        for (int nl = 0; nl < nCells; nl++) {
+        nl = 0;
+        do
+        {
           incr = nl + 1;
           xr = ComponentCellCenters[ idx2(nl, 0, 2) ] \
                - ComponentCellCenters[ idx2(cl, 0, 2) ];
@@ -860,22 +862,41 @@ void FluidMesh::innerFaceConnectivity( \
 
           if (fabs(xr) < epsx) {
             if (fabs(yr) < ytol) {
-              if (yr < 0) ComponentFaceConnectivity[ idx2(cl, 0, 4) ] = incr;
-              else if (yr > 0) ComponentFaceConnectivity[ idx2(cl, 2, 4) ] = incr;
+              if (yr < 0)
+              {
+                ComponentFaceConnectivity[ idx2(cl, 0, 4) ] = incr;
+                numNeighbors++;
+              }
+              else if (yr > 0)
+              {
+                ComponentFaceConnectivity[ idx2(cl, 2, 4) ] = incr;
+                numNeighbors++;
+              }
             }
           }
           else if (fabs(yr) < epsy) {
             if (fabs(xr) < xtol) {
-              if (xr < 0) ComponentFaceConnectivity[ idx2(cl, 3, 4 ) ] = incr;
-              else if (xr > 0) ComponentFaceConnectivity[ idx2( cl, 1, 4 ) ] = incr;
+              if (xr < 0)
+              {
+                ComponentFaceConnectivity[ idx2(cl, 3, 4 ) ] = incr;
+                numNeighbors++;
+              }
+              else if (xr > 0)
+              {
+                ComponentFaceConnectivity[ idx2( cl, 1, 4 ) ] = incr;
+                numNeighbors++;
+              }
             }
           }
-        }
+        } while (nl < nCells && numNeighbors < 4);
       }
       break;
     default :
       for (int cl = 0; cl < nCells; cl++) {
-        for (int nl = 0; nl < nCells; nl++) {
+        numNeighbors = 0;
+        nl = 0;
+        do
+        {
           incr = nl + 1;
           xr = ComponentCellCenters[ idx2(nl, 0, 3) ] \
                - ComponentCellCenters[ idx2(cl, 0, 3) ];
@@ -887,26 +908,51 @@ void FluidMesh::innerFaceConnectivity( \
           if (fabs(xr) < epsx) {
             if (fabs(yr) < epsy) {
               if (fabs(zr) < ztol) {
-                if (zr < 0) ComponentFaceConnectivity[ idx2(cl, 0, 6) ] = incr;
-                else if (zr > 0) ComponentFaceConnectivity[ idx2(cl, 2, 6) ] = incr;
+                if (zr < 0)
+                {
+                  ComponentFaceConnectivity[ idx2(cl, 0, 6) ] = incr;
+                  numNeighbors++;
+                }
+                else if (zr > 0)
+                {
+                  ComponentFaceConnectivity[ idx2(cl, 2, 6) ] = incr;
+                  numNeighbors++;
+                }
               }
             }
             if (fabs(zr) < epsz) {
               if (fabs(yr) < ytol) {
-                if (yr < 0) ComponentFaceConnectivity[ idx2(cl, 5, 6) ] = incr;
-                else if (yr > 0) ComponentFaceConnectivity[ idx2(cl, 4, 6)] = incr;
+                if (yr < 0)
+                {
+                  ComponentFaceConnectivity[ idx2(cl, 5, 6) ] = incr;
+                  numNeighbors++;
+                }
+                else if (yr > 0)
+                {
+                  ComponentFaceConnectivity[ idx2(cl, 4, 6)] = incr;
+                  numNeighbors++;
+                }
               }
             }
           }
           else if (fabs(yr) < epsy) {
             if (fabs(zr) < epsz) {
               if (fabs(xr) < xtol) {
-                if (xr < 0) ComponentFaceConnectivity[ idx2(cl, 3, 6) ] = incr;
-                else if (xr > 0) ComponentFaceConnectivity[ idx2(cl, 1, 6) ] = incr;
+                if (xr < 0)
+                {
+                  ComponentFaceConnectivity[ idx2(cl, 3, 6) ] = incr;
+                  numNeighbors++;
+                }
+                else if (xr > 0)
+                {
+                  ComponentFaceConnectivity[ idx2(cl, 1, 6) ] = incr;
+                  numNeighbors++;
+                }
               }
             }
           }
-        }
+          nl++;
+        } while (nl < nCells && numNeighbors < 6);
       }
       break;
   }
