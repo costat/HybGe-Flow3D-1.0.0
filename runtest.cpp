@@ -56,4 +56,6 @@ main( int argc, const char* argv[] )
                  length, width, height, direction, visc, \
                  nThreads, prec, numSims, simNum );
 
+  delete[] gridin;
+
 }
