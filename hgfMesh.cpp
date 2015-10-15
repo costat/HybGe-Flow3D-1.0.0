@@ -851,6 +851,7 @@ void FluidMesh::innerFaceConnectivity( \
   {
     case 2 :
       for (int cl = 0; cl < nCells; cl++) {
+        numNeighbors = 0;
         nl = 0;
         do
         {
@@ -888,6 +889,7 @@ void FluidMesh::innerFaceConnectivity( \
               }
             }
           }
+          nl++;
         } while (nl < nCells && numNeighbors < 4);
       }
       break;
