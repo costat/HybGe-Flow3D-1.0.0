@@ -68,6 +68,7 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
       int countCell = -1;
       mv.resize( (numPCells * 4) );
       double cellVert [ 8 ];
+      porosity = numPCells/(double)(nx * ny);
 
       // First we buil FullGrid, ImmersedBoundary, and Nodes.
       FullGrid.reserve((nx * ny));
@@ -384,6 +385,7 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
       int countCell = -1;
       mv.resize( (numPCells * 8) );
       double cellVert [ 24 ];
+      porosity = numPCells /(double)(nx * ny * nz);
 
       // First we buil FullGrid, ImmersedBoundary, and Nodes.
       FullGrid.reserve((nx * ny * nz));

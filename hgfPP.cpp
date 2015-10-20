@@ -99,9 +99,9 @@ computeKTensorL ( const FluidMesh& Mesh, \
       // Write out solution to file
       std::ofstream KTensor;
       KTensor.open ("KTensor.dat");
-      KTensor << K[0] << "\t" << K[1] << "\t" << K[2] << "\n";
-      KTensor << K[3] << "\t" << K[4] << "\t" << K[5] << "\n";
-      KTensor << K[6] << "\t" << K[7] << "\t" << K[8];
+      KTensor << K[0]*Mesh.porosity << "\t" << K[1]*Mesh.porosity << "\t" << K[2]*Mesh.porosity << "\n";
+      KTensor << K[3]*Mesh.porosity << "\t" << K[4]*Mesh.porosity << "\t" << K[5]*Mesh.porosity << "\n";
+      KTensor << K[6]*Mesh.porosity << "\t" << K[7]*Mesh.porosity << "\t" << K[8]*Mesh.porosity;
       KTensor.close();
       MacroVels.Clear();
       K.Clear();
@@ -167,8 +167,8 @@ computeKTensorL ( const FluidMesh& Mesh, \
       // Write out solution to file
       std::ofstream KTensor;
       KTensor.open ("KTensor.dat");
-      KTensor << K[0] << "\t" << K[1] << "\n";
-      KTensor << K[2] << "\t" << K[3] << "\n";
+      KTensor << K[0]*Mesh.porosity << "\t" << K[1]*Mesh.porosity << "\n";
+      KTensor << K[2]*Mesh.porosity << "\t" << K[3]*Mesh.porosity << "\n";
       KTensor.close();
       MacroVels.Clear();
       K.Clear();
@@ -282,7 +282,7 @@ computeAveragesX ( const FluidMesh& Mesh, \
         // Write out K
         std::ofstream KConstantX;
         KConstantX.open("KConstantX.dat");
-        KConstantX << K;
+        KConstantX << K*Mesh.porosity;
         KConstantX.close();
       }
       break;
@@ -354,7 +354,7 @@ computeAveragesX ( const FluidMesh& Mesh, \
         // Write out K
         std::ofstream KConstantX;
         KConstantX.open("KConstantX.dat");
-        KConstantX << K;
+        KConstantX << K*Mesh.porosity;
         KConstantX.close();
       }
       break;
@@ -464,7 +464,7 @@ computeAveragesY ( const FluidMesh& Mesh, \
         // Write out K
         std::ofstream KConstantY;
         KConstantY.open("KConstantY.dat");
-        KConstantY << K;
+        KConstantY << K*Mesh.porosity;
         KConstantY.close();
       }
       break;
@@ -536,7 +536,7 @@ computeAveragesY ( const FluidMesh& Mesh, \
         // Write out K
         std::ofstream KConstantY;
         KConstantY.open("KConstantY.dat");
-        KConstantY << K;
+        KConstantY << K*Mesh.porosity;
         KConstantY.close();
       }
       break;
@@ -641,7 +641,7 @@ computeAveragesZ ( const FluidMesh& Mesh, \
     // Write out K
     std::ofstream KConstantZ;
     KConstantZ.open("KConstantZ.dat");
-    KConstantZ << K;
+    KConstantZ << K*Mesh.porosity;
     KConstantZ.close();
   }
 }
