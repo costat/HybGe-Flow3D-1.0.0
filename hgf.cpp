@@ -2,7 +2,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <cstdio>
-#include <ctime>
+#include <omp.h>
 
 #include <paralution.hpp>
 
@@ -41,18 +41,17 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
       std::string outNameZ = "flowrunZ.dat";
       int dofTotal, maxNZ;
       double mesh_duration, array_duration, solve_duration, total_duration;
-      std::clock_t start, array_start, solve_start;
+      double start, array_start, solve_start;
 
-      start = std::clock();
+      start = omp_get_wtime();
 
       // Build mesh object
       FluidMesh Mesh;
       Mesh.BuildUniformMesh( gridin, ldi1, ldi2, nx, ny, nz, length, width, height );
 
       // Mesh Timer
-      mesh_duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-      std::cout << "Mesh constructed in " << mesh_duration << "seconds\n";
-      array_start = std::clock();
+      mesh_duration = ( omp_get_wtime() - start );
+      array_start = omp_get_wtime();
 
       // Compute total degrees of freedom and maximum # of nonzero values in matrix.
       dofTotal = Mesh.TotalDOF();
@@ -101,9 +100,8 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
             Mesh, visc, matIsZ, matJsZ, matValsZ, forceZ, 2 );
 
           // Array timer
-          array_duration = ( std::clock() - array_start ) / (double) CLOCKS_PER_SEC;
-          std::cout << "Arrays constructed in " << array_duration << "seconds\n";
-          solve_start = std::clock();
+          array_duration = ( omp_get_wtime() - array_start );
+          solve_start = omp_get_wtime();
 
           set_omp_threads_paralution(nThreads);
 
@@ -184,9 +182,7 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
           lsZ.Solve(forcePZ, &solZ);
 
           // Linear solve timer
-          solve_duration = ( std::clock() - solve_start ) / (double) CLOCKS_PER_SEC;
-          std::cout << "Linear system solved in ";
-          std::cout  << solve_duration << "seconds\n";
+          solve_duration = ( omp_get_wtime() - solve_start );
 
           // Write solution to file
           writeSolutionL ( Mesh, solX, outNameX );
@@ -205,8 +201,12 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
           forcePZ.Clear();
           solZ.Clear();
 
+          std::cout << "Arrays constructed in " << array_duration << "seconds\n";
+          std::cout << "Mesh constructed in " << mesh_duration << "seconds\n";
+          std::cout << "Linear system solved in ";
+          std::cout  << solve_duration << "seconds\n";
           // Total timers
-          total_duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+          total_duration = ( omp_get_wtime() - start );
           std::cout << "Total time: " << total_duration << "seconds\n";
           break;
         }
@@ -225,9 +225,8 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
             Mesh, visc, matIsY, matJsY, matValsY, forceY, 1 );
 
           // Array timer
-          array_duration = ( std::clock() - array_start ) / (double) CLOCKS_PER_SEC;
-          std::cout << "Arrays constructed in " << array_duration << "seconds\n";
-          solve_start = std::clock();
+          array_duration = ( omp_get_wtime() - array_start );
+          solve_start = omp_get_wtime();
 
           set_omp_threads_paralution(nThreads);
 
@@ -291,9 +290,7 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
           lsY.Solve(forcePY, &solY);
 
           // Linear solve timer
-          solve_duration = ( std::clock() - solve_start ) / (double) CLOCKS_PER_SEC;
-          std::cout << "Linear system solved in " << solve_duration;
-          std::cout  << "seconds\n";
+          solve_duration = ( omp_get_wtime() - solve_start );
 
           // Write solution to file
           writeSolutionL ( Mesh, solX, outNameX );
@@ -309,8 +306,12 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
           solY.Clear();
           solZ.Clear();
 
+          std::cout << "Arrays constructed in " << array_duration << "seconds\n";
+          std::cout << "Mesh constructed in " << mesh_duration << "seconds\n";
+          std::cout << "Linear system solved in " << solve_duration;
+          std::cout  << "seconds\n";
           // Total timers
-          total_duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+          total_duration = ( omp_get_wtime() - start );
           std::cout << "Total time: " << total_duration << "seconds\n";
           break;
         }
@@ -322,18 +323,16 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
       std::string outName = "flowrun.dat";
       int dofTotal, maxNZ;
       double mesh_duration, array_duration, solve_duration, total_duration;
-      std::clock_t start, array_start, solve_start;
+      double start, array_start, solve_start;
 
-      start = std::clock();
+      start = omp_get_wtime();
 
       // Build mesh object
       FluidMesh Mesh;
       Mesh.BuildUniformMesh( gridin, ldi1, ldi2, nx, ny, nz, length, width, height );
-
       // Mesh Timer
-      mesh_duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-      std::cout << "Mesh constructed in " << mesh_duration << "seconds\n";
-      array_start = std::clock();
+      mesh_duration = ( omp_get_wtime() - start );
+      array_start = omp_get_wtime();
 
       // Compute total degrees of freedom and maximum # of nonzero values in matrix.
       dofTotal = Mesh.TotalDOF();
@@ -363,9 +362,8 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
       immersedBoundary ( Mesh, matIs, matJs, matVals );
 
       // Array timer
-      array_duration = ( std::clock() - array_start ) / (double) CLOCKS_PER_SEC;
-      std::cout << "Arrays constructed in " << array_duration << "seconds\n";
-      solve_start = std::clock();
+      array_duration = ( omp_get_wtime() - array_start );
+      solve_start = omp_get_wtime();
 
       set_omp_threads_paralution(nThreads);
 
@@ -403,8 +401,7 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
       ls.Solve(forceP, &sol);
 
       // Linear solve timer
-      solve_duration = ( std::clock() - solve_start ) / (double) CLOCKS_PER_SEC;
-      std::cout << "Linear system solved in " << solve_duration << "seconds\n";
+      solve_duration = ( omp_get_wtime() - solve_start );
 
       // Write solution to file
       writeSolutionL ( Mesh, sol, outName );
@@ -417,8 +414,11 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
       forceP.Clear();
       sol.Clear();
 
+      std::cout << "Mesh constructed in " << mesh_duration << "seconds\n";
+      std::cout << "Arrays constructed in " << array_duration << "seconds\n";
+      std::cout << "Linear system solved in " << solve_duration << "seconds\n";
       // Total timers
-      total_duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+      total_duration = ( omp_get_wtime() - start );
       std::cout << "Total time: " << total_duration << "seconds\n";
       break;
     }
