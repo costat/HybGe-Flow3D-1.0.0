@@ -39,7 +39,7 @@ ucartflow ( const FluidMesh& Mesh, std::vector<int>& matIs, \
     if (!Mesh.UFaceConnectivity[ idx2( cl, 1, Mesh.FaceConnectivityLDI ) ]) {
       // Right boundary
       if (direction == 0 && (Mesh.UCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] \
-                             + 0.5 * Mesh.UCellCenters[ cl ]) > xmax) { // Outflow condition for x principal flow direction
+                             + 0.5 * Mesh.UCellWidths[ cl ]) > xmax) { // Outflow condition for x principal flow direction
         val[0] = -1. / Mesh.UCellWidths[ idx2( 0, cl, Mesh.CellWidthsLDI ) ];
         val[1] = 1. / Mesh.UCellWidths[ idx2( 0, cl, Mesh.CellWidthsLDI ) ];
         colId[0] = Mesh.UFaceConnectivity[ idx2( cl, 3, Mesh.FaceConnectivityLDI ) ] - 1;
@@ -1553,9 +1553,9 @@ ucartflow2D ( const FluidMesh& Mesh, std::vector<int>& matIs, \
     if (!Mesh.UFaceConnectivity[ idx2( cl, 1, Mesh.FaceConnectivityLDI) ]) {
       // right boundary
       if (direction == 0 && (Mesh.UCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] \
-                             + 0.5 * Mesh.UCellWidths[ cl ]) > xmax) { // xflow problem, this is an outflow boundary
-        val[0] = -1. / Mesh.UCellWidths[ idx2( 0, cl, Mesh.CellWidthsLDI ) ];
-        val[1] = 1. / Mesh.UCellWidths[ idx2( 0, cl, Mesh.CellWidthsLDI ) ];
+                             + 0.5 * Mesh.UCellWidths[ idx2( cl, 0, 2) ]) > xmax) { // xflow problem, this is an outflow boundary
+        val[0] = -1. / Mesh.UCellWidths[ idx2( cl, 0, Mesh.CellWidthsLDI ) ];
+        val[1] = 1. / Mesh.UCellWidths[ idx2( cl, 0, Mesh.CellWidthsLDI ) ];
         colId[0] = Mesh.UFaceConnectivity[ idx2( cl, 3, Mesh.FaceConnectivityLDI ) ] - 1;
         colId[1] = cl;
         // Insert values
@@ -1578,7 +1578,7 @@ ucartflow2D ( const FluidMesh& Mesh, std::vector<int>& matIs, \
       matJs.push_back(cl);
       matVals.push_back(1);
       if (direction == 0 && (Mesh.UCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ]
-                             - 0.5 * Mesh.UCellWidths[ cl ]) < xmin) { // xflow problem, force is nonzero here
+                             - 0.5 * Mesh.UCellWidths[ idx2( cl, 0, 2 ) ]) < xmin) { // xflow problem, force is nonzero here
         force[cl] = -maxin * (Mesh.UCellCenters[ idx2( cl, 1, Mesh.CellCentersLDI ) ] - ymin) \
                                    * (Mesh.UCellCenters[ idx2( cl, 1, Mesh.CellCentersLDI ) ] - ymax);
       }
@@ -1588,23 +1588,23 @@ ucartflow2D ( const FluidMesh& Mesh, std::vector<int>& matIs, \
       for (fc = 0; fc < 4; fc++) {
         nbrfaces[fc] = Mesh.UFaceConnectivity[ idx2( cl, fc, Mesh.FaceConnectivityLDI ) ];
         if (nbrfaces[fc]) {
-          dx[fc] = Mesh.UCellWidths[ idx2( 0, (nbrfaces[fc] - 1), Mesh.CellWidthsLDI ) ];
-          dy[fc] = Mesh.UCellWidths[ idx2( 1, (nbrfaces[fc] - 1), Mesh.CellWidthsLDI ) ];
+          dx[fc] = Mesh.UCellWidths[ idx2( (nbrfaces[fc] - 1), 0, Mesh.CellWidthsLDI ) ];
+          dy[fc] = Mesh.UCellWidths[ idx2( (nbrfaces[fc] - 1), 1, Mesh.CellWidthsLDI ) ];
         }
         else {
           dx[fc] = 0;
           dy[fc] = 0;
         }
       }
-      val[0] = -visc * Mesh.UCellWidths[ idx2( 1, cl, Mesh.CellWidthsLDI ) ] \
-                     / (0.5 * (dx[1] + Mesh.UCellWidths[ idx2( 0, cl, Mesh.CellWidthsLDI ) ]));
-      val[1] = -visc * Mesh.UCellWidths[ idx2( 0, cl, Mesh.CellWidthsLDI ) ] \
-                     / (0.5 * (dy[2] + Mesh.UCellWidths[ idx2( 1, cl, Mesh.CellWidthsLDI ) ]));
-      val[2] = -visc * Mesh.UCellWidths[ idx2( 1, cl, Mesh.CellWidthsLDI ) ] \
-                     / (0.5 * (dx[3] + Mesh.UCellWidths[ idx2( 0, cl, Mesh.CellWidthsLDI ) ]));
+      val[0] = -visc * Mesh.UCellWidths[ idx2( cl, 1, Mesh.CellWidthsLDI ) ] \
+                     / (0.5 * (dx[1] + Mesh.UCellWidths[ idx2( cl, 0, Mesh.CellWidthsLDI ) ]));
+      val[1] = -visc * Mesh.UCellWidths[ idx2( cl, 0, Mesh.CellWidthsLDI ) ] \
+                     / (0.5 * (dy[2] + Mesh.UCellWidths[ idx2( cl, 1, Mesh.CellWidthsLDI ) ]));
+      val[2] = -visc * Mesh.UCellWidths[ idx2( cl, 1, Mesh.CellWidthsLDI ) ] \
+                     / (0.5 * (dx[3] + Mesh.UCellWidths[ idx2( cl, 0, Mesh.CellWidthsLDI ) ]));
       val[3] = -(val[0] + val[1] + val[2]) \
-               + 2 * visc * Mesh.UCellWidths[ idx2( 0, cl, Mesh.CellWidthsLDI ) ] \
-                          / Mesh.UCellWidths[ idx2( 1, cl, Mesh.CellWidthsLDI ) ];
+               + 2 * visc * Mesh.UCellWidths[ idx2( cl, 0, Mesh.CellWidthsLDI ) ] \
+                          / Mesh.UCellWidths[ idx2( cl, 1, Mesh.CellWidthsLDI ) ];
       colId[0] = nbrfaces[1] - 1;
       colId[1] = nbrfaces[2] - 1;
       colId[2] = nbrfaces[3] - 1;
@@ -1617,7 +1617,7 @@ ucartflow2D ( const FluidMesh& Mesh, std::vector<int>& matIs, \
       matJs.push_back(cl);
       matVals.push_back(val[3]);
       // Pressure component to BC
-      val[0] = -1. * Mesh.UCellWidths[ idx2( 1, cl, Mesh.CellWidthsLDI ) ];
+      val[0] = -1. * Mesh.UCellWidths[ idx2( cl, 1, Mesh.CellWidthsLDI ) ];
       val[1] = -val[0];
       colId[0] = Mesh.UCellPressureNeighbor[ idx2( cl, 0, Mesh.VelocityCellPressureNeighborLDI ) ] \
                  - 1 + Mesh.DOF[1] + Mesh.DOF[2];
@@ -1634,28 +1634,28 @@ ucartflow2D ( const FluidMesh& Mesh, std::vector<int>& matIs, \
       for (fc = 0; fc < 4; fc++) {
         nbrfaces[fc] = Mesh.UFaceConnectivity[ idx2( cl, fc, Mesh.FaceConnectivityLDI ) ];
         if (nbrfaces[fc]) {
-          dx[fc] = Mesh.UCellWidths[ idx2( 0, (nbrfaces[fc] - 1), Mesh.CellWidthsLDI ) ];
-          dy[fc] = Mesh.UCellWidths[ idx2( 1, (nbrfaces[fc] - 1), Mesh.CellWidthsLDI ) ];
+          dx[fc] = Mesh.UCellWidths[ idx2( (nbrfaces[fc] - 1), 0, Mesh.CellWidthsLDI ) ];
+          dy[fc] = Mesh.UCellWidths[ idx2( (nbrfaces[fc] - 1), 1, Mesh.CellWidthsLDI ) ];
         }
         else {
           dx[fc] = 0;
           dy[fc] = 0;
         }
       }
-      val[0] = -visc * Mesh.UCellWidths[ idx2( 0, cl, Mesh.CellWidthsLDI ) ] \
-                     / (0.5 * (dy[0] + Mesh.UCellWidths[ idx2( 1, cl, Mesh.CellWidthsLDI ) ]));
-      val[1] = -visc * Mesh.UCellWidths[ idx2( 1, cl, Mesh.CellWidthsLDI ) ] \
-                     / (0.5 * (dx[1] + Mesh.UCellWidths[ idx2( 0, cl, Mesh.CellWidthsLDI ) ]));
-      val[2] = -visc * Mesh.UCellWidths[ idx2( 1, cl, Mesh.CellWidthsLDI ) ] \
-                     / (0.5 * (dx[3] + Mesh.UCellWidths[ idx2( 0, cl, Mesh.CellWidthsLDI ) ]));
+      val[0] = -visc * Mesh.UCellWidths[ idx2( cl, 0, Mesh.CellWidthsLDI ) ] \
+                     / (0.5 * (dy[0] + Mesh.UCellWidths[ idx2( cl, 1, Mesh.CellWidthsLDI ) ]));
+      val[1] = -visc * Mesh.UCellWidths[ idx2( cl, 1, Mesh.CellWidthsLDI ) ] \
+                     / (0.5 * (dx[1] + Mesh.UCellWidths[ idx2( cl, 0, Mesh.CellWidthsLDI ) ]));
+      val[2] = -visc * Mesh.UCellWidths[ idx2( cl, 1, Mesh.CellWidthsLDI ) ] \
+                     / (0.5 * (dx[3] + Mesh.UCellWidths[ idx2( cl, 0, Mesh.CellWidthsLDI ) ]));
       if (direction == 1 && (Mesh.UCellCenters[ idx2( cl, 1, Mesh.CellCentersLDI ) ] \
-                               + Mesh.UCellWidths[ cl ]) > ymax ) { // yflow problem, this is an outflow
+                               + 0.75 * Mesh.UCellWidths[ idx2( cl, 1, 2 ) ]) > ymax ) { // yflow problem, this is an outflow
         val[3] = -(val[0] + val[1] + val[2]);
       }
       else { // xflow problem, this is a no slip boundary
         val[3] = -(val[0] + val[1] + val[2]) \
-               + 2 * visc * Mesh.UCellWidths[ idx2( 0, cl, Mesh.CellWidthsLDI ) ] \
-                          / Mesh.UCellWidths[ idx2( 1, cl, Mesh.CellWidthsLDI ) ];
+               + 2 * visc * Mesh.UCellWidths[ idx2( cl, 0, Mesh.CellWidthsLDI ) ] \
+                          / Mesh.UCellWidths[ idx2( cl, 1, Mesh.CellWidthsLDI ) ];
       }
       colId[0] = nbrfaces[0] - 1;
       colId[1] = nbrfaces[1] - 1;
@@ -1669,7 +1669,7 @@ ucartflow2D ( const FluidMesh& Mesh, std::vector<int>& matIs, \
       matJs.push_back(cl);
       matVals.push_back(val[3]);
       // Pressure component to BC
-      val[0] = -1. * Mesh.UCellWidths[ idx2( 1, cl, Mesh.CellWidthsLDI ) ];
+      val[0] = -1. * Mesh.UCellWidths[ idx2( cl, 1, Mesh.CellWidthsLDI ) ];
       val[1] = -val[0];
       colId[0] = Mesh.UCellPressureNeighbor[ idx2( cl, 0, Mesh.VelocityCellPressureNeighborLDI ) ] \
                  - 1 + Mesh.DOF[1] + Mesh.DOF[2];
@@ -1711,7 +1711,7 @@ vcartflow2D ( const FluidMesh& Mesh, std::vector<int>& matIs, \
       matJs.push_back(cl2);
       matVals.push_back(1);
       if (direction == 1 && (Mesh.VCellCenters[ idx2( cl, 1, Mesh.CellCentersLDI ) ] \
-                             - 0.5 * Mesh.VCellWidths[ cl ]) < ymin) { // yflow problem, force is nonzero here
+                             - 0.5 * Mesh.VCellWidths[ idx2( cl, 1, 2 ) ]) < ymin) { // yflow problem, force is nonzero here
         force[cl2] = -maxin * (Mesh.VCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] - xmin) \
                                  * (Mesh.VCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] - xmax);
       }
@@ -1719,9 +1719,9 @@ vcartflow2D ( const FluidMesh& Mesh, std::vector<int>& matIs, \
     else if (!Mesh.VFaceConnectivity[ idx2(cl, 2, Mesh.FaceConnectivityLDI) ]) {
       // top boundary
       if (direction == 1 && (Mesh.VCellCenters[ idx2( cl, 1, Mesh.CellCentersLDI ) ] \
-                             + 0.5 * Mesh.VCellWidths[ cl ]) > ymax) { // outflow boundary for yflow problem
-        val[0] = -1. / Mesh.VCellWidths[ idx2( 1, cl, Mesh.CellWidthsLDI ) ];
-        val[1] = 1. / Mesh.VCellWidths[ idx2( 1, cl, Mesh.CellWidthsLDI ) ];
+                             + 0.5 * Mesh.VCellWidths[ idx2( cl, 1, 2 ) ]) > ymax) { // outflow boundary for yflow problem
+        val[0] = -1. / Mesh.VCellWidths[ idx2( cl, 1, Mesh.CellWidthsLDI ) ];
+        val[1] = 1. / Mesh.VCellWidths[ idx2( cl, 1, Mesh.CellWidthsLDI ) ];
         colId[0] = Mesh.VFaceConnectivity[ idx2( cl, 0, Mesh.FaceConnectivityLDI ) ] - 1 + Mesh.DOF[1];
         colId[1] = cl2;
         // Insert values
@@ -1732,7 +1732,7 @@ vcartflow2D ( const FluidMesh& Mesh, std::vector<int>& matIs, \
         matJs.push_back(colId[1]);
         matVals.push_back(val[1]);
       }
-       else { // no slip
+      else { // no slip
         matIs.push_back(cl2);
         matJs.push_back(cl2);
         matVals.push_back(1);
@@ -1743,28 +1743,28 @@ vcartflow2D ( const FluidMesh& Mesh, std::vector<int>& matIs, \
       for (fc = 0; fc < 4; fc++) {
         nbrfaces[fc] = Mesh.VFaceConnectivity[ idx2( cl, fc, Mesh.FaceConnectivityLDI ) ];
         if (nbrfaces[fc]) {
-          dx[fc] = Mesh.VCellWidths[ idx2( 0, (nbrfaces[fc] - 1), Mesh.CellWidthsLDI ) ];
-          dy[fc] = Mesh.VCellWidths[ idx2( 1, (nbrfaces[fc] - 1), Mesh.CellWidthsLDI ) ];
+          dx[fc] = Mesh.VCellWidths[ idx2( (nbrfaces[fc] - 1), 0, Mesh.CellWidthsLDI ) ];
+          dy[fc] = Mesh.VCellWidths[ idx2( (nbrfaces[fc] - 1), 1, Mesh.CellWidthsLDI ) ];
         }
         else {
           dx[fc] = 0;
           dy[fc] = 0;
         }
       }
-      val[0] = -visc * Mesh.VCellWidths[ idx2( 0, cl, Mesh.CellWidthsLDI ) ] \
-                     / (0.5 * (dy[0] + Mesh.VCellWidths[ idx2( 1, cl, Mesh.CellWidthsLDI ) ]));
-      val[1] = -visc * Mesh.VCellWidths[ idx2( 0, cl, Mesh.CellWidthsLDI ) ] \
-                     / (0.5 * (dy[2] + Mesh.VCellWidths[ idx2( 1, cl, Mesh.CellWidthsLDI ) ]));
-      val[2] = -visc * Mesh.VCellWidths[ idx2( 1, cl, Mesh.CellWidthsLDI ) ] \
-                     / (0.5 * (dx[3] + Mesh.VCellWidths[ idx2( 0, cl, Mesh.CellWidthsLDI ) ]));
+      val[0] = -visc * Mesh.VCellWidths[ idx2( cl, 0, Mesh.CellWidthsLDI ) ] \
+                     / (0.5 * (dy[0] + Mesh.VCellWidths[ idx2( cl, 1, Mesh.CellWidthsLDI ) ]));
+      val[1] = -visc * Mesh.VCellWidths[ idx2( cl, 0, Mesh.CellWidthsLDI ) ] \
+                     / (0.5 * (dy[2] + Mesh.VCellWidths[ idx2( cl, 1, Mesh.CellWidthsLDI ) ]));
+      val[2] = -visc * Mesh.VCellWidths[ idx2( cl, 1, Mesh.CellWidthsLDI ) ] \
+                     / (0.5 * (dx[3] + Mesh.VCellWidths[ idx2( cl, 0, Mesh.CellWidthsLDI ) ]));
       if (direction == 0 && (Mesh.VCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] \
-                               + Mesh.VCellWidths[ cl ]) > xmax) {
+                               + Mesh.VCellWidths[ idx2( cl, 0, 2 ) ]) > xmax) {
         val[3] = -(val[0] + val[1] + val[2]);
       }
       else {
         val[3] = -(val[0] + val[1] + val[2]) \
-                  + 2 * visc * Mesh.VCellWidths[ idx2( 1, cl, Mesh.CellWidthsLDI ) ] \
-                             / Mesh.VCellWidths[ idx2( 0, cl, Mesh.CellWidthsLDI ) ];
+                  + 2 * visc * Mesh.VCellWidths[ idx2( cl, 0, Mesh.CellWidthsLDI ) ] \
+                             / Mesh.VCellWidths[ idx2( cl, 1, Mesh.CellWidthsLDI ) ];
       }
       colId[0] = nbrfaces[0] - 1 + Mesh.DOF[1];
       colId[1] = nbrfaces[2] - 1 + Mesh.DOF[1];
@@ -1778,7 +1778,7 @@ vcartflow2D ( const FluidMesh& Mesh, std::vector<int>& matIs, \
       matJs.push_back(cl2);
       matVals.push_back(val[3]);
       // Pressure component
-      val[0] = -1. * Mesh.VCellWidths[ idx2( 0, cl, Mesh.CellWidthsLDI ) ];
+      val[0] = -1. * Mesh.VCellWidths[ idx2( cl, 0, Mesh.CellWidthsLDI ) ];
       val[1] = -val[0];
       colId[0] = Mesh.VCellPressureNeighbor[ idx2( cl, 0, Mesh.VelocityCellPressureNeighborLDI ) ] \
                  - 1 + Mesh.DOF[1] + Mesh.DOF[2];
@@ -1795,23 +1795,23 @@ vcartflow2D ( const FluidMesh& Mesh, std::vector<int>& matIs, \
       for (fc = 0; fc < 4; fc++) {
         nbrfaces[fc] = Mesh.VFaceConnectivity[ idx2( cl, fc, Mesh.FaceConnectivityLDI ) ];
         if (nbrfaces[fc]) {
-          dx[fc] = Mesh.VCellWidths[ idx2( 0, (nbrfaces[fc] - 1), Mesh.CellWidthsLDI ) ];
-          dy[fc] = Mesh.VCellWidths[ idx2( 1, (nbrfaces[fc] - 1), Mesh.CellWidthsLDI ) ];
+          dx[fc] = Mesh.VCellWidths[ idx2( (nbrfaces[fc] - 1), 0, Mesh.CellWidthsLDI ) ];
+          dy[fc] = Mesh.VCellWidths[ idx2( (nbrfaces[fc] - 1), 1, Mesh.CellWidthsLDI ) ];
         }
         else {
           dx[fc] = 0;
           dy[fc] = 0;
         }
       }
-      val[0] = -visc * Mesh.VCellWidths[ idx2( 0, cl, Mesh.CellWidthsLDI ) ] \
-                     / (0.5 * (dy[0] + Mesh.VCellWidths[ idx2( 1, cl, Mesh.CellWidthsLDI ) ]));
-      val[1] = -visc * Mesh.VCellWidths[ idx2( 1, cl, Mesh.CellWidthsLDI ) ] \
-                     / (0.5 * (dx[1] + Mesh.VCellWidths[ idx2( 0, cl, Mesh.CellWidthsLDI ) ]));
-      val[2] = -visc * Mesh.VCellWidths[ idx2( 0, cl, Mesh.CellWidthsLDI ) ] \
-                     / (0.5 * (dy[2] + Mesh.VCellWidths[ idx2( 1, cl, Mesh.CellWidthsLDI ) ]));
+      val[0] = -visc * Mesh.VCellWidths[ idx2( cl, 0, Mesh.CellWidthsLDI ) ] \
+                     / (0.5 * (dy[0] + Mesh.VCellWidths[ idx2( cl, 1, Mesh.CellWidthsLDI ) ]));
+      val[1] = -visc * Mesh.VCellWidths[ idx2( cl, 1, Mesh.CellWidthsLDI ) ] \
+                     / (0.5 * (dx[1] + Mesh.VCellWidths[ idx2( cl, 0, Mesh.CellWidthsLDI ) ]));
+      val[2] = -visc * Mesh.VCellWidths[ idx2( cl, 0, Mesh.CellWidthsLDI ) ] \
+                     / (0.5 * (dy[2] + Mesh.VCellWidths[ idx2( cl, 1, Mesh.CellWidthsLDI ) ]));
       val[3] = -(val[0] + val[1] + val[2]) \
-                + 2 * visc * Mesh.VCellWidths[ idx2( 1, cl, Mesh.CellWidthsLDI ) ] \
-                           / Mesh.VCellWidths[ idx2( 0, cl, Mesh.CellWidthsLDI ) ];
+                + 2 * visc * Mesh.VCellWidths[ idx2( cl, 1, Mesh.CellWidthsLDI ) ] \
+                           / Mesh.VCellWidths[ idx2( cl, 0, Mesh.CellWidthsLDI ) ];
       colId[0] = nbrfaces[0] - 1 + Mesh.DOF[1];
       colId[1] = nbrfaces[1] - 1 + Mesh.DOF[1];
       colId[2] = nbrfaces[2] - 1 + Mesh.DOF[1];
@@ -1824,7 +1824,7 @@ vcartflow2D ( const FluidMesh& Mesh, std::vector<int>& matIs, \
       matJs.push_back(cl2);
       matVals.push_back(val[3]);
       // Pressure component
-      val[0] = -1. * Mesh.VCellWidths[ idx2( 0, cl, Mesh.CellWidthsLDI ) ];
+      val[0] = -1. * Mesh.VCellWidths[ idx2( cl, 0, Mesh.CellWidthsLDI ) ];
       val[1] = -val[0];
       colId[0] = Mesh.VCellPressureNeighbor[ idx2( cl, 0, Mesh.VelocityCellPressureNeighborLDI ) ] \
                  - 1 + Mesh.DOF[1] + Mesh.DOF[2];
@@ -1849,14 +1849,18 @@ BoundaryConditions ( const FluidMesh& Mesh, double visc, \
   switch ( Mesh.DIM )
   {
     case 3 :
+    {
       ucartflow( Mesh, matIs, matJs, matVals, force, visc, direction );
       vcartflow( Mesh, matIs, matJs, matVals, force, visc, direction );
       wcartflow( Mesh, matIs, matJs, matVals, force, visc, direction );
       break;
+    }
     case 2 :
+    {
       ucartflow2D( Mesh, matIs, matJs, matVals, force, visc, direction );
       vcartflow2D( Mesh, matIs, matJs, matVals, force, visc, direction );
       break;
+    }
   }
 
 }
