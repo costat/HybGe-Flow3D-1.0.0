@@ -30,7 +30,7 @@ visc = 0.001
 nThreads = 1
 
 # SET ILU PRECONDITIONER LEVEL
-prec = 4
+prec = 6
 
 ####################################################################
 ### SETUP AND SWIG TRANSLATION, USER SHOULD NOT EDIT BELOW HERE ####
