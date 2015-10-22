@@ -24,6 +24,7 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
   int checkVert;
   int maxPNodes;
   int numPCells = 0;
+  int numVoid = 0;
   xLim[0] = 0;
   xLim[1] = length;
   yLim[0] = 0;
@@ -57,6 +58,7 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
           if (gridin[ idx2(xi, yi, ldi1) ] != 1)
           {
             numPCells++;
+            if (gridin[ idx2(xi, yi, ldi1) ] == 0) numVoid++;
           }
         }
       }
@@ -68,7 +70,7 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
       int countCell = -1;
       mv.resize( (numPCells * 4) );
       double cellVert [ 8 ];
-      porosity = numPCells/(double)(nx * ny);
+      porosity = numVoid/(double)(nx * ny);
 
       // First we buil FullGrid, ImmersedBoundary, and Nodes.
       FullGrid.reserve((nx * ny));
@@ -372,6 +374,7 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
             if (gridin[ idx3(xi, yi, zi, ldi1, ldi2) ] != 1)
             {
               numPCells++;
+              if (gridin[ idx2(xi, yi, ldi1) ] == 0) numVoid++;
             }
           }
         }
@@ -385,7 +388,7 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
       int countCell = -1;
       mv.resize( (numPCells * 8) );
       double cellVert [ 24 ];
-      porosity = numPCells /(double)(nx * ny * nz);
+      porosity = numVoid /(double)(nx * ny * nz);
 
       // First we buil FullGrid, ImmersedBoundary, and Nodes.
       FullGrid.reserve((nx * ny * nz));
