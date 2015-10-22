@@ -388,6 +388,7 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
 
       // Setup a GMRES solver object.
       GMRES<LocalMatrix<double>, LocalVector<double>, double > ls;
+      ls.Init(1e-6, 1e-6, 1e8, 1500);
       ls.SetOperator(mat);
       ls.Verbose(2);
 
@@ -397,6 +398,7 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
 
       // Build the solver.
       ls.Build();
+
       // Solve the problem
       ls.Solve(forceP, &sol);
 
