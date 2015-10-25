@@ -18,6 +18,10 @@ void
 FlowComponent3d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
                   std::vector<int>& matJs, std::vector<double>& matVals, \
                   std::vector<double>& force, const std::vector<unsigned long>& componentBoundary, \
+                  const std::vector<double> componentCellWidths, \
+                  const std::vector<double> CellWidthsLR, \
+                  const std::vector<double> CellWidthsUD, \
+                  const std::vector<unsigned long> componentConnectivity, \
                   double visc, int direction, int component )
 {
 
@@ -26,8 +30,8 @@ FlowComponent3d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
   double xmax = Mesh.xLim[1];
   double ymin = Mesh.yLim[0];
   double ymax = Mesh.yLim[1];
-  int cl, cl2, fc, colId[5], nbrfaces[5], dirIn, dirOut, dirLeft, dirRight, dirUp, dirDown;
-  double val[5], dx[5], dy[5];
+  int cl, cl2, fc, colId[6], nbrfaces[6], dirIn, dirOut, dirLeft, dirRight, dirUp, dirDown, colShift;
+  double val[7], dx[6], dy[6], dz[6];
 
   switch (component)
   {
@@ -39,6 +43,7 @@ FlowComponent3d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
       dirRight = 5;
       dirDown = 0;
       dirUp = 2;
+      break;
     }
     case 1 :
     {
@@ -48,6 +53,7 @@ FlowComponent3d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
       dirRight = 1;
       dirDown = 0;
       dirUp = 2;
+      break;
     }
     case 2 :
     {
@@ -57,18 +63,24 @@ FlowComponent3d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
       dirRight = 1;
       dirDown = 4;
       dirUp = 5;
+      break;
     }
   }
 
+  if (component == 0) colShift = 0;
+  else if (component == 1) colShift = Mesh.DOF[1];
+  else if (component == 2) colShift = Mesh.DOF[1] + Mesh.DOF[2];
+
   for (unsigned long arrayIndex = 0; arrayIndex < componentBoundary.size(); arrayIndex++) {
     cl = componentBoundary[ arrayIndex ];
+    cl2 = cl + colShift;
     for (fc = 0; fc < 6; fc++)
     {
-      nbrfaces[fc] = Mesh.UFaceConnectivity[ idx2( cl, fc, Mesh.FaceConnectivityLDI ) ];
+      nbrfaces[fc] = componentConnectivity[ idx2( cl, fc, Mesh.FaceConnectivityLDI ) ];
       if (nbrfaces[fc]) {
-        dx[fc] = Mesh.UCellWidths[ idx2( (nbrfaces[fc] - 1), 0, Mesh.CellWidthsLDI ) ];
-        dy[fc] = Mesh.UCellWidths[ idx2( (nbrfaces[fc] - 1), 1, Mesh.CellWidthsLDI ) ];
-        dz[fc] = Mesh.UCellWidths[ idx2( (nbrfaces[fc] - 1), 2, Mesh.CellWidthsLDI ) ];
+        dx[fc] = componentCellWidths[ idx2( (nbrfaces[fc] - 1), 0, Mesh.CellWidthsLDI ) ];
+        dy[fc] = componentCellWidths[ idx2( (nbrfaces[fc] - 1), 1, Mesh.CellWidthsLDI ) ];
+        dz[fc] = componentCellWidths[ idx2( (nbrfaces[fc] - 1), 2, Mesh.CellWidthsLDI ) ];
       }
       else {
         dx[fc] = 0;
@@ -78,11 +90,21 @@ FlowComponent3d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
     }
     if (!nbrfaces[dirIn]) // !dirIn section
     {
+      if (component == direction) // inflow, nonzero force
+      {
 
+      }
     }
     else if (!nbrfaces[dirOut]) // !dirOut section
     {
+      if (component == direction) // outflow
+      {
 
+      }
+      else // noslip
+      {
+
+      }
     }
     else if (!nbrfaces[dirDown]) // !dirDown section
     {
@@ -169,10 +191,30 @@ FlowComponent3d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
 }
 
 void
-AxisFlowDrive3d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
-                  std::vector<int>& matJs, std::vector<double>& matVals, \
-                  std::vector<double>& force, double visc, int direction, int component )
+AxisFlowDrive ( const FluidMesh& Mesh, std::vector<int>& matIs, \
+                std::vector<int>& matJs, std::vector<double>& matVals, \
+                std::vector<double>& force, double visc, int direction )
 {
 
+  switch (Mesh.DIM)
+  {
+    case 2 :
+    {
+
+      break;
+    }
+    default :
+    {
+      const std::vector<unsigned long>& componentBoundary = Mesh.UBoundaryCells;
+      const std::vector<double>& componentCellWidths = Mesh.UCellWidths;
+      const std::vector<unsigned long>& componentConnectivity = Mesh.UFaceConnectivity;
+      const std::vector<double>& cellWidthsLR = Mesh.VCellWidths;
+      const std::vector<double>& cellWidthsUD = Mesh.WCellWidths;
+      FlowComponent3D( Mesh, matIs, matJs, matVals, \
+                       force, componentBoundary, componentCellWidths, \
+                       CellWidthsLR, CellWidthsUD, componentConnectivity, \
+                       visc, direction, component );
+      break;
+    }
 }
 
