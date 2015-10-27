@@ -244,8 +244,8 @@ FlowComponent3d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
                                 * componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ] \
                                 / componentCellWidths[ idx2( cl, UD, Mesh.CellWidthsLDI ) ];
             }
+            entries = 4;
           }
-          entries = 4;
         }
         else if (!nbrfaces[dirRight]) // !dirDown, !dirUp, !dirRight
         {
