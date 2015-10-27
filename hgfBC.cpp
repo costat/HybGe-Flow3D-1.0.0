@@ -34,71 +34,65 @@ FlowComponent3d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
   double ymax = Mesh.yLim[1];
   double zmin = Mesh.zLim[0];
   double zmax = Mesh.zLim[1];
-  int cl, cl2, fc, colId[8], nbrfaces[6], LR, UD, entries;
+  int entries = 0;
+  int cl, cl2, fc, colId[8], nbrfaces[6], LR, UD;
   int dirIn, dirOut, dirLeft, dirRight, dirUp, dirDown, colShift;
   double val[8], dxyz[18], componentMin, componentMax, minLR, maxLR, minUD, maxUD;
 
-  switch (component) // sets various constants according to which velocity component is being considered
+  if (component == 0) // sets various constants according to which velocity component is being considered
   {
-    case 0 :
-    {
-      dirIn = 3;
-      dirOut = 1;
-      dirLeft = 4;
-      dirRight = 5;
-      dirDown = 0;
-      dirUp = 2;
-      LR = 1;
-      UD = 2;
-      componentMin = xmin;
-      componentMax = xmax;
-      minLR = ymin;
-      maxLR = ymax;
-      minUD = zmin;
-      maxUD = zmax;
-      break;
-    }
-    case 1 :
-    {
-      dirIn = 5;
-      dirOut = 4;
-      dirLeft = 3;
-      dirRight = 1;
-      dirDown = 0;
-      dirUp = 2;
-      LR = 0;
-      UD = 2;
-      componentMin = ymin;
-      componentMax = ymax;
-      minLR = xmin;
-      maxLR = xmax;
-      minUD = zmin;
-      maxUD = zmax;
-      break;
-    }
-    case 2 :
-    {
-      dirIn = 0;
-      dirOut = 2;
-      dirLeft = 3;
-      dirRight = 1;
-      dirDown = 4;
-      dirUp = 5;
-      LR = 0;
-      UD = 1;
-      componentMin = zmin;
-      componentMax = zmax;
-      minLR = xmin;
-      maxLR = xmax;
-      minUD = zmin;
-      maxUD = zmax;
-      break;
-    }
+    dirIn = 3;
+    dirOut = 1;
+    dirLeft = 4;
+    dirRight = 5;
+    dirDown = 0;
+    dirUp = 2;
+    LR = 1;
+    UD = 2;
+    componentMin = xmin;
+    componentMax = xmax;
+    minLR = ymin;
+    maxLR = ymax;
+    minUD = zmin;
+    maxUD = zmax;
+    colShift = 0;
   }
-
-  if (component == 0) colShift = 0;
-  else if (component == 1) colShift = Mesh.DOF[1];
-  else if (component == 2) colShift = Mesh.DOF[1] + Mesh.DOF[2];
+  else if (component == 1)
+  {
+    dirIn = 5;
+    dirOut = 4;
+    dirLeft = 3;
+    dirRight = 1;
+    dirDown = 0;
+    dirUp = 2;
+    LR = 0;
+    UD = 2;
+    componentMin = ymin;
+    componentMax = ymax;
+    minLR = xmin;
+    maxLR = xmax;
+    minUD = zmin;
+    maxUD = zmax;
+    colShift = Mesh.DOF[1];
+  }
+  else
+  {
+    dirIn = 0;
+    dirOut = 2;
+    dirLeft = 3;
+    dirRight = 1;
+    dirDown = 4;
+    dirUp = 5;
+    LR = 0;
+    UD = 1;
+    componentMin = zmin;
+    componentMax = zmax;
+    minLR = xmin;
+    maxLR = xmax;
+    minUD = zmin;
+    maxUD = zmax;
+    colShift = Mesh.DOF[1] + Mesh.DOF[2];
+  }
 
   for (unsigned long arrayIndex = 0; arrayIndex < componentBoundary.size(); arrayIndex++)
   {
@@ -221,7 +215,7 @@ FlowComponent3d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
                            / (0.5 * (dxyz[ idx2( dirIn, component, 3 )] \
                                   + componentCellWidths[ idx2( cl, component, Mesh.CellWidthsLDI ) ]));
             val[2] = -visc * componentCellWidths[ idx2( cl, UD, Mesh.CellWidthsLDI ) ] \
-                           * componentCellWidhts[ idx2( cl, component, Mesh.CellWidthsLDI ) ] \
+                           * componentCellWidths[ idx2( cl, component, Mesh.CellWidthsLDI ) ] \
                           / (0.5 * (dxyz[ idx2( dirRight, LR, 3 )] \
                                   + componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ]));
             colId[0] = nbrfaces[dirOut] - 1 + colShift;
@@ -264,7 +258,7 @@ FlowComponent3d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
                          / (0.5 * (dxyz[ idx2( dirIn, component, 3 )] \
                                 + componentCellWidths[ idx2( cl, component, Mesh.CellWidthsLDI ) ]));
           val[2] = -visc * componentCellWidths[ idx2( cl, UD, Mesh.CellWidthsLDI ) ] \
-                         * componentCellWidhts[ idx2( cl, component, Mesh.CellWidthsLDI ) ] \
+                         * componentCellWidths[ idx2( cl, component, Mesh.CellWidthsLDI ) ] \
                         / (0.5 * (dxyz[ idx2( dirLeft, LR, 3 )] \
                                 + componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ]));
           colId[0] = nbrfaces[dirOut] - 1 + colShift;
@@ -320,7 +314,7 @@ FlowComponent3d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
                                + componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ]));
           val[3] = -visc * componentCellWidths[ idx2( cl, UD, Mesh.CellWidthsLDI ) ] \
                          * componentCellWidths[ idx2( cl, component, Mesh.CellWidthsLDI ) ] \
-                         / (0.5 * (dxyz idx2( dirRight, LR, 3 ) ] \
+                         / (0.5 * (dxyz[ idx2( dirRight, LR, 3 ) ] \
                                 + componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ]));
           colId[0] = nbrfaces[dirOut] - 1 + colShift;
           colId[1] = nbrfaces[dirIn] - 1 + colShift;
@@ -328,8 +322,8 @@ FlowComponent3d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
           colId[3] = nbrfaces[dirRight] - 1 + colShift;
           colId[4] = cl2;
           // check for outflow possibility in UD direction
-          if (direction == UD && && (componentCellCenters[ idx2( cl, UD, Mesh.CellCentersLDI ) ] \
-                                   + componentCellWidths[ idx2( cl, UD, Mesh.CellCentersLDI ) ]) > maxUD)
+          if (direction == UD && (componentCellCenters[ idx2( cl, UD, Mesh.CellCentersLDI ) ] \
+                                 + componentCellWidths[ idx2( cl, UD, Mesh.CellCentersLDI ) ]) > maxUD)
           {
             val[4] = -(val[0] + val[1] + val[2] + val[3]) \
                    + 2 * visc * componentCellWidths[ idx2( cl, component, Mesh.CellWidthsLDI ) ] \
@@ -375,8 +369,8 @@ FlowComponent3d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
                               * componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ] \
                               / componentCellWidths[ idx2( cl, UD, Mesh.CellWidthsLDI ) ];
                    + 2 * visc * componentCellWidths[ idx2( cl, component, Mesh.CellWidthsLDI ) ] \
-                              * componentCellWidths[ idx2( cl, UD, Mesh.CellWidths ) ] \
-                              / componentCellWidths[ idx2( cl, LR, Mesh.CellWidths ) ];
+                              * componentCellWidths[ idx2( cl, UD, Mesh.CellWidthsLDI ) ] \
+                              / componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ];
           }
           else
           {
@@ -385,8 +379,8 @@ FlowComponent3d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
                               * componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ] \
                               / componentCellWidths[ idx2( cl, UD, Mesh.CellWidthsLDI ) ];
                    + 4 * visc * componentCellWidths[ idx2( cl, component, Mesh.CellWidthsLDI ) ] \
-                              * componentCellWidths[ idx2( cl, UD, Mesh.CellWidths ) ] \
-                              / componentCellWidths[ idx2( cl, LR, Mesh.CellWidths ) ];
+                              * componentCellWidths[ idx2( cl, UD, Mesh.CellWidthsLDI ) ] \
+                              / componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ];
           }
           entries = 4;
         }
@@ -442,7 +436,7 @@ FlowComponent3d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
                        / (0.5 * (dxyz[ idx2( dirLeft, component, 3 ) ] \
                               + componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ]));
         // check for outflow possibility in LR direction
-        if (direction == LR && && (componentCellCenters[ idx2( cl, LR, Mesh.CellCentersLDI ) ] \
+        if (direction == LR && (componentCellCenters[ idx2( cl, LR, Mesh.CellCentersLDI ) ] \
                                   + componentCellWidths[ idx2( cl, LR, Mesh.CellCentersLDI ) ]) > maxLR)
         {
           val[4] = -(val[0] + val[1] + val[2] + val[3]) \
@@ -521,7 +515,7 @@ FlowComponent3d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
                                 + componentCellWidths[ idx2( cl, component, Mesh.CellWidthsLDI ) ]));
           val[2] = -visc * componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ] \
                          * componentCellWidths[ idx2( cl, component, Mesh.CellWidthsLDI ) ] \
-                         / (0.5 * (dxyz[ idx2( dirDown, component, 3 ] \
+                         / (0.5 * (dxyz[ idx2( dirDown, component, 3 ) ] \
                                 + componentCellWidths[ idx2( cl, UD, Mesh.CellWidthsLDI ) ]));
           colId[0] = nbrfaces[dirOut] - 1 + colShift;
           colId[1] = nbrfaces[dirIn] - 1 + colShift;
@@ -571,7 +565,7 @@ FlowComponent3d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
                          / (0.5 * (dxyz[ idx2( dirIn, component, 3 ) ] \
                                 + componentCellWidths[ idx2( cl, component, Mesh.CellWidthsLDI ) ]));
           val[2] = -visc * componentCellWidths[ idx2( cl, component, Mesh.CellWidthsLDI ) ] \
-                         * componentCellWidths[ idx2( cl, LR, component, Mesh.CellWidthsLDI ) ] \
+                         * componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ] \
                          / (0.5 * (dxyz[ idx2( dirDown, component, 3 ) ] \
                                 + componentCellWidths[ idx2( cl, UD, Mesh.CellWidthsLDI ) ]));
           val[3] = -visc * componentCellWidths[ idx2( cl, component, Mesh.CellWidthsLDI ) ] \
@@ -596,13 +590,13 @@ FlowComponent3d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
           {
             val[4] = -(val[0] + val[1] + val[2] + val[3]) \
                      + 2 * visc * componentCellWidths[ idx2( cl, component, Mesh.CellWidthsLDI ) ] \
-                                * componentCellWidths[ idx2( UD, Mesh.CellWidthsLDI ) ] \
-                                / componentCellWidths[ idx2( LR, Mesh.CellWidthsLDI ) ]
+                                * componentCellWidths[ idx2( cl, UD, Mesh.CellWidthsLDI ) ] \
+                                / componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ]
                      + 2 * visc * componentCellWidths[ idx2( cl, component, Mesh.CellWidthsLDI ) ] \
-                                * componentCellWidths[ idx2( LR, Mesh.CellWidthsLDI ) ] \
-                                / componentCellWidths[ idx2( UD, Mesh.CellWidthsLDI ) ];
+                                * componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ] \
+                                / componentCellWidths[ idx2( cl, UD, Mesh.CellWidthsLDI ) ];
           }
-          entires = 5;
+          entries = 5;
         }
       }
       else if (!nbrfaces[dirRight]) // !dirUp, !dirRight
@@ -616,7 +610,7 @@ FlowComponent3d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
                        / (0.5 * (dxyz[ idx2( dirIn, component, 3 ) ] \
                               + componentCellWidths[ idx2( cl, component, Mesh.CellWidthsLDI ) ]));
         val[2] = -visc * componentCellWidths[ idx2( cl, component, Mesh.CellWidthsLDI ) ] \
-                       * componentCellWidths[ idx2( cl, LR, component, Mesh.CellWidthsLDI ) ] \
+                       * componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ] \
                        / (0.5 * (dxyz[ idx2( dirDown, component, 3 ) ] \
                               + componentCellWidths[ idx2( cl, UD, Mesh.CellWidthsLDI ) ]));
         val[3] = -visc * componentCellWidths[ idx2( cl, component, Mesh.CellWidthsLDI ) ] \
@@ -641,13 +635,13 @@ FlowComponent3d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
         {
           val[4] = -(val[0] + val[1] + val[2] + val[3]) \
                    + 2 * visc * componentCellWidths[ idx2( cl, component, Mesh.CellWidthsLDI ) ] \
-                              * componentCellWidths[ idx2( UD, Mesh.CellWidthsLDI ) ] \
-                              / componentCellWidths[ idx2( LR, Mesh.CellWidthsLDI ) ]
+                              * componentCellWidths[ idx2( cl, UD, Mesh.CellWidthsLDI ) ] \
+                              / componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ]
                    + 2 * visc * componentCellWidths[ idx2( cl, component, Mesh.CellWidthsLDI ) ] \
-                              * componentCellWidths[ idx2( LR, Mesh.CellWidthsLDI ) ] \
-                              / componentCellWidths[ idx2( UD, Mesh.CellWidthsLDI ) ];
+                              * componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ] \
+                              / componentCellWidths[ idx2( cl, UD, Mesh.CellWidthsLDI ) ];
         }
-        entires = 5;
+        entries = 5;
       }
       else // !dirUp
       {
@@ -660,7 +654,7 @@ FlowComponent3d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
                        / (0.5 * (dxyz[ idx2( dirIn, component, 3 ) ] \
                               + componentCellWidths[ idx2( cl, component, Mesh.CellWidthsLDI ) ]));
         val[2] = -visc * componentCellWidths[ idx2( cl, component, Mesh.CellWidthsLDI ) ] \
-                       * componentCellWidths[ idx2( cl, LR, component, Mesh.CellWidthsLDI ) ] \
+                       * componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ] \
                        / (0.5 * (dxyz[ idx2( dirDown, component, 3 ) ] \
                               + componentCellWidths[ idx2( cl, UD, Mesh.CellWidthsLDI ) ]));
         val[3] = -visc * componentCellWidths[ idx2( cl, component, Mesh.CellWidthsLDI ) ] \
@@ -687,8 +681,8 @@ FlowComponent3d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
         {
           val[5] = -(val[0] + val[1] + val[2] + val[3] + val[4]) \
                    + 2 * visc * componentCellWidths[ idx2( cl, component, Mesh.CellWidthsLDI ) ] \
-                              * componentCellWidths[ idx2( LR, Mesh.CellWidthsLDI ) ] \
-                              / componentCellWidths[ idx2( UD, Mesh.CellWidthsLDI ) ];
+                              * componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ] \
+                              / componentCellWidths[ idx2( cl, UD, Mesh.CellWidthsLDI ) ];
         }
         entries = 6;
       }
@@ -715,7 +709,7 @@ FlowComponent3d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
                        / (0.5 * (dxyz[ idx2( dirIn, component, 3 ) ] \
                               + componentCellWidths[ idx2( cl, component, Mesh.CellWidthsLDI ) ]));
         val[2] = -visc * componentCellWidths[ idx2( cl, component, Mesh.CellWidthsLDI ) ] \
-                       * componentCellWidths[ idx2( cl, LR, component, Mesh.CellWidthsLDI ) ] \
+                       * componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ] \
                        / (0.5 * (dxyz[ idx2( dirDown, component, 3 ) ] \
                               + componentCellWidths[ idx2( cl, UD, Mesh.CellWidthsLDI ) ]));
         val[3] = -visc * componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ] \
@@ -743,7 +737,7 @@ FlowComponent3d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
                               * componentCellWidths[ idx2( cl, UD, Mesh.CellWidthsLDI ) ] \
                               / componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ];
         }
-        entires = 5;
+        entries = 5;
       }
       else // !dirLeft
       {
@@ -756,7 +750,7 @@ FlowComponent3d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
                        / (0.5 * (dxyz[ idx2( dirIn, component, 3 ) ] \
                               + componentCellWidths[ idx2( cl, component, Mesh.CellWidthsLDI ) ]));
         val[2] = -visc * componentCellWidths[ idx2( cl, component, Mesh.CellWidthsLDI ) ] \
-                       * componentCellWidths[ idx2( cl, LR, component, Mesh.CellWidthsLDI ) ] \
+                       * componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ] \
                        / (0.5 * (dxyz[ idx2( dirDown, component, 3 ) ] \
                               + componentCellWidths[ idx2( cl, UD, Mesh.CellWidthsLDI ) ]));
         val[3] = -visc * componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ] \
@@ -797,7 +791,7 @@ FlowComponent3d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
                      / (0.5 * (dxyz[ idx2( dirIn, component, 3 ) ] \
                             + componentCellWidths[ idx2( cl, component, Mesh.CellWidthsLDI ) ]));
       val[2] = -visc * componentCellWidths[ idx2( cl, component, Mesh.CellWidthsLDI ) ] \
-                     * componentCellWidths[ idx2( cl, LR, component, Mesh.CellWidthsLDI ) ] \
+                     * componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ] \
                      / (0.5 * (dxyz[ idx2( dirDown, component, 3 ) ] \
                             + componentCellWidths[ idx2( cl, UD, Mesh.CellWidthsLDI ) ]));
       val[3] = -visc * componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ] \
@@ -857,6 +851,7 @@ FlowComponent2d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
                   const std::vector<double>& componentCellWidths, \
                   const std::vector<double>& CellWidthsLR, \
                   const std::vector<unsigned long>& componentConnectivity, \
+                  const std::vector<unsigned long>& PressureNeighbor, \
                   double visc, int direction, int component
                 )
 {
@@ -865,42 +860,37 @@ FlowComponent2d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
   double xmax = Mesh.xLim[1];
   double ymin = Mesh.yLim[0];
   double ymax = Mesh.yLim[1];
-  int cl, cl2, fc, colId[6], nbrfaces[4], LR, UD, entries;
+  int entries = 0;
+  int cl, cl2, fc, colId[6], nbrfaces[4], LR;
   int dirIn, dirOut, dirLeft, dirRight, colShift;
   double val[8], dxyz[8], componentMin, componentMax, minLR, maxLR;
 
-  switch (component) // sets various constants according to which velocity component is being considered
+  if (component == 0) // sets various constants according to which velocity component is being considered
   {
-    case 0 :
-    {
-      dirIn = 3;
-      dirOut = 1;
-      dirLeft = 0;
-      dirRight = 2;
-      LR = 1;
-      componentMin = xmin;
-      componentMax = xmax;
-      minLR = ymin;
-      maxLR = ymax;
-      break;
-    }
-    case 1 :
-    {
-      dirIn = 0;
-      dirOut = 2;
-      dirLeft = 3;
-      dirRight = 1;
-      LR = 0;
-      componentMin = ymin;
-      componentMin = ymax;
-      minLR = xmin;
-      maxLR = xmax;
-      break;
-    }
+    dirIn = 3;
+    dirOut = 1;
+    dirLeft = 0;
+    dirRight = 2;
+    LR = 1;
+    componentMin = xmin;
+    componentMax = xmax;
+    minLR = ymin;
+    maxLR = ymax;
+    colShift = 0;
   }
-
-  if (component == 0) colShift = 0;
-  else if (component == 1) colShift = Mesh.DOF[1];
+  else
+  {
+    dirIn = 0;
+    dirOut = 2;
+    dirLeft = 3;
+    dirRight = 1;
+    LR = 0;
+    componentMin = ymin;
+    componentMax = ymax;
+    minLR = xmin;
+    maxLR = xmax;
+    colShift = Mesh.DOF[1];
+  }
 
   for (unsigned long arrayIndex = 0; arrayIndex < componentBoundary.size(); arrayIndex++)
   { // loop over component boundary cells
@@ -995,7 +985,7 @@ FlowComponent2d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
                               + componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ]));
         val[3] = -(val[0] + val[1] + val[2]) \
                  + 2 * visc * componentCellWidths[ idx2( cl, component, Mesh.CellWidthsLDI ) ] \
-                            / componentCellWidths[ idx2( cl, LR, Mesh.CellWidths ) ];
+                            / componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ];
         colId[0] = nbrfaces[dirOut] - 1 + colShift;
         colId[1] = nbrfaces[dirIn] - 1 + colShift;
         colId[2] = nbrfaces[dirRight] - 1 + colShift;
@@ -1077,20 +1067,19 @@ AxisFlowDrive ( const FluidMesh& Mesh, std::vector<int>& matIs, \
       const std::vector<unsigned long>& PressureNeighbor = Mesh.UCellPressureNeighbor;
       FlowComponent2d( Mesh, matIs, matJs, matVals, \
                        force, componentBoundary, componentCellCenters, componentCellWidths, \
-                       CellWidthsLR, componentConnectivity, PressureNeighbor, \
-                       visc, direction, component );
+                       cellWidthsLR, componentConnectivity, PressureNeighbor, \
+                       visc, direction, 0 );
       // Set V boundary conditions
-      const std::vector<unsigned long>& componentBoundary = Mesh.VBoundaryCells;
-      const std::vector<double>& componentCellWidths = Mesh.VCellWidths;
-      const std::vector<double>& componentCellCenters = Mesh.VCellCenters;
-      const std::vector<unsigned long>& componentConnectivity = Mesh.VFaceConnectivity;
-      const std::vector<double>& cellWidthsLR = Mesh.UCellWidths;
-      const std::vector<double>& cellWidthsUD = Mesh.WCellWidths;
-      const std::vector<unsigned long>& PressureNeighbor = Mesh.VCellPressureNeighbor;
+      const std::vector<unsigned long>& componentBoundary1 = Mesh.VBoundaryCells;
+      const std::vector<double>& componentCellWidths1 = Mesh.VCellWidths;
+      const std::vector<double>& componentCellCenters1 = Mesh.VCellCenters;
+      const std::vector<unsigned long>& componentConnectivity1 = Mesh.VFaceConnectivity;
+      const std::vector<double>& cellWidthsLR1 = Mesh.UCellWidths;
+      const std::vector<unsigned long>& PressureNeighbor1 = Mesh.VCellPressureNeighbor;
       FlowComponent2d( Mesh, matIs, matJs, matVals, \
-                       force, componentBoundary, componentCellCenters, componentCellWidths, \
-                       CellWidthsLR, componentConnectivity, PressureNeighbor, \
-                       visc, direction, component );
+                       force, componentBoundary1, componentCellCenters1, componentCellWidths1, \
+                       cellWidthsLR1, componentConnectivity1, PressureNeighbor1, \
+                       visc, direction, 1 );
       break;
     }
     default :
@@ -1105,32 +1094,33 @@ AxisFlowDrive ( const FluidMesh& Mesh, std::vector<int>& matIs, \
       const std::vector<unsigned long>& PressureNeighbor = Mesh.UCellPressureNeighbor;
       FlowComponent3d( Mesh, matIs, matJs, matVals, \
                        force, componentBoundary, componentCellCenters, componentCellWidths, \
-                       CellWidthsLR, CellWidthsUD, componentConnectivity, PressureNeighbor, \
-                       visc, direction, component );
+                       cellWidthsLR, cellWidthsUD, componentConnectivity, PressureNeighbor, \
+                       visc, direction, 0 );
       // Set V boundary conditions
-      const std::vector<unsigned long>& componentBoundary = Mesh.VBoundaryCells;
-      const std::vector<double>& componentCellWidths = Mesh.VCellWidths;
-      const std::vector<double>& componentCellCenters = Mesh.VCellCenters;
-      const std::vector<unsigned long>& componentConnectivity = Mesh.VFaceConnectivity;
-      const std::vector<double>& cellWidthsLR = Mesh.UCellWidths;
-      const std::vector<double>& cellWidthsUD = Mesh.WCellWidths;
-      const std::vector<unsigned long>& PressureNeighbor = Mesh.VCellPressureNeighbor;
+      const std::vector<unsigned long>& componentBoundary1 = Mesh.VBoundaryCells;
+      const std::vector<double>& componentCellWidths1 = Mesh.VCellWidths;
+      const std::vector<double>& componentCellCenters1 = Mesh.VCellCenters;
+      const std::vector<unsigned long>& componentConnectivity1 = Mesh.VFaceConnectivity;
+      const std::vector<double>& cellWidthsLR1 = Mesh.UCellWidths;
+      const std::vector<double>& cellWidthsUD1 = Mesh.WCellWidths;
+      const std::vector<unsigned long>& PressureNeighbor1 = Mesh.VCellPressureNeighbor;
       FlowComponent3d( Mesh, matIs, matJs, matVals, \
-                       force, componentBoundary, componentCellCenters, componentCellWidths, \
-                       CellWidthsLR, CellWidthsUD, componentConnectivity, PressureNeighbor, \
-                       visc, direction, component );
+                       force, componentBoundary1, componentCellCenters1, componentCellWidths1, \
+                       cellWidthsLR1, cellWidthsUD1, componentConnectivity1, PressureNeighbor1, \
+                       visc, direction, 1 );
       // Set W boundary conditions
-      const std::vector<unsigned long>& componentBoundary = Mesh.WBoundaryCells;
-      const std::vector<double>& componentCellWidths = Mesh.WCellWidths;
-      const std::vector<double>& componentCellCenters = Mesh.WCellCenters;
-      const std::vector<unsigned long>& componentConnectivity = Mesh.WFaceConnectivity;
-      const std::vector<double>& cellWidthsLR = Mesh.UCellWidths;
-      const std::vector<double>& cellWidthsUD = Mesh.VCellWidths;
-      const std::vector<unsigned long>& PressureNeighbor = Mesh.WCellPressureNeighbor;
+      const std::vector<unsigned long>& componentBoundary2 = Mesh.WBoundaryCells;
+      const std::vector<double>& componentCellWidths2 = Mesh.WCellWidths;
+      const std::vector<double>& componentCellCenters2 = Mesh.WCellCenters;
+      const std::vector<unsigned long>& componentConnectivity2 = Mesh.WFaceConnectivity;
+      const std::vector<double>& cellWidthsLR2 = Mesh.UCellWidths;
+      const std::vector<double>& cellWidthsUD2 = Mesh.VCellWidths;
+      const std::vector<unsigned long>& PressureNeighbor2 = Mesh.WCellPressureNeighbor;
       FlowComponent3d( Mesh, matIs, matJs, matVals, \
-                       force, componentBoundary, componentCellCenters, componentCellWidths, \
-                       CellWidthsLR, CellWidthsUD, componentConnectivity, PressureNeighbor, \
-                       visc, direction, component );
+                       force, componentBoundary2, componentCellCenters2, componentCellWidths2, \
+                       cellWidthsLR2, cellWidthsUD2, componentConnectivity2, PressureNeighbor2, \
+                       visc, direction, 2 );
       break;
     }
+  }
 }
