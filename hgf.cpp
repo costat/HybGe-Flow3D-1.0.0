@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <omp.h>
+#include<iterator>
 
 #include <paralution.hpp>
 
@@ -92,12 +93,12 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
           forceZ.resize( dofTotal );
 
           // Boundary Conditions & Force
-          BoundaryConditions( \
-            Mesh, visc, matIsX, matJsX, matValsX, forceX, 0 );
-          BoundaryConditions( \
-            Mesh, visc, matIsY, matJsY, matValsY, forceY, 1 );
-          BoundaryConditions( \
-            Mesh, visc, matIsZ, matJsZ, matValsZ, forceZ, 2 );
+          AxisFlowDrive( \
+            Mesh, matIsX, matJsX, matValsX, forceX, visc, 0 );
+          AxisFlowDrive( \
+            Mesh, matIsY, matJsY, matValsY, forceY, visc, 1 );
+          AxisFlowDrive( \
+            Mesh, matIsZ, matJsZ, matValsZ, forceZ, visc, 2 );
 
           // Array timer
           array_duration = ( omp_get_wtime() - array_start );
@@ -219,10 +220,10 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
           std::vector<double> forceY;
           forceY.resize( dofTotal );
           // Boundary Conditions & Force
-          BoundaryConditions( \
-            Mesh, visc, matIsX, matJsX, matValsX, forceX, 0 );
-          BoundaryConditions( \
-            Mesh, visc, matIsY, matJsY, matValsY, forceY, 1 );
+          AxisFlowDrive( \
+            Mesh, matIsX, matJsX, matValsX, forceX, visc, 0 );
+          AxisFlowDrive( \
+            Mesh, matIsY, matJsY, matValsY, forceY, visc, 1 );
 
           // Array timer
           array_duration = ( omp_get_wtime() - array_start );
@@ -355,13 +356,11 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
       StokesArray( Mesh, visc, matIs, matJs, matVals );
 
       // Boundary Conditions & Force
-      BoundaryConditions( Mesh, visc, matIs, matJs, matVals, \
-                                  force, direction );
+      AxisFlowDrive ( Mesh, matIs, matJs, matVals, \
+                            force, visc, direction );
 
       // Immersed Boundary
       immersedBoundary ( Mesh, matIs, matJs, matVals );
-
-      // Array timer
       array_duration = ( omp_get_wtime() - array_start );
       solve_start = omp_get_wtime();
 
