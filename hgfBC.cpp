@@ -89,8 +89,8 @@ FlowComponent3d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
     componentMax = zmax;
     minLR = xmin;
     maxLR = xmax;
-    minUD = zmin;
-    maxUD = zmax;
+    minUD = ymin;
+    maxUD = ymax;
     colShift = Mesh.DOF[1] + Mesh.DOF[2];
   }
 
@@ -168,6 +168,7 @@ FlowComponent3d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
             colId[0] = nbrfaces[dirOut] - 1 + colShift;
             colId[1] = nbrfaces[dirIn] - 1 + colShift;
             colId[2] = cl2;
+            entries = 3;
              // check for outflow possibility in LR direction
             if (direction == LR && (componentCellCenters[ idx2( cl, LR, Mesh.CellCentersLDI ) ] \
                                     + componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ]) > maxLR)
@@ -202,7 +203,6 @@ FlowComponent3d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
                                   * componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ] \
                                   / componentCellWidths[ idx2( cl, UD, Mesh.CellWidthsLDI ) ];
             }
-            entries = 3;
           }
           else // !dirDown, !dirUp, !dirLeft
           {
