@@ -186,9 +186,9 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
           solve_duration = ( omp_get_wtime() - solve_start );
 
           // Write solution to file
-          writeSolutionL ( Mesh, solX, outNameX );
-          writeSolutionL ( Mesh, solY, outNameY );
-          writeSolutionL ( Mesh, solZ, outNameZ );
+          writeSolutionTP ( Mesh, solX, outNameX );
+          writeSolutionTP ( Mesh, solY, outNameY );
+          writeSolutionTP ( Mesh, solZ, outNameZ );
           computeKTensorL ( Mesh, solX, solY, solZ );
 
           // Clear arrays no longer in use.
@@ -294,8 +294,8 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
           solve_duration = ( omp_get_wtime() - solve_start );
 
           // Write solution to file
-          writeSolutionL ( Mesh, solX, outNameX );
-          writeSolutionL ( Mesh, solY, outNameY );
+          writeSolutionTP ( Mesh, solX, outNameX );
+          writeSolutionTP ( Mesh, solY, outNameY );
           computeKTensorL ( Mesh, solX, solY, solZ );
 
           // Clear arrays no longer in use.
@@ -387,7 +387,7 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
 
       // Setup a GMRES solver object.
       GMRES<LocalMatrix<double>, LocalVector<double>, double > ls;
-      ls.Init(1e-6, 1e-6, 1e8, 1500);
+      ls.Init(1e-12, 1e-12, 1e8, 1500);
       ls.SetOperator(mat);
       ls.Verbose(2);
 
@@ -405,7 +405,7 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
       solve_duration = ( omp_get_wtime() - solve_start );
 
       // Write solution to file
-      writeSolutionL ( Mesh, sol, outName );
+      writeSolutionTP ( Mesh, sol, outName );
       computeKConstantDrive ( Mesh, sol, direction );
 
       // Clear arrays no longer in use.

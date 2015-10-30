@@ -28,6 +28,9 @@ computeKConstantDrive ( const FluidMesh& Mesh, \
                         int direction );
 
 void
-writeSolutionL ( const FluidMesh& Mesh, const paralution::LocalVector<double>& sol, \
-                 std::string& outName );
+writeSolutionTP ( const FluidMesh& Mesh, const paralution::LocalVector<double>& sol, \
+                  std::string& outName );
 
+void
+writeSolutionPV ( const FluidMesh& Mesh, const paralution::LocalVector<double>& sol, \
+                  std::string& outName );
