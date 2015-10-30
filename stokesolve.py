@@ -11,8 +11,8 @@ import re
 # GRID INFORMATION. USER PROVIDES PATH .DAT FILE CONTAINING
 # VOXEL ARRAY OF 0S 1S AND 2S.
 # ALSO, USER PROVIDES TOTAL GRID LENGTHS IN EACH DIRECTION.
-gridfiles = './grids/pflow2d.dat'
-L = 10.
+gridfiles = './grids/3dsmall.dat'
+L = 1.
 W = 1.
 H = 1.
 
@@ -25,10 +25,10 @@ direction = 0
 visc = 1
 
 # NUMBER OF OMP THREADS FOR USE IN PARALUTION LINEAR ALGEBRA
-nThreads = 1
+nThreads = 4
 
 # SET ILU PRECONDITIONER LEVEL
-prec = 4
+prec = 1
 
 ##########################################################
 ### SWIG TRANSLATION, USER SHOULD NOT EDIT BELOW HERE ####
@@ -43,11 +43,12 @@ nxyz = re.findall(r'\d+', geoData)
 nx = int(nxyz[0])
 ny = int(nxyz[1])
 nz = int(nxyz[2])
+print gridin1.shape
 
 if nz:
     gridin = np.zeros((nx, ny, nz), dtype = int)
     for zLevel in range(0,nz):
-        gridin[:,:,zLevel] = gridin1[zLevel*ny:(zLevel+1)*ny][:]
+        gridin[:,:,zLevel] = gridin1[zLevel*nx:(zLevel+1)*nx][:]
     gridin_ldi1, gridin_ldi2, gridin_ldi3 = gridin.shape
     gridin = np.array(gridin, dtype = np.uint64).ravel()
 elif not nz:
