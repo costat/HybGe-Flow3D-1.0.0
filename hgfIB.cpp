@@ -38,54 +38,38 @@ immersedBoundary ( const FluidMesh& Mesh, std::vector<int>& matIs, \
              this by summing repeated entries. If a different solver is used that
              does not allow repeated entries, care should be taken to
              overcome this issue. */
-          matIs.push_back( \
-            Mesh.PressureCellUNeighbor[ \
+          matIs.push_back( Mesh.PressureCellUNeighbor[ \
               idx2( cl, 0, Mesh.PressureCellVelocityNeighborLDI ) ] );
-          matJs.push_back( \
-            Mesh.PressureCellUNeighbor[ \
+          matJs.push_back( Mesh.PressureCellUNeighbor[ \
               idx2( cl, 0, Mesh.PressureCellVelocityNeighborLDI ) ] );
           matVals.push_back(pen);
-          matIs.push_back( \
-            Mesh.PressureCellUNeighbor[ \
+          matIs.push_back( Mesh.PressureCellUNeighbor[ \
               idx2( cl, 1, Mesh.PressureCellVelocityNeighborLDI ) ] );
-          matJs.push_back( \
-            Mesh.PressureCellUNeighbor[ \
+          matJs.push_back( Mesh.PressureCellUNeighbor[ \
               idx2( cl, 1, Mesh.PressureCellVelocityNeighborLDI ) ] );
           matVals.push_back(pen);
-          matIs.push_back( \
-            Mesh.PressureCellVNeighbor[ \
+          matIs.push_back( Mesh.PressureCellVNeighbor[ \
               idx2( cl, 0, Mesh.PressureCellVelocityNeighborLDI ) ] \
               + Mesh.DOF[1]);
-          matJs.push_back( \
-            Mesh.PressureCellVNeighbor[ \
+          matJs.push_back( Mesh.PressureCellVNeighbor[ \
               idx2( cl, 0, Mesh.PressureCellVelocityNeighborLDI ) ] \
               + Mesh.DOF[1]);
           matVals.push_back(pen);
-          matIs.push_back( \
-            Mesh.PressureCellVNeighbor[ \
+          matIs.push_back( Mesh.PressureCellVNeighbor[ \
               idx2( cl, 1, Mesh.PressureCellVelocityNeighborLDI ) ] \
               + Mesh.DOF[1]);
-          matJs.push_back( \
-            Mesh.PressureCellVNeighbor[ \
+          matJs.push_back( Mesh.PressureCellVNeighbor[ \
               idx2( cl, 1, Mesh.PressureCellVelocityNeighborLDI ) ] \
               + Mesh.DOF[1]);
           matVals.push_back(pen);
-          matIs.push_back( \
-            Mesh.PressureCellVNeighbor[ \
-              idx2( cl, 0, Mesh.PressureCellVelocityNeighborLDI ) ] \
-              + Mesh.DOF[1] + Mesh.DOF[2]);
-          matJs.push_back( \
-            Mesh.PressureCellVNeighbor[ \
-              idx2( cl, 0, Mesh.PressureCellVelocityNeighborLDI ) ] \
-              + Mesh.DOF[1] + Mesh.DOF[2]);
-          matIs.push_back( \
-            Mesh.PressureCellVNeighbor[ \
-              idx2( cl, 1, Mesh.PressureCellVelocityNeighborLDI ) ] \
-              + Mesh.DOF[1] + Mesh.DOF[2]);
-          matJs.push_back( \
-            Mesh.PressureCellVNeighbor[ \
-              idx2( cl, 1, Mesh.PressureCellVelocityNeighborLDI ) ] \
-              + Mesh.DOF[1] + Mesh.DOF[2]);
+          matIs.push_back( Mesh.PressureCellVNeighbor[ \
+              idx2( cl, 0, Mesh.PressureCellVelocityNeighborLDI ) ] + Mesh.DOF[1] + Mesh.DOF[2]);
+          matJs.push_back( Mesh.PressureCellVNeighbor[ \
+              idx2( cl, 0, Mesh.PressureCellVelocityNeighborLDI ) ] + Mesh.DOF[1] + Mesh.DOF[2]);
+          matIs.push_back( Mesh.PressureCellVNeighbor[ \
+              idx2( cl, 1, Mesh.PressureCellVelocityNeighborLDI ) ] + Mesh.DOF[1] + Mesh.DOF[2]);
+          matJs.push_back( Mesh.PressureCellVNeighbor[ \
+              idx2( cl, 1, Mesh.PressureCellVelocityNeighborLDI ) ] + Mesh.DOF[1] + Mesh.DOF[2]);
         }
       }
     }
@@ -102,35 +86,27 @@ immersedBoundary ( const FluidMesh& Mesh, std::vector<int>& matIs, \
              this by summing repeated entries. If a different solver is used that
              does not allow repeated entries, care should be taken to
              overcome this issue. */
-          matIs.push_back( \
-            Mesh.PressureCellUNeighbor[ \
+          matIs.push_back( Mesh.PressureCellUNeighbor[ \
               idx2( cl, 0, Mesh.PressureCellVelocityNeighborLDI ) ] );
-          matJs.push_back( \
-            Mesh.PressureCellUNeighbor[ \
+          matJs.push_back( Mesh.PressureCellUNeighbor[ \
               idx2( cl, 0, Mesh.PressureCellVelocityNeighborLDI ) ] );
           matVals.push_back(pen);
-          matIs.push_back( \
-            Mesh.PressureCellUNeighbor[ \
+          matIs.push_back( Mesh.PressureCellUNeighbor[ \
               idx2( cl, 1, Mesh.PressureCellVelocityNeighborLDI ) ] );
-          matJs.push_back( \
-            Mesh.PressureCellUNeighbor[ \
+          matJs.push_back( Mesh.PressureCellUNeighbor[ \
               idx2( cl, 1, Mesh.PressureCellVelocityNeighborLDI ) ] );
           matVals.push_back(pen);
-          matIs.push_back( \
-            Mesh.PressureCellVNeighbor[ \
+          matIs.push_back( Mesh.PressureCellVNeighbor[ \
               idx2( cl, 0, Mesh.PressureCellVelocityNeighborLDI ) ] \
               + Mesh.DOF[1]);
-          matJs.push_back( \
-            Mesh.PressureCellVNeighbor[ \
+          matJs.push_back( Mesh.PressureCellVNeighbor[ \
               idx2( cl, 0, Mesh.PressureCellVelocityNeighborLDI ) ] \
               + Mesh.DOF[1]);
           matVals.push_back(pen);
-          matIs.push_back( \
-            Mesh.PressureCellVNeighbor[ \
+          matIs.push_back( Mesh.PressureCellVNeighbor[ \
               idx2( cl, 1, Mesh.PressureCellVelocityNeighborLDI ) ] \
               + Mesh.DOF[1]);
-          matJs.push_back( \
-            Mesh.PressureCellVNeighbor[ \
+          matJs.push_back( Mesh.PressureCellVNeighbor[ \
               idx2( cl, 1, Mesh.PressureCellVelocityNeighborLDI ) ] \
               + Mesh.DOF[1]);
           matVals.push_back(pen);

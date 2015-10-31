@@ -29,8 +29,15 @@ visc = 0.001
 # NUMBER OF OMP THREADS FOR USE IN PARALUTION LINEAR ALGEBRA
 nThreads = 1
 
-# SET ILU PRECONDITIONER LEVEL
-prec = 6
+# SET SOLVER PARAMETERS: ILU PRECONDITIONER LEVEL,
+# ABSOLUTE AND RELATIVE RESIDUAL TOLERANCES, AND MAXIMUM ITERATIONS
+prec = 1
+tolAbs = 1e-10;
+tolRel = 1e-10;
+maxIt = 1500;
+
+# CHOOSE OUTPUT FORMAT, 0 - TECPLOT, 1 - VTK FOR PARAVIEW
+output = 0;
 
 ####################################################################
 ### SETUP AND SWIG TRANSLATION, USER SHOULD NOT EDIT BELOW HERE ####
@@ -74,7 +81,8 @@ for root, dirs, filenames in os.walk(infolder):
     #################
 
     hgf.hgfStokesDrive ( gridin, gridin_ldi2, gridin_ldi3, nx, ny, nz, \
-                         L, W, H, direction, visc, nThreads, prec, nGrids, gridCount )
+                         L, W, H, direction, visc, nThreads, prec, nGrids, gridCount, \
+                         tolAbs, tolRel, maxIt, output )
 
     ### Grab computed K ###
     KLoc = outfolder + 'Ks.dat'

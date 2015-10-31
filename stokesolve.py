@@ -27,8 +27,15 @@ visc = 1
 # NUMBER OF OMP THREADS FOR USE IN PARALUTION LINEAR ALGEBRA
 nThreads = 4
 
-# SET ILU PRECONDITIONER LEVEL
+# SET SOLVER PARAMETERS: ILU PRECONDITIONER LEVEL,
+# ABSOLUTE AND RELATIVE RESIDUAL TOLERANCES, AND MAXIMUM ITERATIONS
 prec = 1
+tolAbs = 1e-10;
+tolRel = 1e-10;
+maxIt = 1500;
+
+# CHOOSE OUTPUT FORMAT, 0 - TECPLOT, 1 - VTK FOR PARAVIEW
+output = 0;
 
 ##########################################################
 ### SWIG TRANSLATION, USER SHOULD NOT EDIT BELOW HERE ####
@@ -66,5 +73,5 @@ print 'Solving the stationary Stokes problem...\n'
 #################
 
 hgf.hgfStokesDrive ( gridin, gridin_ldi2, gridin_ldi3, nx, ny, nz, \
-                     L, W, H, direction, visc, nThreads, prec, 1, 1 )
-
+                     L, W, H, direction, visc, nThreads, prec, 1, 1, \
+                     tolAbs, tolRel, maxit, output )
