@@ -38,17 +38,20 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
   {
     case 3 : // Solve all 3 flow directions for upscaled tensor
     {
+      std::string outNameX;
+      std::string outNameY;
+      std::string outNameZ;
       if (output)
       {
-        std::string outNameX = "flowrunX.vtk";
-        std::string outNameY = "flowrunY.vtk";
-        std::string outNameZ = "flowrunZ.vtk";
+        outNameX = "flowrunX.vtk";
+        outNameY = "flowrunY.vtk";
+        outNameZ = "flowrunZ.vtk";
       }
       else
       {
-        std::string outNameX = "flowrunX.dat";
-        std::string outNameY = "flowrunY.dat";
-        std::string outNameZ = "flowrunZ.dat";
+        outNameX = "flowrunX.dat";
+        outNameY = "flowrunY.dat";
+        outNameZ = "flowrunZ.dat";
       }
       int dofTotal, maxNZ;
       double mesh_duration, array_duration, solve_duration, total_duration;
@@ -353,7 +356,15 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
     }
     default : // Solve a single flow direction, upscale constant conductivity
     {
-      std::string outName = "flowrun.dat";
+      std::string outName;
+      if (output)
+      {
+        outName = "flowrun.vtk";
+      }
+      else
+      {
+        outName = "flowrun.dat";
+      }
       int dofTotal, maxNZ;
       double mesh_duration, array_duration, solve_duration, total_duration;
       double start, array_start, solve_start;
