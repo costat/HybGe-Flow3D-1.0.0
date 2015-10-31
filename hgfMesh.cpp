@@ -47,7 +47,6 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
       NX = nx;
       NY = ny;
       NZ = nz;
-      int (*callIsNear)( std::vector<double>&, std::vector<double>&, double, double, double, int) = isNear2d;
 
       // Max pressure nodes
       std::vector<double> nodeHold;
@@ -107,7 +106,7 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
               }
               else
               {
-                checkVert = isNear( nodeHold, Nodes, dx, dy, dz, nNodes, callIsNear );
+                checkVert = isNear2d( nodeHold, Nodes, dx, dy, dz, nNodes );
               }
               if (checkVert == -1) // node is not a duplicate
               {
@@ -183,8 +182,8 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
               }
               else
               {
-                checkVertU = isNear( nodeHoldU, UCellCenters, \
-                                     dx, dy, dz, countUCells, callIsNear );
+                checkVertU = isNear2d( nodeHoldU, UCellCenters, \
+                                     dx, dy, dz, countUCells );
               }
               if (checkVertU == -1) // cell center location is not a duplicate
               {
@@ -280,8 +279,8 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
               }
               else
               {
-                checkVertV = isNear( nodeHoldV, VCellCenters, \
-                                    dx, dy, dz, countVCells, callIsNear );
+                checkVertV = isNear2d( nodeHoldV, VCellCenters, \
+                                    dx, dy, dz, countVCells );
               }
               if (checkVertV == -1)
               {
@@ -362,8 +361,6 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
       FaceConnectivityLDI = 6;
       PressureCellVelocityNeighborLDI = 2;
       VelocityCellPressureNeighborLDI = 2;
-      int (*callIsNear)( std::vector<double>&, std::vector<double>&, double, double, double, int) = isNear3d;
-
 
       // Max pressure nodes
       std::vector<double> nodeHold;
@@ -453,7 +450,7 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
                 }
                 else
                 {
-                  checkVert = isNear( nodeHold, Nodes, dx, dy, dz, nNodes, callIsNear );
+                  checkVert = isNear3d( nodeHold, Nodes, dx, dy, dz, nNodes );
                 }
                 if (checkVert == -1) // node is not a duplicate
                 {
@@ -541,8 +538,8 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
               }
               else
               {
-                checkVertU = isNear( nodeHoldU, UCellCenters, \
-                                    dx, dy, dz, countUCells, callIsNear );
+                checkVertU = isNear3d( nodeHoldU, UCellCenters, \
+                                    dx, dy, dz, countUCells );
               }
               if (checkVertU == -1) // cell center location is not a duplicate
               {
@@ -646,8 +643,8 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
               }
               else
               {
-                checkVertV = isNear( nodeHoldV, VCellCenters, \
-                                    dx, dy, dz, countVCells, callIsNear );
+                checkVertV = isNear3d( nodeHoldV, VCellCenters, \
+                                    dx, dy, dz, countVCells );
               }
               if (checkVertV == -1)
               {
@@ -751,8 +748,8 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
               }
               else
               {
-                checkVertW = isNear( nodeHoldW, WCellCenters, \
-                                    dx, dy, dz, countWCells, callIsNear );
+                checkVertW = isNear3d( nodeHoldW, WCellCenters, \
+                                    dx, dy, dz, countWCells );
               }
               if (checkVertW == -1)
               {
@@ -886,13 +883,6 @@ int FluidMesh::isNear3d( std::vector<double>& Vector1, std::vector<double>& Vect
     }
   } while (prox == -1 && cl > 0);
   return prox;
-}
-// Pointer to 3d or 2d isNear functions
-int isNear( std::vector<double>& Vector1, std::vector<double>& Vector2, \
-            double dx, double dy, double dz, int nNodes, \
-            int (*functocall)( std::vector<double>&, std::vector<double>&, double, double, double, int ) )
-{
-  return (*functocall)( Vector1, Vector2, dx, dy, dz, nNodes )
 }
 
 // Function to compute cell face connectivity information
