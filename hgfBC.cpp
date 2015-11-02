@@ -922,7 +922,7 @@ FlowComponent2d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
                                     - 0.5 * componentCellWidths[ idx2( cl, direction, Mesh.CellCentersLDI ) ]) \
                                     < componentMin) // inflow, nonzero force
       {
-        force[cl2] = maxin \
+        force[cl2] = -maxin \
           * (componentCellCenters[ idx2( cl, LR, Mesh.CellCentersLDI ) ] - minLR) \
           * (componentCellCenters[ idx2( cl, LR, Mesh.CellCentersLDI ) ] - maxLR);
       }

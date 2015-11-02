@@ -11,9 +11,9 @@ import re
 # GRID INFORMATION. USER PROVIDES PATH .DAT FILE CONTAINING
 # VOXEL ARRAY OF 0S 1S AND 2S.
 # ALSO, USER PROVIDES TOTAL GRID LENGTHS IN EACH DIRECTION.
-gridfiles = './grids/3dsmall.dat'
-L = 1.
-W = 1.
+gridfiles = './grids/ellipserepeat'
+L = 8.
+W = 8.
 H = 1.
 
 # PRINCIPAL FLOW DIRECTION, 0 - X, 1 - Y, 2 - Z, SINGLE FLOW DIRECTION SOLVES,
@@ -29,9 +29,9 @@ nThreads = 4
 
 # SET SOLVER PARAMETERS: ILU PRECONDITIONER LEVEL,
 # ABSOLUTE AND RELATIVE RESIDUAL TOLERANCES, AND MAXIMUM ITERATIONS
-prec = 1
-tolAbs = 1e-10;
-tolRel = 1e-10;
+prec = 4
+tolAbs = 1e-8;
+tolRel = 1e-8;
 maxIt = 1500;
 
 # CHOOSE OUTPUT FORMAT, 0 - TECPLOT, 1 - VTK FOR PARAVIEW
@@ -50,7 +50,6 @@ nxyz = re.findall(r'\d+', geoData)
 nx = int(nxyz[0])
 ny = int(nxyz[1])
 nz = int(nxyz[2])
-print gridin1.shape
 
 if nz:
     gridin = np.zeros((nx, ny, nz), dtype = int)
@@ -74,4 +73,4 @@ print 'Solving the stationary Stokes problem...\n'
 
 hgf.hgfStokesDrive ( gridin, gridin_ldi2, gridin_ldi3, nx, ny, nz, \
                      L, W, H, direction, visc, nThreads, prec, 1, 1, \
-                     tolAbs, tolRel, maxit, output )
+                     tolAbs, tolRel, maxIt, output )
