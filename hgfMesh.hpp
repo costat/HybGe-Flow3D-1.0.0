@@ -37,9 +37,6 @@ class FluidMesh
                   double dx, double dy, double dz, int nNodes );
     int isNear3d( std::vector<double>& Vector1, std::vector<double>& Vector2, \
                   double dx, double dy, double dz, int nNodes );
-    int isNear( std::vector<double>& Vector1, std::vector<double>& Vector2, \
-            double dx, double dy, double dz, int nNodes, \
-            int (*functocall)( std::vector<double>&, std::vector<double>&, double, double, double, int ) );
     void innerFaceConnectivity( std::vector<unsigned long>& ComponentFaceConnectivity, \
                                 std::vector<double> ComponentCellCenters, \
                                 double dx, double dy, double dz, int nCells );
