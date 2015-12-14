@@ -1,37 +1,31 @@
 #include <vector>
 
 void
-ucartflow ( const FluidMesh& Mesh, std::vector<int>& matIs, \
-            std::vector<int>& matJs, std::vector<double>& matVals, \
-            std::vector<double>& force, \
-            double visc, int direction );
+FlowComponent3d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
+                  std::vector<int>& matJs, std::vector<double>& matVals, \
+                  std::vector<double>& force, \
+                  const std::vector<unsigned long>& componentBoundary, \
+                  const std::vector<double>& componentCellCenters, \
+                  const std::vector<double>& componentCellWidths, \
+                  const std::vector<double>& CellWidthsLR, \
+                  const std::vector<double>& CellWidthsUD, \
+                  const std::vector<unsigned long>& componentConnectivity, \
+                  const std::vector<unsigned long>& PressureNeighbor, \
+                  double visc, int direction, int component );
 
 void
-vcartflow ( const FluidMesh& Mesh, std::vector<int>& matIs, \
-            std::vector<int>& matJs, std::vector<double>& matVals, \
-            std::vector<double>& force, \
-            double visc, int direction );
+FlowComponent2d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
+                  std::vector<int>& matJs, std::vector<double>& matVals, \
+                  std::vector<double>& force, \
+                  const std::vector<unsigned long>& componentBoundary, \
+                  const std::vector<double>& componentCellCenters, \
+                  const std::vector<double>& componentCellWidths, \
+                  const std::vector<double>& CellWidthsLR, \
+                  const std::vector<unsigned long>& componentConnectivity, \
+                  const std::vector<unsigned long>& PressureNeighbor, \
+                  double visc, int direction, int component );
 
 void
-wcartflow ( const FluidMesh& Mesh, std::vector<int>& matIs, \
-            std::vector<int>& matJs, std::vector<double>& matVals, \
-            std::vector<double>& force, \
-            double visc, int direction );
-
-void
-ucartflow2D ( const FluidMesh& Mesh, std::vector<int>& matIs, \
-              std::vector<int>& matJs, std::vector<double>& matVals, \
-              std::vector<double>& force, \
-              double visc, int direction );
-
-void
-vcartflow2D ( const FluidMesh& Mesh, std::vector<int>& matIs, \
-              std::vector<int>& matJs, std::vector<double>& matVals, \
-              std::vector<double>& force, \
-              double visc, int direction );
-
-void
-BoundaryConditions ( const FluidMesh& Mesh, double visc, \
-                     std::vector<int>& matIs, std::vector<int>& matJs, \
-                     std::vector<double>& matVals, \
-                     std::vector<double>& force, int direction );
+AxisFlowDrive ( const FluidMesh& Mesh, std::vector<int>& matIs, \
+                std::vector<int>& matJs, std::vector<double>& matVals, \
+                std::vector<double>& force, double visc, int direction );

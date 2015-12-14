@@ -43,18 +43,18 @@ diffusionArrays( const FluidMesh& Mesh, std::vector<int>& matIs, \
         rcl = cl + velShift;
         for (int i = 0; i < 4; i++) {
           nbrfaces[i] = fconn[ idx2(cl, i, 4) ] - 1;
-          dx[i] = dxyz[ idx2(0, nbrfaces[i], 2) ];
-          dy[i] = dxyz[ idx2(1, nbrfaces[i], 2) ];
+          dx[i] = dxyz[ idx2(nbrfaces[i], 0, 2) ];
+          dy[i] = dxyz[ idx2(nbrfaces[i], 1, 2) ];
         }
         /* Values to be inserted in this row */
-        val[0] = -visc * dxyz[ idx2(0,cl,2) ] / (0.5 * (dy[0] \
-                                       + dxyz[ idx2(1,cl,2) ]));
-        val[1] = -visc * dxyz[ idx2(1,cl,2) ] / (0.5 * (dx[1] \
-                                       + dxyz[ idx2(0,cl,2) ]));
-        val[2] = -visc * dxyz[ idx2(0,cl,2) ] / (0.5 * (dy[2] \
-                                       + dxyz[ idx2(1,cl,2) ]));
-        val[3] = -visc * dxyz[ idx2(1,cl,2) ] / (0.5 * (dx[3] \
-                                       + dxyz[ idx2(0,cl,2) ]));
+        val[0] = -visc * dxyz[ idx2(cl,0,2) ] / (0.5 * (dy[0] \
+                                       + dxyz[ idx2(cl,1,2) ]));
+        val[1] = -visc * dxyz[ idx2(cl,1,2) ] / (0.5 * (dx[1] \
+                                       + dxyz[ idx2(cl,0,2) ]));
+        val[2] = -visc * dxyz[ idx2(cl,0,2) ] / (0.5 * (dy[2] \
+                                       + dxyz[ idx2(cl,1,2) ]));
+        val[3] = -visc * dxyz[ idx2(cl,1,2) ] / (0.5 * (dx[3] \
+                                       + dxyz[ idx2(cl,0,2) ]));
         val[4] = -(val[0] + val[1] + val[2] + val[3]);
 
         /* Insert values into assembly vector matVals */
@@ -83,29 +83,29 @@ diffusionArrays( const FluidMesh& Mesh, std::vector<int>& matIs, \
         rcl = cl + velShift;
         for (int i = 0; i < 6; i++) {
           nbrfaces[i] = fconn[ idx2(cl, i, 6) ] - 1;
-          dx[i] = dxyz[ idx2(0, nbrfaces[i], 3) ];
-          dy[i] = dxyz[ idx2(1, nbrfaces[i], 3) ];
-          dz[i] = dxyz[ idx2(2, nbrfaces[i], 3) ];
+          dx[i] = dxyz[ idx2(nbrfaces[i], 0, 3) ];
+          dy[i] = dxyz[ idx2(nbrfaces[i], 1, 3) ];
+          dz[i] = dxyz[ idx2(nbrfaces[i], 2, 3) ];
         }
         /* Values to be inserted in this row */
-        val[0] = -visc * dxyz[ idx2(0,cl,3) ] \
-                       * dxyz[ idx2(1,cl,3) ] / (0.5 * (dz[0] \
-                       + dxyz[ idx2(2,cl,3) ] ));
-        val[1] = -visc * dxyz[ idx2(1,cl,3) ] \
-                       * dxyz[ idx2(2,cl,3) ] / (0.5 * (dx[1] \
-                       + dxyz[ idx2(0,cl,3) ] ));
-        val[2] = -visc * dxyz[ idx2(0,cl,3) ] \
-                       * dxyz[ idx2(1,cl,3) ] / (0.5 * (dz[2] \
-                       + dxyz[ idx2(2,cl,3) ] ));
-        val[3] = -visc * dxyz[ idx2(1,cl,3) ] \
-                       * dxyz[ idx2(2,cl,3) ] / (0.5 * (dx[3] \
-                       + dxyz[ idx2(0,cl,3) ] ));
-        val[4] = -visc * dxyz[ idx2(0,cl,3) ] \
-                       * dxyz[ idx2(2,cl,3) ] / (0.5 * (dy[4] \
-                       + dxyz[ idx2(1,cl,3) ] ));
-        val[5] = -visc * dxyz[ idx2(0,cl,3) ] \
-                       * dxyz[ idx2(2,cl,3) ] / (0.5 * (dy[5] \
-                       + dxyz[ idx2(1,cl,3) ] ));
+        val[0] = -visc * dxyz[ idx2(cl,0,3) ] \
+                       * dxyz[ idx2(cl,1,3) ] / (0.5 * (dz[0] \
+                       + dxyz[ idx2(cl,2,3) ] ));
+        val[1] = -visc * dxyz[ idx2(cl,1,3) ] \
+                       * dxyz[ idx2(cl,2,3) ] / (0.5 * (dx[1] \
+                       + dxyz[ idx2(cl,0,3) ] ));
+        val[2] = -visc * dxyz[ idx2(cl,0,3) ] \
+                       * dxyz[ idx2(cl,1,3) ] / (0.5 * (dz[2] \
+                       + dxyz[ idx2(cl,2,3) ] ));
+        val[3] = -visc * dxyz[ idx2(cl,1,3) ] \
+                       * dxyz[ idx2(cl,2,3) ] / (0.5 * (dx[3] \
+                       + dxyz[ idx2(cl,0,3) ] ));
+        val[4] = -visc * dxyz[ idx2(cl,0,3) ] \
+                       * dxyz[ idx2(cl,2,3) ] / (0.5 * (dy[4] \
+                       + dxyz[ idx2(cl,1,3) ] ));
+        val[5] = -visc * dxyz[ idx2(cl,0,3) ] \
+                       * dxyz[ idx2(cl,2,3) ] / (0.5 * (dy[5] \
+                       + dxyz[ idx2(cl,1,3) ] ));
         val[6] = -(val[0] + val[1] + val[2] + val[3] + val[4] + val[5]);
 
         /* Insert values into assembly vectors */
@@ -439,4 +439,3 @@ StokesArray ( const FluidMesh& Mesh, double visc, std::vector<int>& matIs, \
     }
   }
 }
-

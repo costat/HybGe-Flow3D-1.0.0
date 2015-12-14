@@ -14,7 +14,7 @@ except AttributeError:
 hgf_module = Extension( '_hgf',
                        sources=['hgf.i', 'hgf.cpp', 'hgfMesh.cpp', 'hgfArrays.cpp', 'hgfBC.cpp', 'hgfIB.cpp', 'hgfPP.cpp'],
 		       include_dirs = [numpy_include],
-                       extra_compile_args=['-O3'],
+                       extra_compile_args=['-O3','-fopenmp'],
                        extra_link_args=['-lparalution'],
 		       swig_opts=['-c++']
 		      )

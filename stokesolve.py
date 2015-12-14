@@ -11,9 +11,9 @@ import re
 # GRID INFORMATION. USER PROVIDES PATH .DAT FILE CONTAINING
 # VOXEL ARRAY OF 0S 1S AND 2S.
 # ALSO, USER PROVIDES TOTAL GRID LENGTHS IN EACH DIRECTION.
-gridfiles = './grids/pflow2d.dat'
-L = 10.
-W = 1.
+gridfiles = './grids/idealPores2d.dat'
+L = 8.
+W = 8.
 H = 1.
 
 # PRINCIPAL FLOW DIRECTION, 0 - X, 1 - Y, 2 - Z, SINGLE FLOW DIRECTION SOLVES,
@@ -25,10 +25,14 @@ direction = 0
 visc = 1
 
 # NUMBER OF OMP THREADS FOR USE IN PARALUTION LINEAR ALGEBRA
-nThreads = 1
+nThreads = 4
 
-# SET ILU PRECONDITIONER LEVEL
+# SET SOLVER PARAMETERS: ILU PRECONDITIONER LEVEL,
+# ABSOLUTE AND RELATIVE RESIDUAL TOLERANCES, AND MAXIMUM ITERATIONS
 prec = 4
+tolAbs = 1e-8;
+tolRel = 1e-8;
+maxIt = 1500;
 
 ##########################################################
 ### SWIG TRANSLATION, USER SHOULD NOT EDIT BELOW HERE ####
@@ -47,7 +51,7 @@ nz = int(nxyz[2])
 if nz:
     gridin = np.zeros((nx, ny, nz), dtype = int)
     for zLevel in range(0,nz):
-        gridin[:,:,zLevel] = gridin1[zLevel*ny:(zLevel+1)*ny][:]
+        gridin[:,:,zLevel] = gridin1[zLevel*nx:(zLevel+1)*nx][:]
     gridin_ldi1, gridin_ldi2, gridin_ldi3 = gridin.shape
     gridin = np.array(gridin, dtype = np.uint64).ravel()
 elif not nz:
@@ -65,5 +69,5 @@ print 'Solving the stationary Stokes problem...\n'
 #################
 
 hgf.hgfStokesDrive ( gridin, gridin_ldi2, gridin_ldi3, nx, ny, nz, \
-                     L, W, H, direction, visc, nThreads, prec, 1, 1 )
-
+                     L, W, H, direction, visc, nThreads, prec, 1, 1, \
+                     tolAbs, tolRel, maxIt )
