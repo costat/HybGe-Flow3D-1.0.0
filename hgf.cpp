@@ -29,7 +29,7 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
                 int nx, int ny, int nz, \
                 double length, double width, double height, int direction, \
                 double visc, int nThreads, int prec, int numSims, int simNum, \
-                double tolAbs, double tolRel, int maxIt, int output )
+                double tolAbs, double tolRel, int maxIt )
 {
 
   if (simNum == 1) init_paralution();
@@ -41,18 +41,9 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
       std::string outNameX;
       std::string outNameY;
       std::string outNameZ;
-      if (output)
-      {
-        outNameX = "flowrunX.vtk";
-        outNameY = "flowrunY.vtk";
-        outNameZ = "flowrunZ.vtk";
-      }
-      else
-      {
-        outNameX = "flowrunX.dat";
-        outNameY = "flowrunY.dat";
-        outNameZ = "flowrunZ.dat";
-      }
+      outNameX = "flowrunX.dat";
+      outNameY = "flowrunY.dat";
+      outNameZ = "flowrunZ.dat";
       int dofTotal, maxNZ;
       double mesh_duration, array_duration, solve_duration, total_duration;
       double start, array_start, solve_start;
@@ -202,18 +193,9 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
           solve_duration = ( omp_get_wtime() - solve_start );
 
           // Write solution to file
-          if (output)
-          {
-            writeSolutionPV ( Mesh, solX, outNameX );
-            writeSolutionPV ( Mesh, solY, outNameY );
-            writeSolutionPV ( Mesh, solZ, outNameZ );
-          }
-          else
-          {
-            writeSolutionTP ( Mesh, solX, outNameX );
-            writeSolutionTP ( Mesh, solY, outNameY );
-            writeSolutionTP ( Mesh, solZ, outNameZ );
-          }
+          writeSolutionTP ( Mesh, solX, outNameX );
+          writeSolutionTP ( Mesh, solY, outNameY );
+          writeSolutionTP ( Mesh, solZ, outNameZ );
           computeKTensorL ( Mesh, solX, solY, solZ );
 
           // Clear arrays no longer in use.
@@ -321,16 +303,8 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
           solve_duration = ( omp_get_wtime() - solve_start );
 
           // Write solution to file
-          if (output)
-          {
-            writeSolutionPV ( Mesh, solX, outNameX );
-            writeSolutionPV ( Mesh, solY, outNameY );
-          }
-          else
-          {
-            writeSolutionTP ( Mesh, solX, outNameX );
-            writeSolutionTP ( Mesh, solY, outNameY );
-          }
+          writeSolutionTP ( Mesh, solX, outNameX );
+          writeSolutionTP ( Mesh, solY, outNameY );
           computeKTensorL ( Mesh, solX, solY, solZ );
 
           // Clear arrays no longer in use.
@@ -357,14 +331,7 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
     default : // Solve a single flow direction, upscale constant conductivity
     {
       std::string outName;
-      if (output)
-      {
-        outName = "flowrun.vtk";
-      }
-      else
-      {
-        outName = "flowrun.dat";
-      }
+      outName = "flowrun.dat";
       int dofTotal, maxNZ;
       double mesh_duration, array_duration, solve_duration, total_duration;
       double start, array_start, solve_start;
@@ -448,14 +415,7 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
       solve_duration = ( omp_get_wtime() - solve_start );
 
       // Write solution to file
-      if (output)
-      {
-        writeSolutionPV ( Mesh, sol, outName );
-      }
-      else
-      {
-        writeSolutionTP ( Mesh, sol, outName );
-      }
+      writeSolutionTP ( Mesh, sol, outName );
       computeKConstantDrive ( Mesh, sol, direction );
 
       // Clear arrays no longer in use.

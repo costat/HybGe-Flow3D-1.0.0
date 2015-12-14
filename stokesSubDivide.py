@@ -32,9 +32,6 @@ tolAbs = 1e-10;
 tolRel = 1e-10;
 maxIt = 1500;
 
-# CHOOSE OUTPUT FORMAT, 0 - TECPLOT, 1 - VTK FOR PARAVIEW
-output = 0;
-
 ###################################
 ### SETUP AND SWIG TRANSLATION ####
 ###################################
@@ -80,7 +77,7 @@ elif not nz:
 
       hgf.hgfStokesDrive( gridin, gridin_ldi2, gridin_ldi3, nxG, nyG, nz, \
                           lG, wG, H, 0, visc, nThreads, prec, gridTotal, gridCount, \
-                          tolAbs, tolRel, maxIt, output )
+                          tolAbs, tolRel, maxIt )
       sol1 = 'SOL_grid%d_x.dat' % (subgrid)
       shutil.copy('flowrun.dat', sol1)
 
@@ -99,7 +96,7 @@ elif not nz:
       gridCount = gridCount + 1
       hgf.hgfStokesDrive( gridin, gridin_ldi2, gridin_ldi3, nxG, nyG, nz, \
                           lG, wG, H, 1, visc, nThreads, prec, gridTotal, gridCount, \
-                          tolAbs, tolRel, maxIt, output )
+                          tolAbs, tolRel, maxIt )
       sol2 = 'SOL_grid%d_y.dat' % (subgrid)
       shutil.copy('flowrun.dat', sol2)
 

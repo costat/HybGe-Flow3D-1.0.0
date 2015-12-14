@@ -36,9 +36,6 @@ tolAbs = 1e-10;
 tolRel = 1e-10;
 maxIt = 1500;
 
-# CHOOSE OUTPUT FORMAT, 0 - TECPLOT, 1 - VTK FOR PARAVIEW
-output = 0;
-
 ####################################################################
 ### SETUP AND SWIG TRANSLATION, USER SHOULD NOT EDIT BELOW HERE ####
 ####################################################################
@@ -82,7 +79,7 @@ for root, dirs, filenames in os.walk(infolder):
 
     hgf.hgfStokesDrive ( gridin, gridin_ldi2, gridin_ldi3, nx, ny, nz, \
                          L, W, H, direction, visc, nThreads, prec, nGrids, gridCount, \
-                         tolAbs, tolRel, maxIt, output )
+                         tolAbs, tolRel, maxIt )
 
     ### Grab computed K ###
     KLoc = outfolder + 'Ks.dat'

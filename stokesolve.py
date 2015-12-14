@@ -11,7 +11,7 @@ import re
 # GRID INFORMATION. USER PROVIDES PATH .DAT FILE CONTAINING
 # VOXEL ARRAY OF 0S 1S AND 2S.
 # ALSO, USER PROVIDES TOTAL GRID LENGTHS IN EACH DIRECTION.
-gridfiles = './grids/ellipserepeat'
+gridfiles = './grids/idealPores2d.dat'
 L = 8.
 W = 8.
 H = 1.
@@ -33,9 +33,6 @@ prec = 4
 tolAbs = 1e-8;
 tolRel = 1e-8;
 maxIt = 1500;
-
-# CHOOSE OUTPUT FORMAT, 0 - TECPLOT, 1 - VTK FOR PARAVIEW
-output = 0;
 
 ##########################################################
 ### SWIG TRANSLATION, USER SHOULD NOT EDIT BELOW HERE ####
@@ -73,4 +70,4 @@ print 'Solving the stationary Stokes problem...\n'
 
 hgf.hgfStokesDrive ( gridin, gridin_ldi2, gridin_ldi3, nx, ny, nz, \
                      L, W, H, direction, visc, nThreads, prec, 1, 1, \
-                     tolAbs, tolRel, maxIt, output )
+                     tolAbs, tolRel, maxIt )
