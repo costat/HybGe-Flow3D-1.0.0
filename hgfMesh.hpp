@@ -24,7 +24,7 @@ class FluidMesh
     int NodesLDI, CellCentersLDI, CellWidthsLDI, FaceConnectivityLDI;
     int PressureCellVelocityNeighborLDI, VelocityCellPressureNeighborLDI;
     int DIM, NX, NY, NZ;
-    double xLim[2], yLim[2], zLim[2];
+    double xLim[2], yLim[2], zLim[2], porosity;
     // Public functions
     int TotalDOF( void );
     int VelocityDOF( void );
@@ -32,12 +32,14 @@ class FluidMesh
     void BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
                     int nx, int ny, int nz, \
                     double length, double width, double height );
-    int isNear( std::vector<double>& Vector1, std::vector<double>& Vector2, \
-                double dx, double dy, double dz, int nNodes, int DIM );
-    void innerFaceConnectivity( \
-                        std::vector<unsigned long>& ComponentFaceConnectivity, \
-                        std::vector<double> ComponentCellCenters, \
-                        double dx, double dy, double dz, int nCells );
+  private:
+    int isNear2d( std::vector<double>& Vector1, std::vector<double>& Vector2, \
+                  double dx, double dy, double dz, int nNodes );
+    int isNear3d( std::vector<double>& Vector1, std::vector<double>& Vector2, \
+                  double dx, double dy, double dz, int nNodes );
+    void innerFaceConnectivity( std::vector<unsigned long>& ComponentFaceConnectivity, \
+                                std::vector<double> ComponentCellCenters, \
+                                double dx, double dy, double dz, int nCells );
 /*  Some upcoming functions not yet implemented
     void AddCell( double *Nodes, int isIB );
     void RemoveCell( int GlobalCellNumber  );

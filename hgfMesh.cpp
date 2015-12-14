@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
+#include <omp.h>
 #include "hgfMesh.hpp"
 #include "hgf.hpp"
 #include "hgfArrays.hpp"
@@ -23,6 +24,7 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
   int checkVert;
   int maxPNodes;
   int numPCells = 0;
+  int numVoid = 0;
   xLim[0] = 0;
   xLim[1] = length;
   yLim[0] = 0;
@@ -56,6 +58,7 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
           if (gridin[ idx2(xi, yi, ldi1) ] != 1)
           {
             numPCells++;
+            if (gridin[ idx2(xi, yi, ldi1) ] == 0) numVoid++;
           }
         }
       }
@@ -67,6 +70,7 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
       int countCell = -1;
       mv.resize( (numPCells * 4) );
       double cellVert [ 8 ];
+      porosity = numVoid/(double)(nx * ny);
 
       // First we buil FullGrid, ImmersedBoundary, and Nodes.
       FullGrid.reserve((nx * ny));
@@ -102,7 +106,7 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
               }
               else
               {
-                checkVert = isNear( nodeHold, Nodes, dx, dy, dz, nNodes, DIM );
+                checkVert = isNear2d( nodeHold, Nodes, dx, dy, dz, nNodes );
               }
               if (checkVert == -1) // node is not a duplicate
               {
@@ -133,202 +137,217 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
              + Nodes[ idx2( mv[ idx2( cl, 2, 4) ], 1, NodesLDI ) ]);
       }
 
-      // Next we compute a face connectivity array.
-      PFaceConnectivity.resize((numPCells * 4));
-      innerFaceConnectivity( PFaceConnectivity, PCellCenters, dx, dy, dz, numPCells );
-
-      /* Next we determine velocity cell centers and neighbor information
-         by staggering the pressure grids */
-      int countUCells = 0;
-      int countVCells = 0;
-      double uStep = 0.5*dx;
-      double vStep = 0.5*dy;
-      int maxUCells = nx * ny + ny;
-      int maxVCells = nx * ny + nx;
-      UCellCenters.reserve((maxUCells * 2));
-      VCellCenters.reserve((maxVCells * 2));
-      PressureCellUNeighbor.resize((numPCells * 2));
-      PressureCellVNeighbor.resize((numPCells * 2));
-      UCellPressureNeighbor.resize((maxUCells * 2));
-      VCellPressureNeighbor.resize((maxVCells * 2));
-
-      for (int cl = 0; cl < numPCells; cl++)
-      {
-        cellVert[0] = PCellCenters[ idx2( cl, 0, 2 ) ] - uStep;
-        cellVert[1] = PCellCenters[ idx2( cl, 1, 2 ) ];
-        cellVert[2] = PCellCenters[ idx2( cl, 0, 2 ) ] + uStep;
-        cellVert[3] = PCellCenters[ idx2( cl, 1, 2 ) ];
-        cellVert[4] = PCellCenters[ idx2( cl, 0, 2 ) ];
-        cellVert[5] = PCellCenters[ idx2( cl, 1, 2 ) ] - vStep;
-        cellVert[6] = PCellCenters[ idx2( cl, 0, 2 ) ];
-        cellVert[7] = PCellCenters[ idx2( cl, 1, 2 ) ] + vStep;
-
-        for (int pcount = 0; pcount < 2; pcount++)
-        {
-          // U Component
-          nodeHold[0] = cellVert[ idx2( pcount, 0, 2 ) ];
-          nodeHold[1] = cellVert[ idx2( pcount, 1, 2 ) ];
-          if ( !countUCells ) // First U node
-          {
-            checkVert = -1;
-          }
-          else
-          {
-            checkVert = isNear( nodeHold, UCellCenters, \
-                                dx, dy, dz, countUCells, DIM );
-          }
-          if (checkVert == -1) // cell center location is not a duplicate
-          {
-            countUCells++;
-            UCellCenters.push_back(nodeHold[0]);
-            UCellCenters.push_back(nodeHold[1]);
-            if (pcount == 0) {
-              UCellPressureNeighbor[ idx2( (countUCells-1), 1, \
-                               VelocityCellPressureNeighborLDI) ] = cl+1;
-              PressureCellUNeighbor[ idx2( cl, 0, \
-                               PressureCellVelocityNeighborLDI ) ] = countUCells;
-            }
-            else if (pcount == 1) {
-              UCellPressureNeighbor[ idx2( (countUCells-1), 0, \
-                               VelocityCellPressureNeighborLDI) ] = cl+1;
-              PressureCellUNeighbor[ idx2( cl, 1, \
-                               PressureCellVelocityNeighborLDI ) ] = countUCells;
-            }
-          }
-          if (checkVert != -1)
-          {
-            if (pcount == 0) {
-              UCellPressureNeighbor[ idx2( checkVert, 1, \
-                               VelocityCellPressureNeighborLDI) ] = cl+1;
-              PressureCellUNeighbor[ idx2( cl, 0, \
-                               PressureCellVelocityNeighborLDI ) ] = checkVert+1;
-            }
-            else if (pcount== 1) {
-              UCellPressureNeighbor[ idx2( checkVert, 0, \
-                               VelocityCellPressureNeighborLDI) ] = cl+1;
-              PressureCellUNeighbor[ idx2( cl, 1, \
-                               PressureCellVelocityNeighborLDI ) ] = checkVert+1;
-            }
-          }
-          // V Component
-          nodeHold[0] = cellVert[ idx2( (pcount + 2), 0, 2 ) ];
-          nodeHold[1] = cellVert[ idx2( (pcount + 2), 1, 2 ) ];
-          if ( !countVCells ) // First V node
-          {
-            checkVert = -1;
-          }
-          else
-          {
-            checkVert = isNear( nodeHold, VCellCenters, \
-                                dx, dy, dz, countVCells, DIM );
-          }
-          if (checkVert == -1)
-          {
-            countVCells++;
-            VCellCenters.push_back(nodeHold[0]);
-            VCellCenters.push_back(nodeHold[1]);
-            if (pcount == 0) {
-              VCellPressureNeighbor[ idx2( (countVCells-1), 1, \
-                           VelocityCellPressureNeighborLDI ) ] = cl+1;
-              PressureCellVNeighbor[ idx2( cl, 0, \
-                           PressureCellVelocityNeighborLDI ) ] = countVCells;
-            }
-            else if (pcount == 1) {
-              VCellPressureNeighbor[ idx2( (countVCells-1), 0, \
-                           VelocityCellPressureNeighborLDI ) ] = cl+1;
-              PressureCellVNeighbor[ idx2( cl, 1, \
-                           PressureCellVelocityNeighborLDI ) ] = countVCells;
-            }
-          }
-          if (checkVert != -1)
-          {
-            if (pcount == 0) {
-              VCellPressureNeighbor[ idx2( checkVert, 1, \
-                           VelocityCellPressureNeighborLDI) ] = cl+1;
-              PressureCellVNeighbor[ idx2( cl, 0, \
-                           PressureCellVelocityNeighborLDI ) ] = checkVert+1;
-            }
-            else if (pcount== 1) {
-              VCellPressureNeighbor[ idx2( checkVert, 0, \
-                           VelocityCellPressureNeighborLDI) ] = cl+1;
-              PressureCellVNeighbor[ idx2( cl, 1, \
-                           PressureCellVelocityNeighborLDI ) ] = checkVert+1;
-            }
-          }
-        }
-      }
-      UCellCenters.resize(UCellCenters.size());
-      VCellCenters.resize(VCellCenters.size());
       DOF.resize(3);
-      DOF[0] = numPCells;
-      DOF[1] = countUCells;
-      DOF[2] = countVCells;
-      UCellPressureNeighbor.resize((DOF[1] * 2));
-      VCellPressureNeighbor.resize((DOF[2] * 2));
 
-      // Next we compute face connectivity arrays.
-      UFaceConnectivity.resize((countUCells * 4));
-      innerFaceConnectivity( UFaceConnectivity, UCellCenters, \
-                             dx, dy, dz, countUCells );
-      VFaceConnectivity.resize((countVCells * 4));
-      innerFaceConnectivity( VFaceConnectivity, VCellCenters, \
-                             dx, dy, dz, countVCells );
-
-      // Next we define boolean vectors indicating interior and boundary cells
-      int nbrs;
-      UInteriorCells.reserve(DOF[1]);
-      VInteriorCells.reserve(DOF[2]);
-      UBoundaryCells.reserve(DOF[1]);
-      VBoundaryCells.reserve(DOF[2]);
-
-      for (int cl = 0; cl < DOF[1]; cl++) {
-        nbrs = 0;
-        for (int position = 0; position < 4; position++) {
-          if (UFaceConnectivity[ idx2( cl, position, FaceConnectivityLDI ) ] != 0) {
-            nbrs++;
+      /* We finish mesh construction concurrently, since staggered grids
+         for each component are constructed from the P grid, independent
+         of other velocity components */
+      #pragma omp parallel sections
+      {
+        { // Final P computations
+          DOF[0] = numPCells;
+          PFaceConnectivity.resize((numPCells * 4));
+          innerFaceConnectivity( PFaceConnectivity, PCellCenters, dx, dy, dz, numPCells );
+          PCellWidths.resize((DOF[0] * CellWidthsLDI));
+          for (int cl = 0; cl < DOF[0]; cl++) {
+            PCellWidths[ idx2( cl, 0, CellWidthsLDI ) ] = dx;
+            PCellWidths[ idx2( cl, 1, CellWidthsLDI ) ] = dy;
           }
         }
-        if (nbrs == 4) {
-          UInteriorCells.push_back(cl);
-        }
-        else {
-          UBoundaryCells.push_back(cl);
-        }
-      }
-      for (int cl = 0; cl < DOF[2]; cl++) {
-        nbrs = 0;
-        for (int position = 0; position < 4; position++) {
-          if (VFaceConnectivity[ idx2( cl, position, FaceConnectivityLDI ) ] != 0) {
-            nbrs++;
+        #pragma omp section
+        { // U grid
+          int checkVertU;
+          std::vector<double> nodeHoldU;
+          nodeHoldU.resize(2);
+          int countUCells = 0;
+          double uStep = 0.5*dx;
+          int maxUCells = nx * ny + ny;
+          UCellCenters.reserve((maxUCells * 2));
+          PressureCellUNeighbor.resize((numPCells * 2));
+          UCellPressureNeighbor.resize((maxUCells * 2));
+          for (int cl = 0; cl < numPCells; cl++)
+          {
+            cellVert[0] = PCellCenters[ idx2( cl, 0, 2 ) ] - uStep;
+            cellVert[1] = PCellCenters[ idx2( cl, 1, 2 ) ];
+            cellVert[2] = PCellCenters[ idx2( cl, 0, 2 ) ] + uStep;
+            cellVert[3] = PCellCenters[ idx2( cl, 1, 2 ) ];
+            for (int pcount = 0; pcount < 2; pcount++)
+            {
+              // U Component
+              nodeHoldU[0] = cellVert[ idx2( pcount, 0, 2 ) ];
+              nodeHoldU[1] = cellVert[ idx2( pcount, 1, 2 ) ];
+              if ( !countUCells ) // First U node
+              {
+                checkVertU = -1;
+              }
+              else
+              {
+                checkVertU = isNear2d( nodeHoldU, UCellCenters, \
+                                     dx, dy, dz, countUCells );
+              }
+              if (checkVertU == -1) // cell center location is not a duplicate
+              {
+                countUCells++;
+                UCellCenters.push_back(nodeHoldU[0]);
+                UCellCenters.push_back(nodeHoldU[1]);
+                if (pcount == 0) {
+                  UCellPressureNeighbor[ idx2( (countUCells-1), 1, \
+                               VelocityCellPressureNeighborLDI) ] = cl+1;
+                  PressureCellUNeighbor[ idx2( cl, 0, \
+                               PressureCellVelocityNeighborLDI ) ] = countUCells;
+                }
+                else if (pcount == 1) {
+                  UCellPressureNeighbor[ idx2( (countUCells-1), 0, \
+                               VelocityCellPressureNeighborLDI) ] = cl+1;
+                  PressureCellUNeighbor[ idx2( cl, 1, \
+                               PressureCellVelocityNeighborLDI ) ] = countUCells;
+                }
+              }
+              if (checkVertU != -1)
+              {
+                if (pcount == 0) {
+                  UCellPressureNeighbor[ idx2( checkVertU, 1, \
+                               VelocityCellPressureNeighborLDI) ] = cl+1;
+                  PressureCellUNeighbor[ idx2( cl, 0, \
+                               PressureCellVelocityNeighborLDI ) ] = checkVertU+1;
+                }
+                else if (pcount== 1) {
+                  UCellPressureNeighbor[ idx2( checkVertU, 0, \
+                               VelocityCellPressureNeighborLDI) ] = cl+1;
+                  PressureCellUNeighbor[ idx2( cl, 1, \
+                               PressureCellVelocityNeighborLDI ) ] = checkVertU+1;
+                }
+              }
+            }
+          }
+          UCellCenters.resize(UCellCenters.size());
+          DOF[1] = countUCells;
+          UCellPressureNeighbor.resize((DOF[1] * 2));
+          UFaceConnectivity.resize((countUCells * 4));
+          innerFaceConnectivity( UFaceConnectivity, UCellCenters, \
+                                 dx, dy, dz, countUCells );
+          UInteriorCells.reserve(DOF[1]);
+          UBoundaryCells.reserve(DOF[1]);
+          int nbrsu;
+          for (int cl = 0; cl < DOF[1]; cl++) {
+            nbrsu = 0;
+            for (int position = 0; position < 4; position++) {
+              if (UFaceConnectivity[ idx2( cl, position, FaceConnectivityLDI ) ] != 0) {
+                nbrsu++;
+              }
+            }
+            if (nbrsu == 4) {
+              UInteriorCells.push_back(cl);
+            }
+            else {
+              UBoundaryCells.push_back(cl);
+            }
+          }
+          UInteriorCells.resize(UInteriorCells.size());
+          UBoundaryCells.resize(UBoundaryCells.size());
+          UCellWidths.resize((DOF[1] * CellWidthsLDI));
+          for (int cl = 0; cl < DOF[1]; cl++) {
+            UCellWidths[ idx2( cl, 0, CellWidthsLDI ) ] = dx;
+            UCellWidths[ idx2( cl, 1, CellWidthsLDI ) ] = dy;
           }
         }
-        if (nbrs == 4) {
-          VInteriorCells.push_back(cl);
+        #pragma omp section
+        { // V grid
+          int checkVertV;
+          std::vector<double> nodeHoldV;
+          nodeHoldV.resize(2);
+          int countVCells = 0;
+          double vStep = 0.5*dy;
+          int maxVCells = nx * ny + nx;
+          VCellCenters.reserve((maxVCells * 2));
+          PressureCellVNeighbor.resize((numPCells * 2));
+          VCellPressureNeighbor.resize((maxVCells * 2));
+          for (int cl = 0; cl < numPCells; cl++)
+          {
+            cellVert[4] = PCellCenters[ idx2( cl, 0, 2 ) ];
+            cellVert[5] = PCellCenters[ idx2( cl, 1, 2 ) ] - vStep;
+            cellVert[6] = PCellCenters[ idx2( cl, 0, 2 ) ];
+            cellVert[7] = PCellCenters[ idx2( cl, 1, 2 ) ] + vStep;
+            for (int pcount = 0; pcount < 2; pcount++)
+            {
+              // V Component
+              nodeHoldV[0] = cellVert[ idx2( (pcount + 2), 0, 2 ) ];
+              nodeHoldV[1] = cellVert[ idx2( (pcount + 2), 1, 2 ) ];
+              if ( !countVCells ) // First V node
+              {
+                checkVertV = -1;
+              }
+              else
+              {
+                checkVertV = isNear2d( nodeHoldV, VCellCenters, \
+                                    dx, dy, dz, countVCells );
+              }
+              if (checkVertV == -1)
+              {
+                countVCells++;
+                VCellCenters.push_back(nodeHoldV[0]);
+                VCellCenters.push_back(nodeHoldV[1]);
+                if (pcount == 0) {
+                  VCellPressureNeighbor[ idx2( (countVCells-1), 1, \
+                               VelocityCellPressureNeighborLDI ) ] = cl+1;
+                  PressureCellVNeighbor[ idx2( cl, 0, \
+                               PressureCellVelocityNeighborLDI ) ] = countVCells;
+                }
+                else if (pcount == 1) {
+                  VCellPressureNeighbor[ idx2( (countVCells-1), 0, \
+                               VelocityCellPressureNeighborLDI ) ] = cl+1;
+                  PressureCellVNeighbor[ idx2( cl, 1, \
+                               PressureCellVelocityNeighborLDI ) ] = countVCells;
+                }
+              }
+              if (checkVertV != -1)
+              {
+                if (pcount == 0) {
+                  VCellPressureNeighbor[ idx2( checkVertV, 1, \
+                               VelocityCellPressureNeighborLDI) ] = cl+1;
+                  PressureCellVNeighbor[ idx2( cl, 0, \
+                               PressureCellVelocityNeighborLDI ) ] = checkVertV+1;
+                }
+                else if (pcount== 1) {
+                  VCellPressureNeighbor[ idx2( checkVertV, 0, \
+                               VelocityCellPressureNeighborLDI) ] = cl+1;
+                  PressureCellVNeighbor[ idx2( cl, 1, \
+                               PressureCellVelocityNeighborLDI ) ] = checkVertV+1;
+                }
+              }
+            }
+          }
+          UCellCenters.resize(UCellCenters.size());
+          DOF[2] = countVCells;
+          VCellPressureNeighbor.resize((DOF[2] * 2));
+          VFaceConnectivity.resize((countVCells * 4));
+          innerFaceConnectivity( VFaceConnectivity, VCellCenters, \
+                                 dx, dy, dz, countVCells );
+          VInteriorCells.reserve(DOF[2]);
+          VBoundaryCells.reserve(DOF[2]);
+          int nbrsv;
+          for (int cl = 0; cl < DOF[2]; cl++) {
+            nbrsv = 0;
+            for (int position = 0; position < 4; position++) {
+              if (VFaceConnectivity[ idx2( cl, position, FaceConnectivityLDI ) ] != 0) {
+                nbrsv++;
+              }
+            }
+            if (nbrsv == 4) {
+              VInteriorCells.push_back(cl);
+            }
+            else {
+              VBoundaryCells.push_back(cl);
+            }
+          }
+          VInteriorCells.resize(VInteriorCells.size());
+          VBoundaryCells.resize(VBoundaryCells.size());
+          VCellWidths.resize((DOF[2] * CellWidthsLDI));
+          for (int cl = 0; cl < DOF[2]; cl++) {
+            VCellWidths[ idx2( cl, 0, CellWidthsLDI ) ] = dx;
+            VCellWidths[ idx2( cl, 1, CellWidthsLDI ) ] = dy;
+          }
         }
-        else {
-          VBoundaryCells.push_back(cl);
-        }
-      }
-      UInteriorCells.resize(UInteriorCells.size());
-      VInteriorCells.resize(VInteriorCells.size());
-      UBoundaryCells.resize(UBoundaryCells.size());
-      VBoundaryCells.resize(VBoundaryCells.size());
-
-      // Finally we define cell widths. In this case, uniform.
-      PCellWidths.resize((DOF[0] * CellWidthsLDI));
-      UCellWidths.resize((DOF[1] * CellWidthsLDI));
-      VCellWidths.resize((DOF[2] * CellWidthsLDI));
-      for (int cl = 0; cl < DOF[0]; cl++) {
-        PCellWidths[ idx2( cl, 0, CellWidthsLDI ) ] = dx;
-        PCellWidths[ idx2( cl, 1, CellWidthsLDI ) ] = dy;
-      }
-      for (int cl = 0; cl < DOF[1]; cl++) {
-        UCellWidths[ idx2( cl, 0, CellWidthsLDI ) ] = dx;
-        UCellWidths[ idx2( cl, 1, CellWidthsLDI ) ] = dy;
-      }
-      for (int cl = 0; cl < DOF[2]; cl++) {
-        VCellWidths[ idx2( cl, 0, CellWidthsLDI ) ] = dx;
-        VCellWidths[ idx2( cl, 1, CellWidthsLDI ) ] = dy;
       }
       break;
     }
@@ -355,6 +374,7 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
             if (gridin[ idx3(xi, yi, zi, ldi1, ldi2) ] != 1)
             {
               numPCells++;
+              if (gridin[ idx2(xi, yi, ldi1) ] == 0) numVoid++;
             }
           }
         }
@@ -368,6 +388,7 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
       int countCell = -1;
       mv.resize( (numPCells * 8) );
       double cellVert [ 24 ];
+      porosity = numVoid /(double)(nx * ny * nz);
 
       // First we buil FullGrid, ImmersedBoundary, and Nodes.
       FullGrid.reserve((nx * ny * nz));
@@ -429,7 +450,7 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
                 }
                 else
                 {
-                  checkVert = isNear( nodeHold, Nodes, dx, dy, dz, nNodes, DIM );
+                  checkVert = isNear3d( nodeHold, Nodes, dx, dy, dz, nNodes );
                 }
                 if (checkVert == -1) // node is not a duplicate
                 {
@@ -465,318 +486,374 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
              + Nodes[ idx2( mv[ idx2( cl, 7, 8 ) ], 2, NodesLDI ) ]);
       }
 
-      // Next we compute a face connectivity array.
-      PFaceConnectivity.resize((numPCells * 6));
-      innerFaceConnectivity( PFaceConnectivity, PCellCenters, dx, dy, dz, numPCells );
-
-      /* Next we determine velocity cell centers and neighbor information
-         by staggering the pressure grids */
-      int countUCells = 0;
-      int countVCells = 0;
-      int countWCells = 0;
-      double uStep = 0.5*dx;
-      double vStep = 0.5*dy;
-      double wStep = 0.5*dz;
-      int maxUCells = nx * ny * nz + ny * nz;
-      int maxVCells = nx * ny * nz + nx * nz;
-      int maxWCells = nx * ny * nz + nx * ny;
-      UCellCenters.reserve((maxUCells * 3));
-      VCellCenters.reserve((maxVCells * 3));
-      WCellCenters.reserve((maxWCells * 3));
-      PressureCellUNeighbor.resize((numPCells * 2));
-      PressureCellVNeighbor.resize((numPCells * 2));
-      PressureCellWNeighbor.resize((numPCells * 2));
-      UCellPressureNeighbor.resize((maxUCells * 2));
-      VCellPressureNeighbor.resize((maxVCells * 2));
-      WCellPressureNeighbor.resize((maxWCells * 2));
-
-      for (int cl = 0; cl < numPCells; cl++)
-      {
-        // Each 3 value block is a 'row' of the 2d celLVert array
-        cellVert[0] = PCellCenters[ idx2( cl, 0, 3 ) ] - uStep;
-        cellVert[1] = PCellCenters[ idx2( cl, 1, 3 ) ];
-        cellVert[2] = PCellCenters[ idx2( cl, 2, 3 ) ];
-
-        cellVert[3] = PCellCenters[ idx2( cl, 0, 3 ) ] + uStep;
-        cellVert[4] = PCellCenters[ idx2( cl, 1, 3 ) ];
-        cellVert[5] = PCellCenters[ idx2( cl, 2, 3 ) ];
-
-        cellVert[6] = PCellCenters[ idx2( cl, 0, 3 ) ];
-        cellVert[7] = PCellCenters[ idx2( cl, 1, 3 ) ] - vStep;
-        cellVert[8] = PCellCenters[ idx2( cl, 2, 3 ) ];
-
-        cellVert[9] = PCellCenters[ idx2( cl, 0, 3 ) ];
-        cellVert[10] = PCellCenters[ idx2( cl, 1, 3 ) ] + vStep;
-        cellVert[11] = PCellCenters[ idx2( cl, 2, 3 ) ];
-
-        cellVert[12] = PCellCenters[ idx2( cl, 0, 3 ) ];
-        cellVert[13] = PCellCenters[ idx2( cl, 1, 3 ) ];
-        cellVert[14] = PCellCenters[ idx2( cl, 2, 3 ) ] - wStep;
-
-        cellVert[15] = PCellCenters[ idx2( cl, 0, 3 ) ];
-        cellVert[16] = PCellCenters[ idx2( cl, 1, 3 ) ];
-        cellVert[17] = PCellCenters[ idx2( cl, 2, 3 ) ] + wStep;
-
-        for (int pcount = 0; pcount < 2; pcount++)
-        {
-          // U Component
-          nodeHold[0] = cellVert[ idx2( pcount, 0, 3 ) ];
-          nodeHold[1] = cellVert[ idx2( pcount, 1, 3 ) ];
-          nodeHold[2] = cellVert[ idx2( pcount, 2, 3 ) ];
-          if ( !countUCells ) // First U node
-          {
-            checkVert = -1;
-          }
-          else
-          {
-            checkVert = isNear( nodeHold, UCellCenters, \
-                                dx, dy, dz, countUCells, DIM );
-          }
-          if (checkVert == -1) // cell center location is not a duplicate
-          {
-            countUCells++;
-            UCellCenters.push_back(nodeHold[0]);
-            UCellCenters.push_back(nodeHold[1]);
-            UCellCenters.push_back(nodeHold[2]);
-            if (pcount == 0) {
-              UCellPressureNeighbor[ idx2( (countUCells-1), 1, \
-                           VelocityCellPressureNeighborLDI) ] = cl+1;
-              PressureCellUNeighbor[ idx2( cl, 0, \
-                           PressureCellVelocityNeighborLDI ) ] = countUCells;
-            }
-            else if (pcount == 1) {
-              UCellPressureNeighbor[ idx2( (countUCells-1), 0, \
-                           VelocityCellPressureNeighborLDI) ] = cl+1;
-              PressureCellUNeighbor[ idx2( cl, 1, \
-                           PressureCellVelocityNeighborLDI ) ] = countUCells;
-            }
-          }
-          if (checkVert != -1)
-          {
-            if (pcount == 0) {
-              UCellPressureNeighbor[ idx2( checkVert, 1, \
-                           VelocityCellPressureNeighborLDI) ] = cl+1;
-              PressureCellUNeighbor[ idx2( cl, 0, \
-                           PressureCellVelocityNeighborLDI ) ] = checkVert+1;
-            }
-            else if (pcount== 1) {
-              UCellPressureNeighbor[ idx2( checkVert, 0, \
-                           VelocityCellPressureNeighborLDI) ] = cl+1;
-              PressureCellUNeighbor[ idx2( cl, 1, \
-                           PressureCellVelocityNeighborLDI ) ] = checkVert+1;
-            }
-          }
-          // V Component
-          nodeHold[0] = cellVert[ idx2( (pcount + 2), 0, 3 ) ];
-          nodeHold[1] = cellVert[ idx2( (pcount + 2), 1, 3 ) ];
-          nodeHold[2] = cellVert[ idx2( (pcount + 2), 2, 3 ) ];
-          if ( !countVCells ) // First V node
-          {
-            checkVert = -1;
-          }
-          else
-          {
-            checkVert = isNear( nodeHold, VCellCenters, \
-                                dx, dy, dz, countVCells, DIM );
-          }
-          if (checkVert == -1)
-          {
-            countVCells++;
-            VCellCenters.push_back(nodeHold[0]);
-            VCellCenters.push_back(nodeHold[1]);
-            VCellCenters.push_back(nodeHold[2]);
-            if (pcount == 0) {
-              VCellPressureNeighbor[ idx2( (countVCells-1), 1, \
-                           VelocityCellPressureNeighborLDI ) ] = cl+1;
-              PressureCellVNeighbor[ idx2( cl, 0, \
-                           PressureCellVelocityNeighborLDI ) ] = countVCells;
-            }
-            else if (pcount == 1) {
-              VCellPressureNeighbor[ idx2( (countVCells-1), 0, \
-                           VelocityCellPressureNeighborLDI ) ] = cl+1;
-              PressureCellVNeighbor[ idx2( cl, 1, \
-                           PressureCellVelocityNeighborLDI ) ] = countVCells;
-            }
-          }
-          if (checkVert != -1)
-          {
-            if (pcount == 0) {
-              VCellPressureNeighbor[ idx2( checkVert, 1, \
-                           VelocityCellPressureNeighborLDI) ] = cl+1;
-              PressureCellVNeighbor[ idx2( cl, 0, \
-                           PressureCellVelocityNeighborLDI ) ] = checkVert+1;
-            }
-            else if (pcount== 1) {
-              VCellPressureNeighbor[ idx2( checkVert, 0, \
-                           VelocityCellPressureNeighborLDI) ] = cl+1;
-              PressureCellVNeighbor[ idx2( cl, 1, \
-                           PressureCellVelocityNeighborLDI ) ] = checkVert+1;
-            }
-          }
-          // W Component
-          nodeHold[0] = cellVert[ idx2( (pcount + 4), 0, 3 ) ];
-          nodeHold[1] = cellVert[ idx2( (pcount + 4), 1, 3 ) ];
-          nodeHold[2] = cellVert[ idx2( (pcount + 4), 2, 3 ) ];
-          if ( !countWCells ) // First W node
-          {
-            checkVert = -1;
-          }
-          else
-          {
-            checkVert = isNear( nodeHold, WCellCenters, \
-                                dx, dy, dz, countWCells, DIM );
-          }
-          if (checkVert == -1)
-          {
-            countWCells++;
-            WCellCenters.push_back(nodeHold[0]);
-            WCellCenters.push_back(nodeHold[1]);
-            WCellCenters.push_back(nodeHold[2]);
-            if (pcount == 0) {
-              WCellPressureNeighbor[ idx2( (countWCells-1), 1, \
-                           VelocityCellPressureNeighborLDI ) ] = cl+1;
-              PressureCellWNeighbor[ idx2( cl, 0, \
-                           PressureCellVelocityNeighborLDI ) ] = countWCells;
-            }
-            else if (pcount == 1) {
-              WCellPressureNeighbor[ idx2( (countWCells-1), 0, \
-                           VelocityCellPressureNeighborLDI ) ] = cl+1;
-              PressureCellWNeighbor[ idx2( cl, 1, \
-                           PressureCellVelocityNeighborLDI ) ] = countWCells;
-            }
-          }
-          if (checkVert != -1)
-          {
-            if (pcount == 0) {
-              WCellPressureNeighbor[ idx2( checkVert, 1, \
-                           VelocityCellPressureNeighborLDI) ] = cl+1;
-              PressureCellWNeighbor[ idx2( cl, 0, \
-                           PressureCellVelocityNeighborLDI ) ] = checkVert+1;
-            }
-            else if (pcount== 1) {
-              WCellPressureNeighbor[ idx2( checkVert, 0, \
-                           VelocityCellPressureNeighborLDI) ] = cl+1;
-              PressureCellWNeighbor[ idx2( cl, 1, \
-                           PressureCellVelocityNeighborLDI ) ] = checkVert+1;
-            }
-          }
-        }
-      }
-      UCellCenters.resize(UCellCenters.size());
-      VCellCenters.resize(VCellCenters.size());
-      WCellCenters.resize(WCellCenters.size());
       DOF.resize(4);
-      DOF[0] = numPCells;
-      DOF[1] = countUCells;
-      DOF[2] = countVCells;
-      DOF[3] = countWCells;
-      UCellPressureNeighbor.resize((DOF[1] * 2));
-      VCellPressureNeighbor.resize((DOF[2] * 2));
-      WCellPressureNeighbor.resize((DOF[3] * 2));
 
-      // Next we compute face connectivity arrays.
-      UFaceConnectivity.resize((countUCells * 6));
-      innerFaceConnectivity( UFaceConnectivity, UCellCenters, \
-                             dx, dy, dz, countUCells );
-      VFaceConnectivity.resize((countVCells * 6));
-      innerFaceConnectivity( VFaceConnectivity, VCellCenters, \
-                             dx, dy, dz, countVCells );
-      WFaceConnectivity.resize((countWCells * 6));
-      innerFaceConnectivity( WFaceConnectivity, WCellCenters, \
-                             dx, dy, dz, countWCells );
+      /* We finish mesh construction concurrently, since staggered grids
+         for each component are constructed from the P grid, indendent of other
+         velocity components.*/
+      #pragma omp parallel sections
+      {
+        { // Final P computations
+          DOF[0] = numPCells;
+          PFaceConnectivity.resize((numPCells * 6));
+          innerFaceConnectivity( PFaceConnectivity, PCellCenters, dx, dy, dz, numPCells );
+          PCellWidths.resize((DOF[0] * CellWidthsLDI));
+          for (int cl = 0; cl < DOF[0]; cl++) {
+            PCellWidths[ idx2( cl, 0, CellWidthsLDI ) ] = dx;
+            PCellWidths[ idx2( cl, 1, CellWidthsLDI ) ] = dy;
+            PCellWidths[ idx2( cl, 2, CellWidthsLDI ) ] = dz;
+          }
+        } // End P section
+        #pragma omp section
+        { // U section
+          int checkVertU;
+          std::vector<double> nodeHoldU;
+          nodeHoldU.resize(3);
+          int countUCells = 0;
+          double uStep = 0.5*dx;
+          int maxUCells = nx * ny * nz + ny * nz;
+          UCellCenters.reserve((maxUCells * 3));
+          PressureCellUNeighbor.resize((numPCells * 2));
+          UCellPressureNeighbor.resize((maxUCells * 2));
+          for (int cl = 0; cl < numPCells; cl++)
+          {
+            // Each 3 value block is a 'row' of the 2d celLVert array
+            cellVert[0] = PCellCenters[ idx2( cl, 0, 3 ) ] - uStep;
+            cellVert[1] = PCellCenters[ idx2( cl, 1, 3 ) ];
+            cellVert[2] = PCellCenters[ idx2( cl, 2, 3 ) ];
 
-      // Next we define boolean vectors indicating interior and boundary cells
-      int nbrs;
-      UInteriorCells.reserve(DOF[1]);
-      VInteriorCells.reserve(DOF[2]);
-      WInteriorCells.reserve(DOF[3]);
-      UBoundaryCells.reserve(DOF[1]);
-      VBoundaryCells.reserve(DOF[2]);
-      WBoundaryCells.reserve(DOF[3]);
+            cellVert[3] = PCellCenters[ idx2( cl, 0, 3 ) ] + uStep;
+            cellVert[4] = PCellCenters[ idx2( cl, 1, 3 ) ];
+            cellVert[5] = PCellCenters[ idx2( cl, 2, 3 ) ];
 
-      for (int cl = 0; cl < DOF[1]; cl++) {
-        nbrs = 0;
-        for (int position = 0; position < 6; position++) {
-          if (UFaceConnectivity[ idx2( cl, position, FaceConnectivityLDI ) ] != 0) {
-            nbrs++;
+            for (int pcount = 0; pcount < 2; pcount++)
+            {
+              // U Component
+              nodeHoldU[0] = cellVert[ idx2( pcount, 0, 3 ) ];
+              nodeHoldU[1] = cellVert[ idx2( pcount, 1, 3 ) ];
+              nodeHoldU[2] = cellVert[ idx2( pcount, 2, 3 ) ];
+              if ( !countUCells ) // First U node
+              {
+                checkVertU = -1;
+              }
+              else
+              {
+                checkVertU = isNear3d( nodeHoldU, UCellCenters, \
+                                    dx, dy, dz, countUCells );
+              }
+              if (checkVertU == -1) // cell center location is not a duplicate
+              {
+                countUCells++;
+                UCellCenters.push_back(nodeHoldU[0]);
+                UCellCenters.push_back(nodeHoldU[1]);
+                UCellCenters.push_back(nodeHoldU[2]);
+                if (pcount == 0) {
+                  UCellPressureNeighbor[ idx2( (countUCells-1), 1, \
+                               VelocityCellPressureNeighborLDI) ] = cl+1;
+                  PressureCellUNeighbor[ idx2( cl, 0, \
+                               PressureCellVelocityNeighborLDI ) ] = countUCells;
+                }
+                else if (pcount == 1) {
+                  UCellPressureNeighbor[ idx2( (countUCells-1), 0, \
+                               VelocityCellPressureNeighborLDI) ] = cl+1;
+                  PressureCellUNeighbor[ idx2( cl, 1, \
+                               PressureCellVelocityNeighborLDI ) ] = countUCells;
+                }
+              }
+              if (checkVertU != -1)
+              {
+                if (pcount == 0) {
+                  UCellPressureNeighbor[ idx2( checkVertU, 1, \
+                               VelocityCellPressureNeighborLDI) ] = cl+1;
+                  PressureCellUNeighbor[ idx2( cl, 0, \
+                               PressureCellVelocityNeighborLDI ) ] = checkVertU+1;
+                }
+                else if (pcount== 1) {
+                  UCellPressureNeighbor[ idx2( checkVertU, 0, \
+                               VelocityCellPressureNeighborLDI) ] = cl+1;
+                  PressureCellUNeighbor[ idx2( cl, 1, \
+                               PressureCellVelocityNeighborLDI ) ] = checkVertU+1;
+                }
+              }
+            }
+          }
+          UCellCenters.resize(UCellCenters.size());
+          DOF[1] = countUCells;
+          UCellPressureNeighbor.resize((DOF[1] * 2));
+          UFaceConnectivity.resize((countUCells * 6));
+          innerFaceConnectivity( UFaceConnectivity, UCellCenters, \
+                                 dx, dy, dz, countUCells );
+          UInteriorCells.reserve(DOF[1]);
+          UBoundaryCells.reserve(DOF[1]);
+          int nbrsu;
+          for (int cl = 0; cl < DOF[1]; cl++) {
+            nbrsu = 0;
+            for (int position = 0; position < 6; position++) {
+              if (UFaceConnectivity[ idx2( cl, position, FaceConnectivityLDI ) ] != 0) {
+                nbrsu++;
+              }
+            }
+            if (nbrsu == 6) {
+              UInteriorCells.push_back(cl);
+            }
+            else {
+              UBoundaryCells.push_back(cl);
+            }
+          }
+          UInteriorCells.resize(UInteriorCells.size());
+          UBoundaryCells.resize(UBoundaryCells.size());
+          UCellWidths.resize((DOF[1] * CellWidthsLDI));
+          for (int cl = 0; cl < DOF[1]; cl++) {
+            UCellWidths[ idx2( cl, 0, CellWidthsLDI ) ] = dx;
+            UCellWidths[ idx2( cl, 1, CellWidthsLDI ) ] = dy;
+            UCellWidths[ idx2( cl, 2, CellWidthsLDI ) ] = dz;
+          }
+        } // end U section
+        #pragma omp section
+        { // V section
+          int checkVertV;
+          std::vector<double> nodeHoldV;
+          nodeHoldV.resize(3);
+          int countVCells = 0;
+          double vStep = 0.5*dy;
+          int maxVCells = nx * ny * nz + nx * nz;
+          VCellCenters.reserve((maxVCells * 3));
+          PressureCellVNeighbor.resize((numPCells * 2));
+          VCellPressureNeighbor.resize((maxVCells * 2));
+          for (int cl = 0; cl < numPCells; cl++)
+          {
+            // Each 3 value block is a 'row' of the 2d celLVert array
+            cellVert[6] = PCellCenters[ idx2( cl, 0, 3 ) ];
+            cellVert[7] = PCellCenters[ idx2( cl, 1, 3 ) ] - vStep;
+            cellVert[8] = PCellCenters[ idx2( cl, 2, 3 ) ];
+
+            cellVert[9] = PCellCenters[ idx2( cl, 0, 3 ) ];
+            cellVert[10] = PCellCenters[ idx2( cl, 1, 3 ) ] + vStep;
+            cellVert[11] = PCellCenters[ idx2( cl, 2, 3 ) ];
+
+            for (int pcount = 0; pcount < 2; pcount++)
+            {
+              // V Component
+              nodeHoldV[0] = cellVert[ idx2( (pcount + 2), 0, 3 ) ];
+              nodeHoldV[1] = cellVert[ idx2( (pcount + 2), 1, 3 ) ];
+              nodeHoldV[2] = cellVert[ idx2( (pcount + 2), 2, 3 ) ];
+              if ( !countVCells ) // First V node
+              {
+                checkVertV = -1;
+              }
+              else
+              {
+                checkVertV = isNear3d( nodeHoldV, VCellCenters, \
+                                    dx, dy, dz, countVCells );
+              }
+              if (checkVertV == -1)
+              {
+                countVCells++;
+                VCellCenters.push_back(nodeHoldV[0]);
+                VCellCenters.push_back(nodeHoldV[1]);
+                VCellCenters.push_back(nodeHoldV[2]);
+                if (pcount == 0) {
+                  VCellPressureNeighbor[ idx2( (countVCells-1), 1, \
+                               VelocityCellPressureNeighborLDI ) ] = cl+1;
+                  PressureCellVNeighbor[ idx2( cl, 0, \
+                               PressureCellVelocityNeighborLDI ) ] = countVCells;
+                }
+                else if (pcount == 1) {
+                  VCellPressureNeighbor[ idx2( (countVCells-1), 0, \
+                               VelocityCellPressureNeighborLDI ) ] = cl+1;
+                  PressureCellVNeighbor[ idx2( cl, 1, \
+                               PressureCellVelocityNeighborLDI ) ] = countVCells;
+                }
+              }
+              if (checkVertV != -1)
+              {
+                if (pcount == 0) {
+                  VCellPressureNeighbor[ idx2( checkVertV, 1, \
+                               VelocityCellPressureNeighborLDI) ] = cl+1;
+                  PressureCellVNeighbor[ idx2( cl, 0, \
+                               PressureCellVelocityNeighborLDI ) ] = checkVertV+1;
+                }
+                else if (pcount== 1) {
+                  VCellPressureNeighbor[ idx2( checkVertV, 0, \
+                               VelocityCellPressureNeighborLDI) ] = cl+1;
+                  PressureCellVNeighbor[ idx2( cl, 1, \
+                               PressureCellVelocityNeighborLDI ) ] = checkVertV+1;
+                }
+              }
+            }
+          }
+          UCellCenters.resize(UCellCenters.size());
+          DOF[2] = countVCells;
+          VCellPressureNeighbor.resize((DOF[2] * 2));
+          VFaceConnectivity.resize((countVCells * 6));
+          innerFaceConnectivity( VFaceConnectivity, VCellCenters, \
+                                 dx, dy, dz, countVCells );
+          VInteriorCells.reserve(DOF[2]);
+          VBoundaryCells.reserve(DOF[2]);
+          int nbrsv;
+          for (int cl = 0; cl < DOF[2]; cl++) {
+            nbrsv = 0;
+            for (int position = 0; position < 6; position++) {
+              if (VFaceConnectivity[ idx2( cl, position, FaceConnectivityLDI ) ] != 0) {
+                nbrsv++;
+              }
+            }
+            if (nbrsv == 6) {
+              VInteriorCells.push_back(cl);
+            }
+            else {
+              VBoundaryCells.push_back(cl);
+            }
+          }
+          VInteriorCells.resize(VInteriorCells.size());
+          VBoundaryCells.resize(VBoundaryCells.size());
+          VCellWidths.resize((DOF[2] * CellWidthsLDI));
+          for (int cl = 0; cl < DOF[2]; cl++) {
+            VCellWidths[ idx2( cl, 0, CellWidthsLDI ) ] = dx;
+            VCellWidths[ idx2( cl, 1, CellWidthsLDI ) ] = dy;
+            VCellWidths[ idx2( cl, 2, CellWidthsLDI ) ] = dz;
+          }
+        } // end V Section
+        #pragma omp section
+        { // W Section
+          std::vector<double> nodeHoldW;
+          nodeHoldW.resize(3);
+          int countWCells = 0;
+          double wStep = 0.5*dz;
+          int maxWCells = nx * ny * nz + nx * ny;
+          WCellCenters.reserve((maxWCells * 3));
+          PressureCellWNeighbor.resize((numPCells * 2));
+          WCellPressureNeighbor.resize((maxWCells * 2));
+          for (int cl = 0; cl < numPCells; cl++)
+          {
+            // Each 3 value block is a 'row' of the 2d celLVert array
+            cellVert[12] = PCellCenters[ idx2( cl, 0, 3 ) ];
+            cellVert[13] = PCellCenters[ idx2( cl, 1, 3 ) ];
+            cellVert[14] = PCellCenters[ idx2( cl, 2, 3 ) ] - wStep;
+
+            cellVert[15] = PCellCenters[ idx2( cl, 0, 3 ) ];
+            cellVert[16] = PCellCenters[ idx2( cl, 1, 3 ) ];
+            cellVert[17] = PCellCenters[ idx2( cl, 2, 3 ) ] + wStep;
+
+            for (int pcount = 0; pcount < 2; pcount++)
+            {
+              int checkVertW;
+              // W Component
+              nodeHoldW[0] = cellVert[ idx2( (pcount + 4), 0, 3 ) ];
+              nodeHoldW[1] = cellVert[ idx2( (pcount + 4), 1, 3 ) ];
+              nodeHoldW[2] = cellVert[ idx2( (pcount + 4), 2, 3 ) ];
+              if ( !countWCells ) // First W node
+              {
+                checkVertW = -1;
+              }
+              else
+              {
+                checkVertW = isNear3d( nodeHoldW, WCellCenters, \
+                                    dx, dy, dz, countWCells );
+              }
+              if (checkVertW == -1)
+              {
+                countWCells++;
+                WCellCenters.push_back(nodeHoldW[0]);
+                WCellCenters.push_back(nodeHoldW[1]);
+                WCellCenters.push_back(nodeHoldW[2]);
+                if (pcount == 0) {
+                  WCellPressureNeighbor[ idx2( (countWCells-1), 1, \
+                               VelocityCellPressureNeighborLDI ) ] = cl+1;
+                  PressureCellWNeighbor[ idx2( cl, 0, \
+                               PressureCellVelocityNeighborLDI ) ] = countWCells;
+                }
+                else if (pcount == 1) {
+                  WCellPressureNeighbor[ idx2( (countWCells-1), 0, \
+                               VelocityCellPressureNeighborLDI ) ] = cl+1;
+                  PressureCellWNeighbor[ idx2( cl, 1, \
+                               PressureCellVelocityNeighborLDI ) ] = countWCells;
+                }
+              }
+              if (checkVertW != -1)
+              {
+                if (pcount == 0) {
+                  WCellPressureNeighbor[ idx2( checkVertW, 1, \
+                               VelocityCellPressureNeighborLDI) ] = cl+1;
+                  PressureCellWNeighbor[ idx2( cl, 0, \
+                               PressureCellVelocityNeighborLDI ) ] = checkVertW+1;
+                }
+                else if (pcount== 1) {
+                  WCellPressureNeighbor[ idx2( checkVertW, 0, \
+                               VelocityCellPressureNeighborLDI) ] = cl+1;
+                  PressureCellWNeighbor[ idx2( cl, 1, \
+                               PressureCellVelocityNeighborLDI ) ] = checkVertW+1;
+                }
+              }
+            }
+          }
+          WCellCenters.resize(WCellCenters.size());
+          DOF[3] = countWCells;
+          WCellPressureNeighbor.resize((DOF[3] * 2));
+          WFaceConnectivity.resize((countWCells * 6));
+          innerFaceConnectivity( WFaceConnectivity, WCellCenters, \
+                                 dx, dy, dz, countWCells );
+          WInteriorCells.reserve(DOF[3]);
+          WBoundaryCells.reserve(DOF[3]);
+          int nbrsw;
+          for (int cl = 0; cl < DOF[3]; cl++) {
+            nbrsw = 0;
+            for (int position = 0; position < 6; position++) {
+              if (WFaceConnectivity[ idx2( cl, position, FaceConnectivityLDI ) ] != 0) {
+                nbrsw++;
+              }
+            }
+            if (nbrsw == 6) {
+              WInteriorCells.push_back(cl);
+            }
+            else {
+              WBoundaryCells.push_back(cl);
+            }
+          }
+          WInteriorCells.resize(WInteriorCells.size());
+          WBoundaryCells.resize(WBoundaryCells.size());
+          WCellWidths.resize((DOF[3] * CellWidthsLDI));
+          for (int cl = 0; cl < DOF[3]; cl++) {
+            WCellWidths[ idx2( cl, 0, CellWidthsLDI ) ] = dx;
+            WCellWidths[ idx2( cl, 1, CellWidthsLDI ) ] = dy;
+            WCellWidths[ idx2( cl, 2, CellWidthsLDI ) ] = dz;
           }
         }
-        if (nbrs == 6) {
-          UInteriorCells.push_back(cl);
-        }
-        else {
-          UBoundaryCells.push_back(cl);
-        }
       }
-      for (int cl = 0; cl < DOF[2]; cl++) {
-        nbrs = 0;
-        for (int position = 0; position < 6; position++) {
-          if (VFaceConnectivity[ idx2( cl, position, FaceConnectivityLDI ) ] != 0) {
-            nbrs++;
-          }
-        }
-        if (nbrs == 6) {
-          VInteriorCells.push_back(cl);
-        }
-        else {
-          VBoundaryCells.push_back(cl);
-        }
-      }
-      for (int cl = 0; cl < DOF[3]; cl++) {
-        nbrs = 0;
-        for (int position = 0; position < 6; position++) {
-          if (WFaceConnectivity[ idx2( cl, position, FaceConnectivityLDI ) ] != 0) {
-            nbrs++;
-          }
-        }
-        if (nbrs == 6) {
-          WInteriorCells.push_back(cl);
-        }
-        else {
-          WBoundaryCells.push_back(cl);
-        }
-      }
-
-      UInteriorCells.resize(UInteriorCells.size());
-      VInteriorCells.resize(VInteriorCells.size());
-      WInteriorCells.resize(WInteriorCells.size());
-      UBoundaryCells.resize(UBoundaryCells.size());
-      VBoundaryCells.resize(VBoundaryCells.size());
-      WBoundaryCells.resize(WBoundaryCells.size());
-
-      // Finally we define cell widths. In this case, uniform.
-      PCellWidths.resize((DOF[0] * CellWidthsLDI));
-      UCellWidths.resize((DOF[1] * CellWidthsLDI));
-      VCellWidths.resize((DOF[2] * CellWidthsLDI));
-      WCellWidths.resize((DOF[3] * CellWidthsLDI));
-      for (int cl = 0; cl < DOF[0]; cl++) {
-        PCellWidths[ idx2( cl, 0, CellWidthsLDI ) ] = dx;
-        PCellWidths[ idx2( cl, 1, CellWidthsLDI ) ] = dy;
-        PCellWidths[ idx2( cl, 2, CellWidthsLDI ) ] = dz;
-      }
-      for (int cl = 0; cl < DOF[1]; cl++) {
-        UCellWidths[ idx2( cl, 0, CellWidthsLDI ) ] = dx;
-        UCellWidths[ idx2( cl, 1, CellWidthsLDI ) ] = dy;
-        UCellWidths[ idx2( cl, 2, CellWidthsLDI ) ] = dz;
-      }
-      for (int cl = 0; cl < DOF[2]; cl++) {
-        VCellWidths[ idx2( cl, 0, CellWidthsLDI ) ] = dx;
-        VCellWidths[ idx2( cl, 1, CellWidthsLDI ) ] = dy;
-        VCellWidths[ idx2( cl, 2, CellWidthsLDI ) ] = dz;
-      }
-      for (int cl = 0; cl < DOF[3]; cl++) {
-        WCellWidths[ idx2( cl, 0, CellWidthsLDI ) ] = dx;
-        WCellWidths[ idx2( cl, 1, CellWidthsLDI ) ] = dy;
-        WCellWidths[ idx2( cl, 2, CellWidthsLDI ) ] = dz;
-      }
-
       break;
     }
   } // End of dimension switch
 }
+// Function to find duplicate node in 2d
+int FluidMesh::isNear2d( std::vector<double>& Vector1, std::vector<double>& Vector2, \
+                         double dx, double dy, double dz, int nNodes )
+{
+  int cl = nNodes;
+  int prox = -1;
 
-int FluidMesh::isNear( std::vector<double>& Vector1, std::vector<double>& Vector2, \
-                       double dx, double dy, double dz, int nNodes, int DIM )
+  double xr = 0;
+  double yr = 0;
+  double epsx = 0.2 * dx;
+  double epsy = 0.2 * dy;
+
+  do
+  {
+    cl--;
+    xr = fabs( Vector1[0] - Vector2[ idx2( cl, 0, 2 ) ]);
+    yr = fabs( Vector1[1] - Vector2[ idx2( cl, 1, 2 ) ]);
+    if (xr < epsx)
+    {
+      if (yr < epsy)
+      {
+        prox = cl;
+      }
+    }
+  } while (prox == -1 && cl > 0);
+  return prox;
+}
+// Function to find duplicate node in 3d
+int FluidMesh::isNear3d( std::vector<double>& Vector1, std::vector<double>& Vector2, \
+                         double dx, double dy, double dz, int nNodes )
 {
   int cl = nNodes;
   int prox = -1;
@@ -788,49 +865,26 @@ int FluidMesh::isNear( std::vector<double>& Vector1, std::vector<double>& Vector
   double epsy = 0.2 * dy;
   double epsz = 0.2 * dz;
 
-  switch ( DIM )
+  do
   {
-    case 2 :
+    cl--;
+    xr = fabs( Vector1[0] - Vector2[ idx2( cl, 0, 3 ) ]);
+    yr = fabs( Vector1[1] - Vector2[ idx2( cl, 1, 3 ) ]);
+    zr = fabs( Vector1[2] - Vector2[ idx2( cl, 2, 3 ) ]);
+    if (xr < epsx)
     {
-      do
+      if (yr < epsy)
       {
-        cl--;
-        xr = fabs( Vector1[0] - Vector2[ idx2( cl, 0, 2 ) ]);
-        yr = fabs( Vector1[1] - Vector2[ idx2( cl, 1, 2 ) ]);
-        if (xr < epsx)
+        if (zr < epsz)
         {
-          if (yr < epsy)
-          {
-            prox = cl;
-          }
+          prox = cl;
         }
-      } while (prox == -1 && cl > 0);
-      break;
+      }
     }
-    default :
-    {
-      do
-      {
-        cl--;
-        xr = fabs( Vector1[0] - Vector2[ idx2( cl, 0, 3 ) ]);
-        yr = fabs( Vector1[1] - Vector2[ idx2( cl, 1, 3 ) ]);
-        zr = fabs( Vector1[2] - Vector2[ idx2( cl, 2, 3 ) ]);
-        if (xr < epsx)
-        {
-          if (yr < epsy)
-          {
-            if (zr < epsz)
-            {
-              prox = cl;
-            }
-          }
-        }
-      } while (prox == -1 && cl > 0);
-      break;
-    }
-  }
+  } while (prox == -1 && cl > 0);
   return prox;
 }
+
 // Function to compute cell face connectivity information
 void FluidMesh::innerFaceConnectivity( \
                 std::vector<unsigned long>& ComponentFaceConnectivity, \
@@ -850,27 +904,35 @@ void FluidMesh::innerFaceConnectivity( \
   switch ( DIM )
   {
     case 2 :
+    {
+      double cccl0, cccl1;
+      int int0, int1, int2, int3;
       for (int cl = 0; cl < nCells; cl++) {
         numNeighbors = 0;
         nl = 0;
+        cccl0 = ComponentCellCenters[ idx2( cl, 0, 2 ) ];
+        cccl1 = ComponentCellCenters[ idx2( cl, 1, 2 ) ];
+        int0 = 0;
+        int1 = 0;
+        int2 = 0;
+        int3 = 0;
         do
         {
           incr = nl + 1;
           xr = ComponentCellCenters[ idx2(nl, 0, 2) ] \
-               - ComponentCellCenters[ idx2(cl, 0, 2) ];
+               - cccl0;
           yr = ComponentCellCenters[ idx2(nl, 1, 2) ] \
-               - ComponentCellCenters[ idx2(cl, 1, 2) ];
-
+               - cccl1;
           if (fabs(xr) < epsx) {
             if (fabs(yr) < ytol) {
               if (yr < 0)
               {
-                ComponentFaceConnectivity[ idx2(cl, 0, 4) ] = incr;
+                int0 = incr;
                 numNeighbors++;
               }
               else if (yr > 0)
               {
-                ComponentFaceConnectivity[ idx2(cl, 2, 4) ] = incr;
+                int2 = incr;
                 numNeighbors++;
               }
             }
@@ -879,45 +941,62 @@ void FluidMesh::innerFaceConnectivity( \
             if (fabs(xr) < xtol) {
               if (xr < 0)
               {
-                ComponentFaceConnectivity[ idx2(cl, 3, 4 ) ] = incr;
+                int3 = incr;
                 numNeighbors++;
               }
               else if (xr > 0)
               {
-                ComponentFaceConnectivity[ idx2( cl, 1, 4 ) ] = incr;
+                int1 = incr;
                 numNeighbors++;
               }
             }
           }
           nl++;
         } while (nl < nCells && numNeighbors < 4);
+        ComponentFaceConnectivity[ idx2(cl, 0, 4) ] = int0;
+        ComponentFaceConnectivity[ idx2(cl, 1, 4) ] = int1;
+        ComponentFaceConnectivity[ idx2(cl, 2, 4) ] = int2;
+        ComponentFaceConnectivity[ idx2(cl, 3, 4) ] = int3;
       }
       break;
+    }
     default :
+    {
+      double cccl0, cccl1, cccl2;
+      int int0, int1, int2, int3, int4, int5;
       for (int cl = 0; cl < nCells; cl++) {
         numNeighbors = 0;
+        cccl0 = ComponentCellCenters[ idx2( cl, 0, 3 ) ];
+        cccl1 = ComponentCellCenters[ idx2( cl, 1, 3 ) ];
+        cccl2 = ComponentCellCenters[ idx2( cl, 2, 3 ) ];
+        int0 = 0;
+        int1 = 0;
+        int2 = 0;
+        int3 = 0;
+        int4 = 0;
+        int5 = 0;
         nl = 0;
         do
         {
           incr = nl + 1;
           xr = ComponentCellCenters[ idx2(nl, 0, 3) ] \
-               - ComponentCellCenters[ idx2(cl, 0, 3) ];
+               - cccl0;
           yr = ComponentCellCenters[ idx2(nl, 1, 3) ] \
-               - ComponentCellCenters[ idx2(cl, 1, 3) ];
+               - cccl1;
           zr = ComponentCellCenters[ idx2(nl, 2, 3) ] \
-               - ComponentCellCenters[ idx2(cl, 2, 3) ];
+               - cccl2;
 
           if (fabs(xr) < epsx) {
             if (fabs(yr) < epsy) {
               if (fabs(zr) < ztol) {
                 if (zr < 0)
                 {
-                  ComponentFaceConnectivity[ idx2(cl, 0, 6) ] = incr;
+                  int0 = incr;
                   numNeighbors++;
                 }
                 else if (zr > 0)
                 {
-                  ComponentFaceConnectivity[ idx2(cl, 2, 6) ] = incr;
+                  int2 = incr;
                   numNeighbors++;
                 }
               }
@@ -926,12 +1005,12 @@ void FluidMesh::innerFaceConnectivity( \
               if (fabs(yr) < ytol) {
                 if (yr < 0)
                 {
-                  ComponentFaceConnectivity[ idx2(cl, 5, 6) ] = incr;
+                  int5 = incr;
                   numNeighbors++;
                 }
                 else if (yr > 0)
                 {
-                  ComponentFaceConnectivity[ idx2(cl, 4, 6)] = incr;
+                  int4 = incr;
                   numNeighbors++;
                 }
               }
@@ -942,12 +1021,12 @@ void FluidMesh::innerFaceConnectivity( \
               if (fabs(xr) < xtol) {
                 if (xr < 0)
                 {
-                  ComponentFaceConnectivity[ idx2(cl, 3, 6) ] = incr;
+                  int3 = incr;
                   numNeighbors++;
                 }
                 else if (xr > 0)
                 {
-                  ComponentFaceConnectivity[ idx2(cl, 1, 6) ] = incr;
+                  int1 = incr;
                   numNeighbors++;
                 }
               }
@@ -955,8 +1034,15 @@ void FluidMesh::innerFaceConnectivity( \
           }
           nl++;
         } while (nl < nCells && numNeighbors < 6);
-      }
+        ComponentFaceConnectivity[ idx2(cl, 0, 6) ] = int0;
+        ComponentFaceConnectivity[ idx2(cl, 1, 6) ] = int1;
+        ComponentFaceConnectivity[ idx2(cl, 2, 6) ] = int2;
+        ComponentFaceConnectivity[ idx2(cl, 3, 6) ] = int3;
+        ComponentFaceConnectivity[ idx2(cl, 4, 6) ] = int4;
+        ComponentFaceConnectivity[ idx2(cl, 5, 6) ] = int5;
+       }
       break;
+    }
   }
 }
 // Compute total DOF
