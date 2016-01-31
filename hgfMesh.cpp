@@ -317,7 +317,7 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
               }
             }
           }
-          UCellCenters.resize(UCellCenters.size());
+          VCellCenters.resize(VCellCenters.size());
           DOF[2] = countVCells;
           VCellPressureNeighbor.resize((DOF[2] * 2));
           VFaceConnectivity.resize((countVCells * 4));
@@ -682,7 +682,7 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
               }
             }
           }
-          UCellCenters.resize(UCellCenters.size());
+          VCellCenters.resize(VCellCenters.size());
           DOF[2] = countVCells;
           VCellPressureNeighbor.resize((DOF[2] * 2));
           VFaceConnectivity.resize((countVCells * 6));

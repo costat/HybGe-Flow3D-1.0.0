@@ -391,7 +391,6 @@ continuityDrive ( const FluidMesh& Mesh, std::vector<int>& matIs, \
   }
 }
 
-
 /* StokesArray organizes the call to the previously defined functions
    to set up a finite volume discretization of the Stokes equations or
    the linear part of the Navier-Stokes equations in 2 or 3D.

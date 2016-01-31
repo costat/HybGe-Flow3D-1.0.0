@@ -35,7 +35,7 @@ main( int argc, const char* argv[] )
   length = 1;
   width = 1;
   height = 1;
-  visc = 1;
+  visc = 1.0;
 
   if (nz)
   {
@@ -54,7 +54,7 @@ main( int argc, const char* argv[] )
 
   hgfStokesDrive( gridin, size1, ldi1, ldi2, nx, ny, nz, \
                  length, width, height, direction, visc, \
-                 nThreads, prec, numSims, simNum, 1e-6, 1e-6, 1500 );
+                 nThreads, prec, numSims, simNum, 1e-12, 1e-12, 1500 );
 
   delete[] gridin;
 

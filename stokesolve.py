@@ -11,9 +11,9 @@ import re
 # GRID INFORMATION. USER PROVIDES PATH .DAT FILE CONTAINING
 # VOXEL ARRAY OF 0S 1S AND 2S.
 # ALSO, USER PROVIDES TOTAL GRID LENGTHS IN EACH DIRECTION.
-gridfiles = './grids/idealPores2d.dat'
-L = 8.
-W = 8.
+gridfiles = './grids/2dsquare.dat'
+L = 1.
+W = 1.
 H = 1.
 
 # PRINCIPAL FLOW DIRECTION, 0 - X, 1 - Y, 2 - Z, SINGLE FLOW DIRECTION SOLVES,
@@ -29,9 +29,9 @@ nThreads = 4
 
 # SET SOLVER PARAMETERS: ILU PRECONDITIONER LEVEL,
 # ABSOLUTE AND RELATIVE RESIDUAL TOLERANCES, AND MAXIMUM ITERATIONS
-prec = 4
-tolAbs = 1e-8;
-tolRel = 1e-8;
+prec = 3
+tolAbs = 1e-12;
+tolRel = 1e-12;
 maxIt = 1500;
 
 ##########################################################
