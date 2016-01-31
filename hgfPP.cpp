@@ -230,9 +230,9 @@ computeAveragesX ( const FluidMesh& Mesh, \
       for (int cl = 0; cl < Mesh.DOF[1]; cl++)
       {
         pNode1 = Mesh.UCellPressureNeighbor[ \
-                   idx2( cl, 0, Mesh.VelocityCellPressureNeighborLDI ) ] + 1;
+                   idx2( cl, 0, Mesh.VelocityCellPressureNeighborLDI ) ] - 1;
         pNode2 = Mesh.UCellPressureNeighbor[ \
-                   idx2( cl, 1, Mesh.VelocityCellPressureNeighborLDI ) ] + 1;
+                   idx2( cl, 1, Mesh.VelocityCellPressureNeighborLDI ) ] - 1;
         if (!Mesh.ImmersedBoundary[ pNode1 ] && !Mesh.ImmersedBoundary[ pNode2 ])
         {
           if (Mesh.UCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] > xmin)
@@ -310,8 +310,8 @@ computeAveragesX ( const FluidMesh& Mesh, \
       // Compute averages
       for (int cl = 0; cl < Mesh.DOF[1]; cl++)
       {
-        pNode1 = Mesh.UCellPressureNeighbor[ idx2( cl, 0, Mesh.VelocityCellPressureNeighborLDI ) ] + 1;
-        pNode2 = Mesh.UCellPressureNeighbor[ idx2( cl, 1, Mesh.VelocityCellPressureNeighborLDI ) ] + 1;
+        pNode1 = Mesh.UCellPressureNeighbor[ idx2( cl, 0, Mesh.VelocityCellPressureNeighborLDI ) ] - 1;
+        pNode2 = Mesh.UCellPressureNeighbor[ idx2( cl, 1, Mesh.VelocityCellPressureNeighborLDI ) ] - 1;
         if (!Mesh.ImmersedBoundary[ pNode1 ] && !Mesh.ImmersedBoundary[ pNode2 ])
         {
           if (Mesh.UCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] > xmin)
@@ -414,8 +414,8 @@ computeAveragesY ( const FluidMesh& Mesh, \
       // Compute averages
       for (int cl = 0; cl < Mesh.DOF[2]; cl++)
       {
-        pNode1 = Mesh.VCellPressureNeighbor[ idx2( cl, 0, Mesh.VelocityCellPressureNeighborLDI ) ] + 1;
-        pNode2 = Mesh.VCellPressureNeighbor[ idx2( cl, 1, Mesh.VelocityCellPressureNeighborLDI ) ] + 1;
+        pNode1 = Mesh.VCellPressureNeighbor[ idx2( cl, 0, Mesh.VelocityCellPressureNeighborLDI ) ] - 1;
+        pNode2 = Mesh.VCellPressureNeighbor[ idx2( cl, 1, Mesh.VelocityCellPressureNeighborLDI ) ] - 1;
         if (!Mesh.ImmersedBoundary[ pNode1 ] && !Mesh.ImmersedBoundary[ pNode2 ])
         {
           if (Mesh.VCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] > xmin)
@@ -492,8 +492,8 @@ computeAveragesY ( const FluidMesh& Mesh, \
       // Compute averages
       for (int cl = 0; cl < Mesh.DOF[2]; cl++)
       {
-        pNode1 = Mesh.VCellPressureNeighbor[ idx2( cl, 0, Mesh.VelocityCellPressureNeighborLDI ) ] + 1;
-        pNode2 = Mesh.VCellPressureNeighbor[ idx2( cl, 1, Mesh.VelocityCellPressureNeighborLDI ) ] + 1;
+        pNode1 = Mesh.VCellPressureNeighbor[ idx2( cl, 0, Mesh.VelocityCellPressureNeighborLDI ) ] - 1;
+        pNode2 = Mesh.VCellPressureNeighbor[ idx2( cl, 1, Mesh.VelocityCellPressureNeighborLDI ) ] - 1;
         if (!Mesh.ImmersedBoundary[ pNode1 ] && !Mesh.ImmersedBoundary[ pNode2 ])
         {
           if (Mesh.VCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] > xmin)
@@ -591,8 +591,8 @@ computeAveragesZ ( const FluidMesh& Mesh, \
   // Compute averages
   for (int cl = 0; cl < Mesh.DOF[3]; cl++)
   {
-    pNode1 = Mesh.WCellPressureNeighbor[ idx2( cl, 0, Mesh.VelocityCellPressureNeighborLDI ) ] + 1;
-    pNode2 = Mesh.WCellPressureNeighbor[ idx2( cl, 1, Mesh.VelocityCellPressureNeighborLDI ) ] + 1;
+    pNode1 = Mesh.WCellPressureNeighbor[ idx2( cl, 0, Mesh.VelocityCellPressureNeighborLDI ) ] - 1;
+    pNode2 = Mesh.WCellPressureNeighbor[ idx2( cl, 1, Mesh.VelocityCellPressureNeighborLDI ) ] - 1;
     if (!Mesh.ImmersedBoundary[ pNode1 ] && !Mesh.ImmersedBoundary[ pNode2 ])
     {
       if (Mesh.WCellCenters[ idx2( cl, 0, Mesh.CellCentersLDI ) ] > xmin)

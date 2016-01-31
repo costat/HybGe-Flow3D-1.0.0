@@ -54,7 +54,7 @@ main( int argc, const char* argv[] )
 
   hgfStokesDrive( gridin, size1, ldi1, ldi2, nx, ny, nz, \
                  length, width, height, direction, visc, \
-                 nThreads, prec, numSims, simNum, 1e-6, 1e-6, 1500, 0 );
+                 nThreads, prec, numSims, simNum, 1e-6, 1e-6, 1500 );
 
   delete[] gridin;
 
