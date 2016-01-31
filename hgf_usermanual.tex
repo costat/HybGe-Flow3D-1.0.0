@@ -42,7 +42,7 @@
 \chapter{HybGe-Flow3D Overview}
 
 HybGe-Flow3D (HGF) is a software package that solves laminar fluid flow problems
-in complex geometries and produced upscaled conductivites. This software
+in complex geometries and produces upscaled conductivites. This software
 is distributed freely AS IS and with ABSOLUTELY NO WARRANTY, and with
 the hope that it will be used and extended by the scientific computing community.
 In this document we describe how to compile and run Hybge-Flow3D.\\
@@ -88,7 +88,7 @@ is prescribed. This is used for outflow conditions.
 Additionally we have $\Omega = \Omega_g \cup \Omega_f$, $\Omega_g \cap \Omega_f = \emptyset$,
 where $\Omega_g$ refers to the immersed boundary and $\Omega_f$ the fluid flow domain.
 In these equations $u$ is the fluid velocity, $p$ is the fluid pressure,
-and $\mu$ is the fluid viscosity. $\chi_{\Omega_g}$ is the indicator functions
+and $\mu$ is the fluid viscosity. $\chi_{\Omega_g}$ is the indicator function
 for the immersed boundary domain $\Omega_g$, and $\eta$ is a penalization
 parameter, taken to be very small.
 HybGe-Flow3D solves the above fluid flow model by a staggered-grid
@@ -103,7 +103,7 @@ and then compiling HybGe-Flow3D on a Linux machine.
 
 \section{Building Paralution}
 
-Paralution 1.0.0 is straightforward to build on Linux machines
+Paralution is straightforward to build on Linux machines
 using cmake. The instructions contained here can be found at \\
 http://www.paralution.com/download/.\\
 
@@ -117,9 +117,9 @@ Then grab the tar file containing Paralution.
 \noindent The following steps build paralution using cmake.
 
 \begin{mdframed}[style=MyFrame]
-  \$ tar zxvf paralution-1.0.0.tar.gz
+  \$ tar zxvf paralution-1.1.0.tar.gz
 
-  \noindent\$ cd paralution-1.0.0
+  \noindent\$ cd paralution-1.1.0
 
   \noindent\$ mkdir build
 
@@ -131,7 +131,9 @@ Then grab the tar file containing Paralution.
 \end{mdframed}
 
 \noindent Next we write an environment module file for Paralution.
-This file is placed at /usr/share/modulefiles/paralution-1.0.0.
+We assume for exposition that this file is placed at /path/to/modulefiles/paralution-1.1.0, and
+describe the process of adding the folder /path/to/modulefiles/ to the module path while using
+a bash terminal.
 
 \lstset{style=custom}
 \begin{lstlisting}
@@ -158,11 +160,21 @@ setenv          PARALUTION_HOME       $paralution_home
 setenv          PARALUTION_DIR        $paralution_home
 \end{lstlisting}
 
-\noindent Finally, type
+\noindent To see the modulefiles within /path/to/modulefiles we add the following
+line to our .bashrc:
+\begin{mdframed}[style=MyFrame]
+  module use-append /path/to/modulefiles
+\end{mdframed}
+
+\noindent Open a new terimal or type
+\begin{mdframed}[style=MyFrame]
+  \$ source ~/.bashrc
+\end{mdframed}
+Finally, type
 \begin{mdframed}[style=MyFrame]
   \$ module avail
 \end{mdframed}
-and verify that paralution-1.0.0 is an available module.
+and verify that paralution-1.1.0 is an available module.
 
 \section{Building HybGe-Flow3D}
 
@@ -180,7 +192,7 @@ Then navigate into the repository.
 \end{mdframed}
 Next, load the Paralution module.
 \begin{mdframed}[style=MyFrame]
-  \$ module load paralution-1.0.0
+  \$ module load paralution-1.1.0
 \end{mdframed}
 Finally, execute the compile script.
 \begin{mdframed}[style=MyFrame]
@@ -489,7 +501,7 @@ should be computed.\\
 on all grids in the infolder location. HGF then collects the
 constant conductivity from each simulation and lists these values along
 with the name of the grid file in a file named "Ks.dat" in the output
-destination. Additionally, the flow solution file for each simulations is
+destination. Additionally, the flow solution file for each simulation is
 saved in the output folder.
 
 \chapter{Examples}
