@@ -198,24 +198,28 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
           writeSolutionTP ( Mesh, solZ, outNameZ );
           computeKTensorL ( Mesh, solX, solY, solZ );
 
-          // Clear arrays no longer in use.
-          matX.Clear();
-          forcePX.Clear();
-          solX.Clear();
-          matY.Clear();
-          forcePY.Clear();
-          solY.Clear();
-          matZ.Clear();
-          forcePZ.Clear();
-          solZ.Clear();
-
-          std::cout << "Arrays constructed in " << array_duration << "seconds\n";
           std::cout << "Mesh constructed in " << mesh_duration << "seconds\n";
+          std::cout << "Arrays constructed in " << array_duration << "seconds\n";
           std::cout << "Linear system solved in ";
           std::cout  << solve_duration << "seconds\n";
           // Total timers
           total_duration = ( omp_get_wtime() - start );
           std::cout << "Total time: " << total_duration << "seconds\n";
+
+          // Clear arrays no longer in use.
+          lsX.Clear();
+          matX.Clear();
+          forcePX.Clear();
+          solX.Clear();
+          lsY.Clear();
+          matY.Clear();
+          forcePY.Clear();
+          solY.Clear();
+          lsZ.Clear();
+          matZ.Clear();
+          forcePZ.Clear();
+          solZ.Clear();
+
           break;
         }
         case 2 :
@@ -307,22 +311,25 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
           writeSolutionTP ( Mesh, solY, outNameY );
           computeKTensorL ( Mesh, solX, solY, solZ );
 
-          // Clear arrays no longer in use.
-          matX.Clear();
-          forcePX.Clear();
-          solX.Clear();
-          matY.Clear();
-          forcePY.Clear();
-          solY.Clear();
-          solZ.Clear();
-
-          std::cout << "Arrays constructed in " << array_duration << "seconds\n";
           std::cout << "Mesh constructed in " << mesh_duration << "seconds\n";
+          std::cout << "Arrays constructed in " << array_duration << "seconds\n";
           std::cout << "Linear system solved in " << solve_duration;
           std::cout  << "seconds\n";
           // Total timers
           total_duration = ( omp_get_wtime() - start );
           std::cout << "Total time: " << total_duration << "seconds\n";
+
+          // Clear arrays no longer in use.
+          lsX.Clear();
+          matX.Clear();
+          forcePX.Clear();
+          solX.Clear();
+          lsY.Clear();
+          matY.Clear();
+          forcePY.Clear();
+          solY.Clear();
+          solZ.Clear();
+
           break;
         }
       }
