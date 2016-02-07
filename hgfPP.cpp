@@ -1,13 +1,10 @@
 #include <iostream>
 #include <cstdlib>
 #include <vector>
+#include <string>
 #include <paralution.hpp>
 
 #include "hgfMesh.hpp"
-#include "hgf.hpp"
-#include "hgfArrays.hpp"
-#include "hgfBC.hpp"
-#include "hgfIB.hpp"
 #include "hgfPP.hpp"
 
 #define idx2(i, j, ldi) ((i * ldi) + j)
@@ -17,9 +14,9 @@ using namespace paralution;
    flow solutions in each principal axis direction */
 void
 computeKTensorL ( const FluidMesh& Mesh, \
-                  const paralution::LocalVector<double>& xSolution, \
-                  const paralution::LocalVector<double>& ySolution, \
-                  const paralution::LocalVector<double>& zSolution )
+                  const std::vector<double>& xSolution, \
+                  const std::vector<double>& ySolution, \
+                  const std::vector<double>& zSolution )
 {
   switch ( Mesh.DIM )
   {
@@ -91,7 +88,7 @@ computeKTensorL ( const FluidMesh& Mesh, \
       // Solver setup
       GMRES<LocalMatrix<double>, LocalVector<double>, double > ls;
       ls.SetOperator(MacroPresGrads);
-      ls.Verbose(2);
+      ls.Verbose(0);
       ls.Build();
 
       ls.Solve(MacroVels, &K);
@@ -159,7 +156,7 @@ computeKTensorL ( const FluidMesh& Mesh, \
       // Solver setup
       GMRES<LocalMatrix<double>, LocalVector<double>, double > ls;
       ls.SetOperator(MacroPresGrads);
-      ls.Verbose(2);
+      ls.Verbose(0);
       ls.Build();
 
       ls.Solve(MacroVels, &K);
@@ -184,7 +181,7 @@ computeKTensorL ( const FluidMesh& Mesh, \
    is computed and written to an output file */
 void
 computeAveragesX ( const FluidMesh& Mesh, \
-                   const paralution::LocalVector<double>& Solution, \
+                   const std::vector< double >& Solution, \
                    double& V, double& G, int print )
 {
   double xmin, xmax, xmid, midRangex, ymin, ymax, zmin, zmax, K, pNode1, pNode2;
@@ -378,7 +375,7 @@ computeAveragesX ( const FluidMesh& Mesh, \
    is computed and written to an output file */
 void
 computeAveragesY ( const FluidMesh& Mesh, \
-                   const paralution::LocalVector<double>& Solution, \
+                   const std::vector<double>& Solution, \
                    double& V, double& G, int print )
 {
   double xmin, xmax, midRangey, ymin, ymax, ymid, zmin, zmax, K, pNode1, pNode2;
@@ -569,8 +566,8 @@ computeAveragesY ( const FluidMesh& Mesh, \
    is computed and written to an output file */
 void
 computeAveragesZ ( const FluidMesh& Mesh, \
-                    const paralution::LocalVector<double>& Solution, \
-                    double& V, double& G, int print )
+                   const std::vector<double>& Solution, \
+                   double& V, double& G, int print )
 {
   double xmin, xmax, midRangez, ymin, ymax, zmid, zmin, zmax, K, pNode1, pNode2;
   double P1 = 0;
@@ -674,7 +671,7 @@ computeAveragesZ ( const FluidMesh& Mesh, \
    of a constant upscaled conductivity */
 void
 computeKConstantDrive ( const FluidMesh & Mesh, \
-                        const paralution::LocalVector<double>& Solution,
+                        const std::vector<double>& Solution,
                         int direction )
 {
   double V, G;
@@ -695,7 +692,7 @@ computeKConstantDrive ( const FluidMesh & Mesh, \
 /* writeSolutionTP writes the solution to an output file appropriate for tecplot
    visualization */
 void
-writeSolutionTP ( const FluidMesh& Mesh, const paralution::LocalVector<double>& sol, \
+writeSolutionTP ( const FluidMesh& Mesh, const std::vector<double>& sol, \
                   std::string& outName )
 {
   double uval, vval, wval;

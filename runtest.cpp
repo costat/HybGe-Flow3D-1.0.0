@@ -4,8 +4,10 @@
    and bottleneck finding */
 #include <cstdio>
 #include <vector>
+#include <cstdlib>
 
 #include "hgf.hpp"
+#include "hgfStokes.hpp"
 #include "hgfMesh.hpp"
 #include "hgfArrays.hpp"
 #include "hgfBC.hpp"
@@ -52,9 +54,9 @@ main( int argc, const char* argv[] )
     gridin[cl] = 0;
   }
 
-  hgfStokesDrive( gridin, size1, ldi1, ldi2, nx, ny, nz, \
+  hgfDrive( gridin, size1, ldi1, ldi2, nx, ny, nz, \
                  length, width, height, direction, visc, \
-                 nThreads, prec, numSims, simNum, 1e-12, 1e-12, 1500 );
+                 nThreads, prec, numSims, simNum, 1e-12, 1e-12, 5000 );
 
   delete[] gridin;
 

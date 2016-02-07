@@ -12,6 +12,7 @@ class FluidMesh
     std::vector<double> Nodes, PCellCenters, UCellCenters, VCellCenters;
     std::vector<double> WCellCenters;
     std::vector<double> PCellWidths, UCellWidths, VCellWidths, WCellWidths;
+    std::vector<unsigned long> PresListByY, PresListByZ;
     std::vector<unsigned long> PFaceConnectivity, UFaceConnectivity;
     std::vector<unsigned long> VFaceConnectivity, WFaceConnectivity;
     std::vector<unsigned long> PressureCellUNeighbor, PressureCellVNeighbor;
@@ -23,12 +24,10 @@ class FluidMesh
     std::vector<int> DOF;
     int NodesLDI, CellCentersLDI, CellWidthsLDI, FaceConnectivityLDI;
     int PressureCellVelocityNeighborLDI, VelocityCellPressureNeighborLDI;
-    int DIM, NX, NY, NZ;
+    int DIM, NX, NY, NZ, dofTotal, maxNNZ;
     double xLim[2], yLim[2], zLim[2], porosity;
     // Public functions
-    int TotalDOF( void );
     int VelocityDOF( void );
-    int MaxNonZero( void );
     void BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
                     int nx, int ny, int nz, \
                     double length, double width, double height );
@@ -40,6 +39,9 @@ class FluidMesh
     void innerFaceConnectivity( std::vector<unsigned long>& ComponentFaceConnectivity, \
                                 std::vector<double> ComponentCellCenters, \
                                 double dx, double dy, double dz, int nCells );
+    void TotalDOF( void );
+    void MaxNonZero( void );
+    void sortPV( void );
 /*  Some upcoming functions not yet implemented
     void AddCell( double *Nodes, int isIB );
     void RemoveCell( int GlobalCellNumber  );

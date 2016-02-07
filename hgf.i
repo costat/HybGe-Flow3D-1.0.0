@@ -4,6 +4,7 @@
   #define SWIG_FILE_WITH_INIT
   #include "hgf.hpp"
   #include "hgfMesh.hpp"
+  #include "hgfStokes.hpp"
   #include "hgfArrays.hpp"
   #include "hgfBC.hpp"
   #include "hgfIB.hpp"
@@ -20,6 +21,7 @@
 
 %include "hgf.hpp"
 %include "hgfMesh.hpp"
+%include "hgfStokes.hpp"
 %include "hgfArrays.hpp"
 %include "hgfBC.hpp"
 %include "hgfIB.hpp"

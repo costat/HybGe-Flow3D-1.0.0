@@ -2,12 +2,8 @@
 #include <cstdlib>
 #include <vector>
 
-#include "hgf.hpp"
 #include "hgfMesh.hpp"
 #include "hgfArrays.hpp"
-#include "hgfBC.hpp"
-#include "hgfIB.hpp"
-#include "hgfPP.hpp"
 
 /* Define a 2d -> 1d array index,
    uses row major indexing */

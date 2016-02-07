@@ -4,11 +4,7 @@
 #include <paralution.hpp>
 
 #include "hgfMesh.hpp"
-#include "hgf.hpp"
-#include "hgfArrays.hpp"
-#include "hgfBC.hpp"
 #include "hgfIB.hpp"
-#include "hgfPP.hpp"
 
 /* Define a 2d -> 1d array index,
    uses row major indexing */

@@ -3,12 +3,8 @@
 #include <cstdlib>
 #include <string.h>
 
-#include "hgf.hpp"
 #include "hgfMesh.hpp"
-#include "hgfArrays.hpp"
 #include "hgfBC.hpp"
-#include "hgfIB.hpp"
-#include "hgfPP.hpp"
 
 /* Define a 2d -> 1d array index,
    uses row marjor indexing */
@@ -959,7 +955,7 @@ FlowComponent2d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
     if (!nbrfaces[dirIn]) // !dirIn section, no slip regardless of flow directions
     {
       if (component == direction && (componentCellCenters[ idx2( cl, direction, Mesh.CellCentersLDI ) ] \
-                                    - 0.5 * componentCellWidths[ idx2( cl, direction, Mesh.CellCentersLDI ) ]) \
+                                    - 0.6 * componentCellWidths[ idx2( cl, direction, Mesh.CellCentersLDI ) ]) \
                                     < componentMin) // inflow, nonzero force
       {
         force[cl2] = -maxin \

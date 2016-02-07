@@ -9,9 +9,7 @@
 
 #include "hgf.hpp"
 #include "hgfMesh.hpp"
-#include "hgfArrays.hpp"
-#include "hgfBC.hpp"
-#include "hgfIB.hpp"
+#include "hgfStokes.hpp"
 #include "hgfPP.hpp"
 
 /* Define a 2d -> 1d array index,
@@ -25,11 +23,11 @@ using namespace paralution;
    once for upscaling a constant conductivity, or 2/3 times for
    upscaling a conductivity tensor. */
 void
-hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
-                int nx, int ny, int nz, \
-                double length, double width, double height, int direction, \
-                double visc, int nThreads, int prec, int numSims, int simNum, \
-                double tolAbs, double tolRel, int maxIt )
+hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
+          int nx, int ny, int nz, \
+          double length, double width, double height, int direction, \
+          double visc, int nThreads, int prec, int numSims, int simNum, \
+          double tolAbs, double tolRel, int maxIt )
 {
 
   if (simNum == 1) init_paralution();
@@ -44,9 +42,8 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
       outNameX = "flowrunX.dat";
       outNameY = "flowrunY.dat";
       outNameZ = "flowrunZ.dat";
-      int dofTotal, maxNZ;
-      double mesh_duration, array_duration, solve_duration, total_duration;
-      double start, array_start, solve_start;
+      double mesh_duration, stokes_duration, total_duration;
+      double start, stokes_start;
 
       start = omp_get_wtime();
 
@@ -56,141 +53,25 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
 
       // Mesh Timer
       mesh_duration = ( omp_get_wtime() - start );
-      array_start = omp_get_wtime();
-
-      // Compute total degrees of freedom and maximum # of nonzero values in matrix.
-      dofTotal = Mesh.TotalDOF();
-      maxNZ = Mesh.MaxNonZero();
-
-      /* The set matIs, matJs, and matVals are
-         used as a COO sparse representation of the linear system. */
-      std::vector<int> matIsX, matJsX;
-      std::vector<double> matValsX, forceX;
-      matIsX.reserve(maxNZ);
-      matJsX.reserve(maxNZ);
-      matValsX.reserve(maxNZ);
-      forceX.resize(dofTotal);
-
-      /* Compute vectors matVals, matIs, matJs
-         describing values and i/j locations for matrix assembly.
-         This call does not include boundary conditions or
-         immersed boundary, thus, this step can be performed once
-         for any number of realizations or boundary setups.  */
-      StokesArray( Mesh, visc, matIsX, matJsX, matValsX );
-
-      // Immersed Boundary
-      immersedBoundary ( Mesh, matIsX, matJsX, matValsX );
+      stokes_start = omp_get_wtime();
 
       switch ( Mesh.DIM )
       {
         case 3 :
         {
-          // Copy pre-boundary condition vectors to Y flow and Z flow versions
-          std::vector<int> matIsY = matIsX;
-          std::vector<int> matIsZ = matIsX;
-          std::vector<int> matJsY = matJsX;
-          std::vector<int> matJsZ = matJsX;
-          std::vector<double> matValsY = matValsX;
-          std::vector<double> matValsZ = matValsX;
-          std::vector<double> forceY, forceZ;
-          forceY.resize( dofTotal );
-          forceZ.resize( dofTotal );
+          // call Stokes' solver for each axis flow problem
+          std::vector< double > solX;
+          std::vector< double > solY;
+          std::vector< double > solZ;
+          solX.resize( Mesh.dofTotal );
+          solY.resize( Mesh.dofTotal );
+          solZ.resize( Mesh.dofTotal );
+          StokesSolve( Mesh, visc, 0, solX, tolAbs, tolRel, maxIt, nThreads, prec );
+          StokesSolve( Mesh, visc, 1, solY, tolAbs, tolRel, maxIt, nThreads, prec );
+          StokesSolve( Mesh, visc, 2, solZ, tolAbs, tolRel, maxIt, nThreads, prec );
 
-          // Boundary Conditions & Force
-          AxisFlowDrive( \
-            Mesh, matIsX, matJsX, matValsX, forceX, visc, 0 );
-          AxisFlowDrive( \
-            Mesh, matIsY, matJsY, matValsY, forceY, visc, 1 );
-          AxisFlowDrive( \
-            Mesh, matIsZ, matJsZ, matValsZ, forceZ, visc, 2 );
-
-          // Array timer
-          array_duration = ( omp_get_wtime() - array_start );
-          solve_start = omp_get_wtime();
-
-          set_omp_threads_paralution(nThreads);
-
-          // Declare paralution vector and matrix objects
-          LocalVector<double> solX;
-          LocalVector<double> forcePX;
-          LocalMatrix<double> matX;
-          LocalVector<double> solY;
-          LocalVector<double> forcePY;
-          LocalMatrix<double> matY;
-          LocalVector<double> solZ;
-          LocalVector<double> forcePZ;
-          LocalMatrix<double> matZ;
-
-          // Initialize force and solution vectors
-          forcePX.Allocate("force vector", dofTotal);
-          forcePX.Zeros();
-          solX.Allocate("solution", dofTotal);
-          solX.Zeros();
-          forcePY.Allocate("force vector", dofTotal);
-          forcePY.Zeros();
-          solY.Allocate("solution", dofTotal);
-          solY.Zeros();
-          forcePZ.Allocate("force vector", dofTotal);
-          forcePZ.Zeros();
-          solZ.Allocate("solution", dofTotal);
-          solZ.Zeros();
-
-          // Assemble paralution arrays from previously built COO arrays.
-          matX.Assemble(&matIsX[0], &matJsX[0], &matValsX[0], matIsX.size(), \
-                        "operator", dofTotal, dofTotal);
-          for (int cl = 0; cl < dofTotal; cl++) {
-            forcePX[cl] = forceX[cl];
-          }
-          matY.Assemble(&matIsY[0], &matJsY[0], &matValsY[0], matIsY.size(), \
-                        "operator", dofTotal, dofTotal);
-          for (int cl = 0; cl < dofTotal; cl++) {
-            forcePY[cl] = forceY[cl];
-          }
-          matZ.Assemble(&matIsZ[0], &matJsZ[0], &matValsZ[0], matIsZ.size(), \
-                        "operator", dofTotal, dofTotal);
-          for (int cl = 0; cl < dofTotal; cl++) {
-            forcePZ[cl] = forceZ[cl];
-          }
-
-          // Setup a GMRES solver object and an ILU preconditioner.
-          GMRES<LocalMatrix<double>, LocalVector<double>, double > lsX;
-          ILU<LocalMatrix<double>, LocalVector<double>, double> pX;
-          GMRES<LocalMatrix<double>, LocalVector<double>, double > lsY;
-          ILU<LocalMatrix<double>, LocalVector<double>, double> pY;
-          GMRES<LocalMatrix<double>, LocalVector<double>, double > lsZ;
-          ILU<LocalMatrix<double>, LocalVector<double>, double> pZ;
-          lsX.Init(tolAbs, tolRel, 1e8, maxIt);
-          lsY.Init(tolAbs, tolRel, 1e8, maxIt);
-          lsZ.Init(tolAbs, tolRel, 1e8, maxIt);
-
-          // ILU Level
-          pX.Set(prec);
-          pY.Set(prec);
-          pZ.Set(prec);
-
-          // Pass the matrix and preconditioner to the solver.
-          lsX.SetOperator(matX);
-          lsX.SetPreconditioner(pX);
-          lsY.SetOperator(matY);
-          lsY.SetPreconditioner(pY);
-          lsZ.SetOperator(matZ);
-          lsZ.SetPreconditioner(pZ);
-          lsX.Verbose(2);
-          lsY.Verbose(2);
-          lsZ.Verbose(2);
-
-          // Build the solver.
-          lsX.Build();
-          lsY.Build();
-          lsZ.Build();
-
-          // Solve the problem
-          lsX.Solve(forcePX, &solX);
-          lsY.Solve(forcePY, &solY);
-          lsZ.Solve(forcePZ, &solZ);
-
-          // Linear solve timer
-          solve_duration = ( omp_get_wtime() - solve_start );
+          // stokes timer
+          stokes_duration = ( omp_get_wtime() - stokes_start );
 
           // Write solution to file
           writeSolutionTP ( Mesh, solX, outNameX );
@@ -199,112 +80,27 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
           computeKTensorL ( Mesh, solX, solY, solZ );
 
           std::cout << "Mesh constructed in " << mesh_duration << "seconds\n";
-          std::cout << "Arrays constructed in " << array_duration << "seconds\n";
-          std::cout << "Linear system solved in ";
-          std::cout  << solve_duration << "seconds\n";
+          std::cout << "Stokes problems solved in " << stokes_duration << "seconds\n";
+          std::cout  << stokes_duration << "seconds\n";
           // Total timers
           total_duration = ( omp_get_wtime() - start );
           std::cout << "Total time: " << total_duration << "seconds\n";
-
-          // Clear arrays no longer in use.
-          lsX.Clear();
-          matX.Clear();
-          forcePX.Clear();
-          solX.Clear();
-          lsY.Clear();
-          matY.Clear();
-          forcePY.Clear();
-          solY.Clear();
-          lsZ.Clear();
-          matZ.Clear();
-          forcePZ.Clear();
-          solZ.Clear();
-
           break;
         }
         case 2 :
         {
-          // Copy pre-boundary condition vectors to Y flow and Z flow versions
-          std::vector<int> matIsY = matIsX;
-          std::vector<int> matJsY = matJsX;
-          std::vector<double> matValsY = matValsX;
-          std::vector<double> forceY;
-          forceY.resize( dofTotal );
-          // Boundary Conditions & Force
-          AxisFlowDrive( \
-            Mesh, matIsX, matJsX, matValsX, forceX, visc, 0 );
-          AxisFlowDrive( \
-            Mesh, matIsY, matJsY, matValsY, forceY, visc, 1 );
+          // call Stokes' solver for each axis flow problem
+          std::vector< double > solX;
+          std::vector< double > solY;
+          std::vector< double > solZ;
+          solX.resize( Mesh.dofTotal );
+          solY.resize( Mesh.dofTotal );
+          solZ.resize( 1 );
+          StokesSolve( Mesh, visc, 0, solX, tolAbs, tolRel, maxIt, nThreads, prec );
+          StokesSolve( Mesh, visc, 1, solY, tolAbs, tolRel, maxIt, nThreads, prec );
 
-          // Array timer
-          array_duration = ( omp_get_wtime() - array_start );
-          solve_start = omp_get_wtime();
-
-          set_omp_threads_paralution(nThreads);
-
-          // Declare paralution vector and matrix objects
-          LocalVector<double> solX;
-          LocalVector<double> forcePX;
-          LocalMatrix<double> matX;
-          LocalVector<double> solY;
-          LocalVector<double> forcePY;
-          LocalMatrix<double> matY;
-          LocalVector<double> solZ;
-
-          // Initialize force and solution vectors
-          forcePX.Allocate("force vector", dofTotal);
-          forcePX.Zeros();
-          solX.Allocate("solution", dofTotal);
-          solX.Zeros();
-          forcePY.Allocate("force vector", dofTotal);
-          forcePY.Zeros();
-          solY.Allocate("solution", dofTotal);
-          solY.Zeros();
-          solZ.Allocate("solutin", dofTotal);
-          solZ.Zeros();
-
-          // Assemble paralution arrays from previously built COO arrays.
-          matX.Assemble(&matIsX[0], &matJsX[0], &matValsX[0], matIsX.size(), \
-                        "operator", dofTotal, dofTotal);
-          for (int cl = 0; cl < dofTotal; cl++) {
-            forcePX[cl] = forceX[cl];
-          }
-          matY.Assemble(&matIsY[0], &matJsY[0], &matValsY[0], matIsY.size(), \
-                        "operator", dofTotal, dofTotal);
-          for (int cl = 0; cl < dofTotal; cl++) {
-            forcePY[cl] = forceY[cl];
-          }
-
-          // Setup a GMRES solver object and an ILU preconditioner.
-          GMRES<LocalMatrix<double>, LocalVector<double>, double > lsX;
-          ILU<LocalMatrix<double>, LocalVector<double>, double> pX;
-          GMRES<LocalMatrix<double>, LocalVector<double>, double > lsY;
-          ILU<LocalMatrix<double>, LocalVector<double>, double> pY;
-          lsX.Init(tolAbs, tolRel, 1e8, maxIt);
-          lsY.Init(tolAbs, tolRel, 1e8, maxIt);
-
-          // ILU Level
-          pX.Set(prec);
-          pY.Set(prec);
-
-          // Pass the matrix and preconditioner to the solver.
-          lsX.SetOperator(matX);
-          lsX.SetPreconditioner(pX);
-          lsY.SetOperator(matY);
-          lsY.SetPreconditioner(pY);
-          lsX.Verbose(2);
-          lsY.Verbose(2);
-
-          // Build the solver.
-          lsX.Build();
-          lsY.Build();
-
-          // Solve the problem
-          lsX.Solve(forcePX, &solX);
-          lsY.Solve(forcePY, &solY);
-
-          // Linear solve timer
-          solve_duration = ( omp_get_wtime() - solve_start );
+          // stokes timer
+          stokes_duration = ( omp_get_wtime() - stokes_start );
 
           // Write solution to file
           writeSolutionTP ( Mesh, solX, outNameX );
@@ -312,24 +108,11 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
           computeKTensorL ( Mesh, solX, solY, solZ );
 
           std::cout << "Mesh constructed in " << mesh_duration << "seconds\n";
-          std::cout << "Arrays constructed in " << array_duration << "seconds\n";
-          std::cout << "Linear system solved in " << solve_duration;
+          std::cout << "Stokes problems solved in " << stokes_duration;
           std::cout  << "seconds\n";
           // Total timers
           total_duration = ( omp_get_wtime() - start );
           std::cout << "Total time: " << total_duration << "seconds\n";
-
-          // Clear arrays no longer in use.
-          lsX.Clear();
-          matX.Clear();
-          forcePX.Clear();
-          solX.Clear();
-          lsY.Clear();
-          matY.Clear();
-          forcePY.Clear();
-          solY.Clear();
-          solZ.Clear();
-
           break;
         }
       }
@@ -339,9 +122,8 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
     {
       std::string outName;
       outName = "flowrun.dat";
-      int dofTotal, maxNZ;
-      double mesh_duration, array_duration, solve_duration, total_duration;
-      double start, array_start, solve_start;
+      double mesh_duration, stokes_duration, total_duration;
+      double start, stokes_start;
 
       start = omp_get_wtime();
 
@@ -350,91 +132,22 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
       Mesh.BuildUniformMesh( gridin, ldi1, ldi2, nx, ny, nz, length, width, height );
       // Mesh Timer
       mesh_duration = ( omp_get_wtime() - start );
-      array_start = omp_get_wtime();
+      stokes_start = omp_get_wtime();
 
-      // Compute total degrees of freedom and maximum # of nonzero values in matrix.
-      dofTotal = Mesh.TotalDOF();
-      maxNZ = Mesh.MaxNonZero();
-
-      /* The set matIs, matJs, and matVals are
-         used as a COO sparse representation of the linear system. */
-      std::vector<int> matIs, matJs;
-      std::vector<double> matVals, force;
-      matIs.reserve(maxNZ);
-      matJs.reserve(maxNZ);
-      matVals.reserve(maxNZ);
-      force.resize(dofTotal);
-
-      /* Compute vectors matVals, matIs, matJs
-         describing values and i/j locations for matrix assembly.
-         This call does not include boundary conditions or
-         immersed boundary, thus, this step can be performed once
-         for any number of realizations or boundary setups.  */
-      StokesArray( Mesh, visc, matIs, matJs, matVals );
-
-      // Boundary Conditions & Force
-      AxisFlowDrive ( Mesh, matIs, matJs, matVals, \
-                            force, visc, direction );
-
-      // Immersed Boundary
-      immersedBoundary ( Mesh, matIs, matJs, matVals );
-      array_duration = ( omp_get_wtime() - array_start );
-      solve_start = omp_get_wtime();
-
-      set_omp_threads_paralution(nThreads);
-
-      // Declare paralution vector and matrix objects
-      LocalVector<double> sol;
-      LocalVector<double> forceP;
-      LocalMatrix<double> mat;
-
-      // Initialize force and solution vectors
-      forceP.Allocate("force vector", dofTotal);
-      forceP.Zeros();
-      sol.Allocate("solution", dofTotal);
-      sol.Zeros();
-
-      // Assemble paralution arrays from previously built COO arrays.
-      mat.Assemble(&matIs[0], &matJs[0], &matVals[0], matIs.size(), \
-                   "operator", dofTotal, dofTotal);
-
-      for (int cl = 0; cl < dofTotal; cl++) {
-        forceP[cl] = force[cl];
-      }
-
-      // Setup a GMRES solver object.
-      GMRES<LocalMatrix<double>, LocalVector<double>, double > ls;
-      ls.Init(tolAbs, tolRel, 1e8, maxIt);
-      ls.SetOperator(mat);
-      ls.Verbose(2);
-
-      ILU<LocalMatrix<double>, LocalVector<double>, double> p;
-      p.Set(prec);
-      ls.SetPreconditioner(p);
-
-      // Build the solver.
-      ls.Build();
-
-      // Solve the problem
-      ls.Solve(forceP, &sol);
+      // call Stokes' solver
+      std::vector< double > sol;
+      sol.resize( Mesh.dofTotal );
+      StokesSolve( Mesh, visc, direction, sol, tolAbs, tolRel, maxIt, nThreads, prec );
 
       // Linear solve timer
-      solve_duration = ( omp_get_wtime() - solve_start );
+      stokes_duration = ( omp_get_wtime() - stokes_start );
 
       // Write solution to file
       writeSolutionTP ( Mesh, sol, outName );
       computeKConstantDrive ( Mesh, sol, direction );
 
-      // Clear arrays no longer in use.
-      ls.Clear();
-      mat.Clear();
-      p.Clear();
-      forceP.Clear();
-      sol.Clear();
-
       std::cout << "Mesh constructed in " << mesh_duration << "seconds\n";
-      std::cout << "Arrays constructed in " << array_duration << "seconds\n";
-      std::cout << "Linear system solved in " << solve_duration << "seconds\n";
+      std::cout << "Stokes problems solved in " << stokes_duration << "seconds\n";
       // Total timers
       total_duration = ( omp_get_wtime() - start );
       std::cout << "Total time: " << total_duration << "seconds\n";
@@ -444,3 +157,4 @@ hgfStokesDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
 
   if (simNum == numSims) stop_paralution();
 }
+
