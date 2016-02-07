@@ -84,7 +84,7 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
       std::cout << "Total time: " << total_duration << "seconds\n";
       break;
     }
-    case 1 : // Solve all 3 flow directions for upscaled tensor
+    case 1 : // Solve all 2/3 flow directions for upscaled tensor
     {
       std::string outNameX;
       std::string outNameY;
@@ -105,67 +105,35 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
       mesh_duration = ( omp_get_wtime() - start );
       stokes_start = omp_get_wtime();
 
-      switch ( Mesh.DIM )
-      {
-        case 3 :
-        {
-          // call Stokes' solver for each axis flow problem
-          std::vector< double > solX;
-          std::vector< double > solY;
-          std::vector< double > solZ;
-          solX.resize( Mesh.dofTotal );
-          solY.resize( Mesh.dofTotal );
-          solZ.resize( Mesh.dofTotal );
-          StokesSolve( Mesh, visc, 0, solX, tolAbs, tolRel, maxIt, nThreads, prec );
-          StokesSolve( Mesh, visc, 1, solY, tolAbs, tolRel, maxIt, nThreads, prec );
-          StokesSolve( Mesh, visc, 2, solZ, tolAbs, tolRel, maxIt, nThreads, prec );
-
-          // stokes timer
-          stokes_duration = ( omp_get_wtime() - stokes_start );
-
-          // Write solution to file
-          writeSolutionTP ( Mesh, solX, outNameX );
-          writeSolutionTP ( Mesh, solY, outNameY );
-          writeSolutionTP ( Mesh, solZ, outNameZ );
-          computeKTensorL ( Mesh, solX, solY, solZ );
-
-          std::cout << "Mesh constructed in " << mesh_duration << "seconds\n";
-          std::cout << "Stokes problems solved in " << stokes_duration << "seconds\n";
-          std::cout  << stokes_duration << "seconds\n";
-          // Total timers
-          total_duration = ( omp_get_wtime() - start );
-          std::cout << "Total time: " << total_duration << "seconds\n";
-          break;
-        }
-        case 2 :
-        {
-          // call Stokes' solver for each axis flow problem
-          std::vector< double > solX;
-          std::vector< double > solY;
-          std::vector< double > solZ;
-          solX.resize( Mesh.dofTotal );
-          solY.resize( Mesh.dofTotal );
-          solZ.resize( 1 );
-          StokesSolve( Mesh, visc, 0, solX, tolAbs, tolRel, maxIt, nThreads, prec );
-          StokesSolve( Mesh, visc, 1, solY, tolAbs, tolRel, maxIt, nThreads, prec );
-
-          // stokes timer
-          stokes_duration = ( omp_get_wtime() - stokes_start );
-
-          // Write solution to file
-          writeSolutionTP ( Mesh, solX, outNameX );
-          writeSolutionTP ( Mesh, solY, outNameY );
-          computeKTensorL ( Mesh, solX, solY, solZ );
-
-          std::cout << "Mesh constructed in " << mesh_duration << "seconds\n";
-          std::cout << "Stokes problems solved in " << stokes_duration;
-          std::cout  << "seconds\n";
-          // Total timers
-          total_duration = ( omp_get_wtime() - start );
-          std::cout << "Total time: " << total_duration << "seconds\n";
-          break;
-        }
+      // call Stokes' solver for each axis flow problem
+      std::vector< double > solX;
+      std::vector< double > solY;
+      std::vector< double > solZ;
+      solX.resize( Mesh.dofTotal );
+      solY.resize( Mesh.dofTotal );
+      StokesSolve( Mesh, visc, 0, solX, tolAbs, tolRel, maxIt, nThreads, prec );
+      StokesSolve( Mesh, visc, 1, solY, tolAbs, tolRel, maxIt, nThreads, prec );
+      if ( Mesh.DIM == 3) {
+        solZ.resize( Mesh.dofTotal );
+        StokesSolve( Mesh, visc, 2, solZ, tolAbs, tolRel, maxIt, nThreads, prec );
       }
+      else solZ.resize( 1 );
+
+      // stokes timer
+      stokes_duration = ( omp_get_wtime() - stokes_start );
+
+      // Write solution to file
+      writeSolutionTP ( Mesh, solX, outNameX );
+      writeSolutionTP ( Mesh, solY, outNameY );
+      writeSolutionTP ( Mesh, solZ, outNameZ );
+      computeKTensorL ( Mesh, solX, solY, solZ );
+
+      std::cout << "Mesh constructed in " << mesh_duration << "seconds\n";
+      std::cout << "Stokes problems solved in " << stokes_duration << "seconds\n";
+      std::cout  << stokes_duration << "seconds\n";
+      // Total timers
+      total_duration = ( omp_get_wtime() - start );
+      std::cout << "Total time: " << total_duration << "seconds\n";
       break;
     }
     case 2 :
