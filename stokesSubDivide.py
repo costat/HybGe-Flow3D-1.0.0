@@ -28,9 +28,9 @@ nThreads = 1
 # SET SOLVER PARAMETERS: ILU PRECONDITIONER LEVEL,
 # ABSOLUTE AND RELATIVE RESIDUAL TOLERANCES, AND MAXIMUM ITERATIONS
 prec = 1
-tolAbs = 1e-10;
-tolRel = 1e-10;
-maxIt = 1500;
+tolAbs = 1e-12;
+tolRel = 1e-12;
+maxIt = 5000;
 
 ###################################
 ### SETUP AND SWIG TRANSLATION ####
@@ -75,9 +75,9 @@ elif not nz:
       lG = L * (float(nxG)/nx)
       wG = W * (float(nyG)/ny)
 
-      hgf.hgfStokesDrive( gridin, gridin_ldi2, gridin_ldi3, nxG, nyG, nz, \
-                          lG, wG, H, 0, visc, nThreads, prec, gridTotal, gridCount, \
-                          tolAbs, tolRel, maxIt )
+      hgf.hgfDrive( gridin, gridin_ldi2, gridin_ldi3, nxG, nyG, nz, \
+                    lG, wG, H, 0, visc, nThreads, prec, gridTotal, gridCount, \
+                    tolAbs, tolRel, maxIt )
       sol1 = 'SOL_grid%d_x.dat' % (subgrid)
       shutil.copy('flowrun.dat', sol1)
 
@@ -94,9 +94,9 @@ elif not nz:
       KOut.close()
 
       gridCount = gridCount + 1
-      hgf.hgfStokesDrive( gridin, gridin_ldi2, gridin_ldi3, nxG, nyG, nz, \
-                          lG, wG, H, 1, visc, nThreads, prec, gridTotal, gridCount, \
-                          tolAbs, tolRel, maxIt )
+      hgf.hgfDrive( gridin, gridin_ldi2, gridin_ldi3, nxG, nyG, nz, \
+                    lG, wG, H, 1, visc, nThreads, prec, gridTotal, gridCount, \
+                    tolAbs, tolRel, maxIt )
       sol2 = 'SOL_grid%d_y.dat' % (subgrid)
       shutil.copy('flowrun.dat', sol2)
 

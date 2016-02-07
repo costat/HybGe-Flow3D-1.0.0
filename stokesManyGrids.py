@@ -32,9 +32,9 @@ nThreads = 1
 # SET SOLVER PARAMETERS: ILU PRECONDITIONER LEVEL,
 # ABSOLUTE AND RELATIVE RESIDUAL TOLERANCES, AND MAXIMUM ITERATIONS
 prec = 1
-tolAbs = 1e-10;
-tolRel = 1e-10;
-maxIt = 1500;
+tolAbs = 1e-12;
+tolRel = 1e-12;
+maxIt = 5000;
 
 ####################################################################
 ### SETUP AND SWIG TRANSLATION, USER SHOULD NOT EDIT BELOW HERE ####
@@ -77,9 +77,9 @@ for root, dirs, filenames in os.walk(infolder):
     ### SWIG CALL ###
     #################
 
-    hgf.hgfStokesDrive ( gridin, gridin_ldi2, gridin_ldi3, nx, ny, nz, \
-                         L, W, H, direction, visc, nThreads, prec, nGrids, gridCount, \
-                         tolAbs, tolRel, maxIt )
+    hgf.hgfDrive ( gridin, gridin_ldi2, gridin_ldi3, nx, ny, nz, \
+                   L, W, H, direction, visc, nThreads, prec, nGrids, gridCount, \
+                   tolAbs, tolRel, maxIt )
 
     ### Grab computed K ###
     KLoc = outfolder + 'Ks.dat'

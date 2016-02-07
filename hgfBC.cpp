@@ -792,15 +792,12 @@ FlowComponent3d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
         if (direction == LR && (componentCellCenters[ idx2( cl, LR, Mesh.CellCentersLDI ) ] \
                                 + componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ]) > maxLR)
         {
-          val[5] = -(val[0] + val[1] + val[2] + val[3] + val[4]) \
-                   + 2 * visc * componentCellWidths[ idx2( cl, component, Mesh.CellWidthsLDI ) ] \
-                              * componentCellWidths[ idx2( cl, UD, Mesh.CellWidthsLDI ) ] \
-                              / componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ];
+          val[5] = -(val[0] + val[1] + val[2] + val[3] + val[4]);
         }
         else
         {
           val[5] = -(val[0] + val[1] + val[2] + val[3] + val[4]) \
-                   + 4 * visc * componentCellWidths[ idx2( cl, component, Mesh.CellWidthsLDI ) ] \
+                   + 2 * visc * componentCellWidths[ idx2( cl, component, Mesh.CellWidthsLDI ) ] \
                               * componentCellWidths[ idx2( cl, UD, Mesh.CellWidthsLDI ) ] \
                               / componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ];
         }

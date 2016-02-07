@@ -7,12 +7,6 @@
 #include <cstdlib>
 
 #include "hgf.hpp"
-#include "hgfStokes.hpp"
-#include "hgfMesh.hpp"
-#include "hgfArrays.hpp"
-#include "hgfBC.hpp"
-#include "hgfIB.hpp"
-#include "hgfPP.hpp"
 
 int
 main( int argc, const char* argv[] )

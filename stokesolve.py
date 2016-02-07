@@ -11,15 +11,15 @@ import re
 # GRID INFORMATION. USER PROVIDES PATH .DAT FILE CONTAINING
 # VOXEL ARRAY OF 0S 1S AND 2S.
 # ALSO, USER PROVIDES TOTAL GRID LENGTHS IN EACH DIRECTION.
-gridfiles = './grids/2dsquare.dat'
-L = 1.
-W = 1.
+gridfiles = './grids/idealPores2d.dat'
+L = 4.
+W = 4.
 H = 1.
 
 # PRINCIPAL FLOW DIRECTION, 0 - X, 1 - Y, 2 - Z, SINGLE FLOW DIRECTION SOLVES,
 # PRODUCES CONSTANT K FOR USE IN PORE-NETWORK THROATS
 # 3 - ALL DIRECTIONS, PRODUCES UPSCALED K TENSOR
-direction = 0
+direction = 1
 
 # SET VISCOSITY
 visc = 1
@@ -29,10 +29,10 @@ nThreads = 4
 
 # SET SOLVER PARAMETERS: ILU PRECONDITIONER LEVEL,
 # ABSOLUTE AND RELATIVE RESIDUAL TOLERANCES, AND MAXIMUM ITERATIONS
-prec = 3
+prec = 2
 tolAbs = 1e-12;
 tolRel = 1e-12;
-maxIt = 1500;
+maxIt = 5000;
 
 ##########################################################
 ### SWIG TRANSLATION, USER SHOULD NOT EDIT BELOW HERE ####
@@ -68,6 +68,6 @@ print 'Solving the stationary Stokes problem...\n'
 ### SWIG CALL ###
 #################
 
-hgf.hgfStokesDrive ( gridin, gridin_ldi2, gridin_ldi3, nx, ny, nz, \
-                     L, W, H, direction, visc, nThreads, prec, 1, 1, \
-                     tolAbs, tolRel, maxIt )
+hgf.hgfDrive ( gridin, gridin_ldi2, gridin_ldi3, nx, ny, nz, \
+               L, W, H, direction, visc, nThreads, prec, 1, 1, \
+               tolAbs, tolRel, maxIt )
