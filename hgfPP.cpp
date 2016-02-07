@@ -689,7 +689,7 @@ computeKConstantDrive ( const FluidMesh & Mesh, \
       computeAveragesZ ( Mesh, Solution, V, G, print );
       break;
   }
-  K = V/G;
+  K = (V/G) * Mesh.porosity;
 }
 
 /* writeSolutionTP writes the solution to an output file appropriate for tecplot

@@ -2,7 +2,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <cstring>
-#include <cmath>
+#include <math.h>
 #include <omp.h>
 #include <algorithm>
 
@@ -18,6 +18,116 @@
 #define idx2(i, j, ldi) ((i * ldi) + j)
 /* Define a 3d -> 1d array index, uses row major ordering */
 #define idx3(i, j, k, ldi1, ldi2) (k + (ldi2 * (j + ldi1 * i)))
+
+void
+MeshSubdivide( unsigned long *gridin, int ldi1, int ldi2, \
+               int nx, int ny, int nz, \
+               double length, double width, double height, \
+               int MX, int MY, int MZ, \
+               std::vector< std::vector<unsigned long> >& slices, \
+               std::vector<double>& lengths, \
+               std::vector<double>& widths, \
+               std::vector<double>& heights, \
+               std::vector<int>& nxs, \
+               std::vector<int>& nys, \
+               std::vector<int>& nzs )
+{
+  switch ( nz )
+  {
+    case 0 :
+    {
+      int nSubDomains = 0;
+      int xStart, nxRemainder, yStart, nyRemainder, nyG, nxG, xCount, yCount;
+      slices.resize( MX * MY );
+      lengths.resize( MX * MY );
+      widths.resize( MY * MY );
+      heights.resize( 1 );
+      nxs.resize( MX * MY );
+      nys.resize( MX * MY );
+      nzs.resize( 1 );
+      yCount = 0;
+      yStart = 0;
+      nyRemainder = ny;
+      for (int yy = 0; yy < MY; yy++) {
+        xStart = 0;
+        nxRemainder = nx;
+        xCount = 0;
+        nyG = (int)(round(((double)nyRemainder)/(MY-yCount)));
+        for (int xx = 0; xx < MX; xx++) {
+          nSubDomains++;
+          nxG = (int)(round(((double)nxRemainder)/(MX-xCount)));
+          for (int cx = 0; cx < nxG; cx++) {
+            for (int cy = 0; cy < nyG; cy++) {
+              slices[ nSubDomains-1 ].push_back( gridin[ idx2( (cx+xStart), (cy+yStart), ldi1 ) ] );
+            }
+          }
+          lengths[ nSubDomains-1 ] = length * ((double)nxG / nx);
+          widths[ nSubDomains-1 ] = width * ((double)nyG / ny);
+          nxs[ nSubDomains-1 ] = nxG;
+          nys[ nSubDomains-1 ] = nyG;
+          xStart = xStart + nxG;
+          nxRemainder = nx - xStart;
+          xCount++;
+        }
+        yStart = yStart + nyG;
+        nyRemainder = ny - yStart;
+        yCount++;
+      }
+      break;
+    }
+    default :
+    {
+      int nSubDomains = 0;
+      int xStart, nxRemainder, yStart, nyRemainder, zStart, nzRemainder, nxG, nyG, nzG, xCount, yCount, zCount;
+      slices.resize( MX * MY * MZ );
+      lengths.resize( MX * MY * MZ );
+      widths.resize( MY * MY * MZ );
+      heights.resize( MX * MY * MZ );
+      nxs.resize( MX * MY * MZ );
+      nys.resize( MX * MY * MZ );
+      nzs.resize( MX * MY * MZ );
+      zCount = 0;
+      zStart = 0;
+      nzRemainder = nz;
+      for (int zz = 0; zz < MZ; zz++) {
+        yStart = 0;
+        nyRemainder = ny;
+        yCount = 0;
+        nzG = (int)(round(((double)nzRemainder)/(MZ-zCount)));
+        for (int yy = 0; yy < MY; yy++) {
+          nyG = (int)(round(((double)nyRemainder)/(MY-yCount)));
+          for (int xx = 0; xx < MX; xx++) {
+            nSubDomains++;
+            nxG = (int)(round(((double)nxRemainder)/(MX-xCount)));
+            for (int cx = 0; cx < nxG; cx++) {
+              for (int cy = 0; cy < nyG; cy++) {
+                for (int cz = 0; cz < nzG; cz++) {
+                  slices[ nSubDomains-1 ].push_back( gridin[ idx3( (cx+xStart), (cy+yStart), (cz+zStart), ldi1, ldi2 ) ] );
+                }
+              }
+            }
+            lengths[ nSubDomains-1 ] = length * ((double)nxG / nx);
+            widths[ nSubDomains-1 ] = width * ((double)nyG / ny);
+            heights[ nSubDomains-1 ] = height * ((double)nzG / nz);
+            nxs[ nSubDomains-1 ] = nxG;
+            nys[ nSubDomains-1 ] = nyG;
+            nzs[ nSubDomains-1 ] = nzG;
+            xStart = xStart + nxG;
+            nxRemainder = nx - xStart;
+            xCount++;
+          }
+          yStart = yStart + nyG;
+          nyRemainder = ny - yStart;
+          yCount++;
+        }
+        zStart = zStart + nzG;
+        nzRemainder = nz - zStart;
+        zCount++;
+      }
+      break;
+    }
+  }
+}
 
 // Function to construct the mesh from voxel array input
 void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \

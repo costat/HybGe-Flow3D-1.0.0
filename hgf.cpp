@@ -138,60 +138,31 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
     }
     case 2 :
     { // compute conductivities on subdomains, then solve constructed pore-network problem
+
+      // determine array slices for subdomains
+      std::vector< std::vector< unsigned long > > slices;
+      std::vector< double > lengths, widths, heights;
+      std::vector< int > nxs, nys, nzs;
+      MeshSubdivide( gridin, ldi1, ldi2, nx, ny, nz, \
+                     length, width, height, MX, MY, MZ, \
+                     slices, lengths, widths, heights, \
+                     nxs, nys, nzs );
+      std::cout << "\nCheckPoint\n";
       switch ( nz )
       {
         case 0 :
         {
-          int nSubDomains = 0;
-          int xStart, nxRemainder, yStart, nyRemainder, nyG, nxG, xCount, yCount;
-          // determine array slices for subdomains
-          std::vector< std::vector< unsigned long > > slices;
-          std::vector< double > lengths, widths;
-          std::vector< int > nxs, nys;
-          slices.resize( MX * MY );
-          lengths.resize( MX * MY );
-          widths.resize( MX * MY );
-          nxs.resize( MX * MY );
-          nys.resize( MX * MY );
-          yCount = 0;
-          yStart = 0;
-          for (int yy = 0; yy < MY; yy++) {
-            xStart = 0;
-            nxRemainder = nx;
-            xCount = 0;
-            nyG = (int)(round((double)(nyRemainder)/(MY-yCount)));
-            for (int xx = 0; xx < MX; xx++) {
-              nSubDomains++;
-              nxG = (int)(round((double)(nxRemainder)/(MX-xCount)));
-              for (int cx = 0; cx < nxG; cx++) {
-                for (int cy = 0; cy < nyG; cy++) {
-                  slices[ nSubDomains-1 ].push_back( gridin[ idx2( (cx+xStart), (cy+yStart), ldi1 ) ] );
-                }
-              }
-              lengths[ nSubDomains-1 ] = length * ((double)nxG / nx);
-              widths[ nSubDomains-1 ] = width * ((double)nyG / ny);
-              nxs[ nSubDomains-1 ] = nxG;
-              nys[ nSubDomains-1 ] = nyG;
-              xStart = xStart + nxG;
-              nxRemainder = nx - xStart;
-              xCount++;
-            }
-            yStart = yStart + nyG;
-            nyRemainder = ny - yStart;
-            yCount++;
-          }
-
           // build meshes
           std::vector< FluidMesh > Meshes;
-          Meshes.resize(nSubDomains);
-          for (int sd = 0; sd < nSubDomains; sd++) {
+          Meshes.resize( slices.size() );
+          for (int sd = 0; sd < slices.size(); sd++) {
             Meshes[sd].BuildUniformMesh( slices[sd].data(), nys[sd], 0, nxs[sd], nys[sd], 0, lengths[sd], widths[sd], 0 );
           }
 
           // solve porescale problems
           std::vector< std::vector< double > > Solutions;
-          Solutions.resize( 2*nSubDomains );
-          for (int sd = 0; sd < nSubDomains; sd++) {
+          Solutions.resize( 2*slices.size() );
+          for (int sd = 0; sd < slices.size(); sd++) {
             Solutions[ idx2( sd, 0, 2 ) ].resize( Meshes[sd].dofTotal );
             Solutions[ idx2( sd, 1, 2 ) ].resize( Meshes[sd].dofTotal );
             StokesSolve( Meshes[sd], visc, 0, Solutions[ idx2( sd, 0, 2 ) ], tolAbs, tolRel, maxIt, nThreads, prec );
@@ -200,8 +171,8 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
 
           // post-process porescale solutions
           std::vector< double > Ks;
-          Ks.resize( 2*nSubDomains );
-          for (int sd = 0; sd < nSubDomains; sd++)
+          Ks.resize( 2*slices.size() );
+          for (int sd = 0; sd < slices.size(); sd++)
           {
             computeKConstantDrive( Meshes[sd], Solutions[ idx2( sd, 0, 2 ) ], Ks[ idx2( sd, 0, 2 ) ], 0, 0 );
             computeKConstantDrive( Meshes[sd], Solutions[ idx2( sd, 1, 2 ) ], Ks[ idx2( sd, 1, 2 ) ], 1, 0 );
@@ -215,9 +186,15 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
         }
         default :
         {
-          // determine array slices for subdomains
-
+          std::cout << "\nCheckPoint\n";
           // build meshes
+          std::vector< FluidMesh > Meshes;
+          Meshes.resize( slices.size() );
+          for (int sd = 0; sd < slices.size(); sd++) {
+            std::cout << "\n Building mesh # " << sd << ".\n";
+            Meshes[sd].BuildUniformMesh( slices[sd].data(), nys[sd], nzs[sd], nxs[sd], nys[sd], nzs[sd], lengths[sd], widths[sd], heights[sd] );
+          }
+          std::cout << "\nCheckPoint\n";
 
           // solve porescale problems
 
