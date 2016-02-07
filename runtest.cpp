@@ -18,6 +18,9 @@ main( int argc, const char* argv[] )
   nx = atoi(argv[1]);
   ny = atoi(argv[2]);
   nz = atoi(argv[3]);
+  int MX = 2;
+  int MY = 2;
+  int MZ = 2;
 
   ldi1 = ny;
   ldi2 = nz;
@@ -50,7 +53,7 @@ main( int argc, const char* argv[] )
 
   hgfDrive( gridin, size1, ldi1, ldi2, nx, ny, nz, \
                  length, width, height, direction, visc, \
-                 nThreads, prec, numSims, simNum, 1e-12, 1e-12, 5000 );
+                 nThreads, prec, numSims, simNum, 1e-12, 1e-12, 5000, MX, MY, MZ );
 
   delete[] gridin;
 

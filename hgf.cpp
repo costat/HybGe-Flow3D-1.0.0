@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <omp.h>
+#include <math.h>
 #include <iterator>
 
 #include <paralution.hpp>
@@ -27,14 +28,62 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
           int nx, int ny, int nz, \
           double length, double width, double height, int direction, \
           double visc, int nThreads, int prec, int numSims, int simNum, \
-          double tolAbs, double tolRel, int maxIt )
+          double tolAbs, double tolRel, int maxIt, \
+          int MX, int MY, int MZ )
 {
+
+  int type;
 
   if (simNum == 1) init_paralution();
 
-  switch ( direction )
+  if (direction < 3) type = 0;
+  else if (direction == 3) type = 1;
+  else if (direction == 4) type = 2;
+  else
   {
-    case 3 : // Solve all 3 flow directions for upscaled tensor
+    std::cout << "\nProblem type not properly defined. Solving x-flow problem.\n\n";
+    type = 0;
+    direction = 0;
+  }
+
+  switch ( type )
+  {
+    case 0 : // Solve a single flow direction, upscale constant conductivity
+    {
+      std::string outName;
+      outName = "flowrun.dat";
+      double mesh_duration, stokes_duration, total_duration;
+      double start, stokes_start;
+
+      start = omp_get_wtime();
+
+      // Build mesh object
+      FluidMesh Mesh;
+      Mesh.BuildUniformMesh( gridin, ldi1, ldi2, nx, ny, nz, length, width, height );
+      // Mesh Timer
+      mesh_duration = ( omp_get_wtime() - start );
+      stokes_start = omp_get_wtime();
+
+      // call Stokes' solver
+      std::vector< double > sol;
+      sol.resize( Mesh.dofTotal );
+      StokesSolve( Mesh, visc, direction, sol, tolAbs, tolRel, maxIt, nThreads, prec );
+
+      // Linear solve timer
+      stokes_duration = ( omp_get_wtime() - stokes_start );
+
+      // Write solution to file
+      writeSolutionTP ( Mesh, sol, outName );
+      computeKConstantDrive ( Mesh, sol, direction );
+
+      std::cout << "Mesh constructed in " << mesh_duration << "seconds\n";
+      std::cout << "Stokes problems solved in " << stokes_duration << "seconds\n";
+      // Total timers
+      total_duration = ( omp_get_wtime() - start );
+      std::cout << "Total time: " << total_duration << "seconds\n";
+      break;
+    }
+    case 1 : // Solve all 3 flow directions for upscaled tensor
     {
       std::string outNameX;
       std::string outNameY;
@@ -118,40 +167,91 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
       }
       break;
     }
-    default : // Solve a single flow direction, upscale constant conductivity
-    {
-      std::string outName;
-      outName = "flowrun.dat";
-      double mesh_duration, stokes_duration, total_duration;
-      double start, stokes_start;
+    case 2 :
+    { // compute conductivities on subdomains, then solve constructed pore-network problem
+      switch ( nz )
+      {
+        case 0 :
+        {
+          int nSubDomains = 0;
+          int xStart, nxRemainder, yStart, nyRemainder, nyG, nxG, xCount, yCount;
+          // determine array slices for subdomains
+          std::vector< std::vector< unsigned long > > slices;
+          std::vector< double > lengths, widths;
+          std::vector< int > nxs, nys;
+          slices.resize( MX * MY );
+          lengths.resize( MX * MY );
+          widths.resize( MX * MY );
+          nxs.resize( MX * MY );
+          nys.resize( MX * MY );
+          yCount = 0;
+          yStart = 0;
+          for (int yy = 0; yy < MY; yy++) {
+            xStart = 0;
+            nxRemainder = nx;
+            xCount = 0;
+            nyG = (int)(round((double)(nyRemainder)/(MY-yCount)));
+            for (int xx = 0; xx < MX; xx++) {
+              nSubDomains++;
+              nxG = (int)(round((double)(nxRemainder)/(MX-xCount)));
+              for (int cx = 0; cx < nxG; cx++) {
+                for (int cy = 0; cy < nyG; cy++) {
+                  slices[ nSubDomains-1 ].push_back( gridin[ idx2( (cx+xStart), (cy+yStart), ldi1 ) ] );
+                }
+              }
+              lengths[ nSubDomains-1 ] = length * ((double)nxG / nx);
+              widths[ nSubDomains-1 ] = width * ((double)nyG / ny);
+              nxs[ nSubDomains-1 ] = nxG;
+              nys[ nSubDomains-1 ] = nyG;
+              xStart = xStart + nxG;
+              nxRemainder = nx - xStart;
+              xCount++;
+            }
+            yStart = yStart + nyG;
+            nyRemainder = ny - yStart;
+            yCount++;
+          }
 
-      start = omp_get_wtime();
+          // build meshes
+          std::vector< FluidMesh > Meshes;
+          Meshes.resize(nSubDomains);
+          for (int sd = 0; sd < nSubDomains; sd++) {
+            Meshes[sd].BuildUniformMesh( slices[sd].data(), nys[sd], 0, nxs[sd], nys[sd], 0, lengths[sd], widths[sd], 0 );
+          }
 
-      // Build mesh object
-      FluidMesh Mesh;
-      Mesh.BuildUniformMesh( gridin, ldi1, ldi2, nx, ny, nz, length, width, height );
-      // Mesh Timer
-      mesh_duration = ( omp_get_wtime() - start );
-      stokes_start = omp_get_wtime();
+          // solve porescale problems
+          std::vector< std::vector< double > > Solutions;
+          Solutions.resize( 2*nSubDomains );
+          for (int sd = 0; sd < nSubDomains; sd++) {
+            Solutions[ idx2( sd, 0, 2 ) ].resize( Meshes[sd].dofTotal );
+            Solutions[ idx2( sd, 1, 2 ) ].resize( Meshes[sd].dofTotal );
+            StokesSolve( Meshes[sd], visc, 0, Solutions[ idx2( sd, 0, 2 ) ], tolAbs, tolRel, maxIt, nThreads, prec );
+            StokesSolve( Meshes[sd], visc, 1, Solutions[ idx2( sd, 1, 2 ) ], tolAbs, tolRel, maxIt, nThreads, prec );
+          }
 
-      // call Stokes' solver
-      std::vector< double > sol;
-      sol.resize( Mesh.dofTotal );
-      StokesSolve( Mesh, visc, direction, sol, tolAbs, tolRel, maxIt, nThreads, prec );
+          // post-process porescale solutions
+          std::vector< double > Ks;
 
-      // Linear solve timer
-      stokes_duration = ( omp_get_wtime() - stokes_start );
 
-      // Write solution to file
-      writeSolutionTP ( Mesh, sol, outName );
-      computeKConstantDrive ( Mesh, sol, direction );
+          // solve pore-network model with porescale computed Ks
 
-      std::cout << "Mesh constructed in " << mesh_duration << "seconds\n";
-      std::cout << "Stokes problems solved in " << stokes_duration << "seconds\n";
-      // Total timers
-      total_duration = ( omp_get_wtime() - start );
-      std::cout << "Total time: " << total_duration << "seconds\n";
-      break;
+
+          break; // break for 2d dim switch
+        }
+        default :
+        {
+          // determine array slices for subdomains
+
+          // build meshes
+
+          // solve porescale problems
+
+          // solve pore-network model with porescale computed Ks
+
+          break; // break for 3d dim switch
+        }
+      }
+      break; // break for type 2 problem solve
     }
   }
 
