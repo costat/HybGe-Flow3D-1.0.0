@@ -40,11 +40,11 @@ MeshSubdivide( unsigned long *gridin, int ldi1, int ldi2, \
       int xStart, nxRemainder, yStart, nyRemainder, nyG, nxG, xCount, yCount;
       slices.resize( MX * MY );
       lengths.resize( MX * MY );
-      widths.resize( MY * MY );
-      heights.resize( 1 );
+      widths.resize( MX * MY );
+      heights.resize( MX * MY );
       nxs.resize( MX * MY );
       nys.resize( MX * MY );
-      nzs.resize( 1 );
+      nzs.resize( MX * MY );
       yCount = 0;
       yStart = 0;
       nyRemainder = ny;
@@ -95,6 +95,9 @@ MeshSubdivide( unsigned long *gridin, int ldi1, int ldi2, \
         yCount = 0;
         nzG = (int)(round(((double)nzRemainder)/(MZ-zCount)));
         for (int yy = 0; yy < MY; yy++) {
+          xStart = 0;
+          nxRemainder = nx;
+          xCount = 0;
           nyG = (int)(round(((double)nyRemainder)/(MY-yCount)));
           for (int xx = 0; xx < MX; xx++) {
             nSubDomains++;

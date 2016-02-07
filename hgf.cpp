@@ -147,63 +147,66 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
                      length, width, height, MX, MY, MZ, \
                      slices, lengths, widths, heights, \
                      nxs, nys, nzs );
-      std::cout << "\nCheckPoint\n";
-      switch ( nz )
+      for (int sd = 0; sd < slices.size(); sd++)
       {
-        case 0 :
+        std::cout << "\nMesh # " << sd << "; size = " << slices[sd].size() << ".\n";
+        for (int jj = 0; jj < slices[sd].size(); jj++)
         {
-          // build meshes
-          std::vector< FluidMesh > Meshes;
-          Meshes.resize( slices.size() );
-          for (int sd = 0; sd < slices.size(); sd++) {
-            Meshes[sd].BuildUniformMesh( slices[sd].data(), nys[sd], 0, nxs[sd], nys[sd], 0, lengths[sd], widths[sd], 0 );
-          }
-
-          // solve porescale problems
-          std::vector< std::vector< double > > Solutions;
-          Solutions.resize( 2*slices.size() );
-          for (int sd = 0; sd < slices.size(); sd++) {
-            Solutions[ idx2( sd, 0, 2 ) ].resize( Meshes[sd].dofTotal );
-            Solutions[ idx2( sd, 1, 2 ) ].resize( Meshes[sd].dofTotal );
-            StokesSolve( Meshes[sd], visc, 0, Solutions[ idx2( sd, 0, 2 ) ], tolAbs, tolRel, maxIt, nThreads, prec );
-            StokesSolve( Meshes[sd], visc, 1, Solutions[ idx2( sd, 1, 2 ) ], tolAbs, tolRel, maxIt, nThreads, prec );
-          }
-
-          // post-process porescale solutions
-          std::vector< double > Ks;
-          Ks.resize( 2*slices.size() );
-          for (int sd = 0; sd < slices.size(); sd++)
-          {
-            computeKConstantDrive( Meshes[sd], Solutions[ idx2( sd, 0, 2 ) ], Ks[ idx2( sd, 0, 2 ) ], 0, 0 );
-            computeKConstantDrive( Meshes[sd], Solutions[ idx2( sd, 1, 2 ) ], Ks[ idx2( sd, 1, 2 ) ], 1, 0 );
-            std::cout << "\nDomain " << sd << ": Mesh size: " << Meshes[sd].DOF[0] << " cells \t Kxx = " << Ks[idx2(sd,0,2)] << "\t Kyy = " << Ks[idx2(sd,1,2)] << "\n";
-          }
-
-          // solve pore-network model with porescale computed Ks
-
-
-          break; // break for 2d dim switch
-        }
-        default :
-        {
-          std::cout << "\nCheckPoint\n";
-          // build meshes
-          std::vector< FluidMesh > Meshes;
-          Meshes.resize( slices.size() );
-          for (int sd = 0; sd < slices.size(); sd++) {
-            std::cout << "\n Building mesh # " << sd << ".\n";
-            Meshes[sd].BuildUniformMesh( slices[sd].data(), nys[sd], nzs[sd], nxs[sd], nys[sd], nzs[sd], lengths[sd], widths[sd], heights[sd] );
-          }
-          std::cout << "\nCheckPoint\n";
-
-          // solve porescale problems
-
-          // solve pore-network model with porescale computed Ks
-
-          break; // break for 3d dim switch
+          std::cout << slices[sd][jj] << "\n";
         }
       }
-      break; // break for type 2 problem solve
+
+      // build meshes
+      std::vector< FluidMesh > Meshes;
+      Meshes.resize( slices.size() );
+      for (int sd = 0; sd < slices.size(); sd++) {
+        Meshes[sd].BuildUniformMesh( slices[sd].data(), nys[sd], nzs[sd], nxs[sd], nys[sd], nzs[sd], lengths[sd], widths[sd], heights[sd] );
+      }
+
+      // solve porescale problems
+      std::vector< std::vector< double > > Solutions;
+      Solutions.resize( Meshes[0].DIM*slices.size() );
+      if ( nz ) {
+        for (int sd = 0; sd < slices.size(); sd++) {
+          Solutions[ idx2( sd, 0, 3 ) ].resize( Meshes[sd].dofTotal );
+          Solutions[ idx2( sd, 1, 3 ) ].resize( Meshes[sd].dofTotal );
+          Solutions[ idx2( sd, 2, 3 ) ].resize( Meshes[sd].dofTotal );
+          StokesSolve( Meshes[sd], visc, 0, Solutions[ idx2( sd, 0, 3 ) ], tolAbs, tolRel, maxIt, nThreads, prec );
+          StokesSolve( Meshes[sd], visc, 1, Solutions[ idx2( sd, 1, 3 ) ], tolAbs, tolRel, maxIt, nThreads, prec );
+          StokesSolve( Meshes[sd], visc, 2, Solutions[ idx2( sd, 2, 3 ) ], tolAbs, tolRel, maxIt, nThreads, prec );
+        }
+      }
+      else {
+        for (int sd = 0; sd < slices.size(); sd++) {
+          Solutions[ idx2( sd, 0, 2 ) ].resize( Meshes[sd].dofTotal );
+          Solutions[ idx2( sd, 1, 2 ) ].resize( Meshes[sd].dofTotal );
+          StokesSolve( Meshes[sd], visc, 0, Solutions[ idx2( sd, 0, 2 ) ], tolAbs, tolRel, maxIt, nThreads, prec );
+          StokesSolve( Meshes[sd], visc, 1, Solutions[ idx2( sd, 1, 2 ) ], tolAbs, tolRel, maxIt, nThreads, prec );
+        }
+      }
+      // post-process porescale solutions
+      std::vector< double > Ks;
+      Ks.resize( Meshes[0].DIM*slices.size() );
+      if ( nz ) {
+        for (int sd = 0; sd < slices.size(); sd++)
+        {
+          computeKConstantDrive( Meshes[sd], Solutions[ idx2( sd, 0, 3 ) ], Ks[ idx2( sd, 0, 3 ) ], 0, 0 );
+          computeKConstantDrive( Meshes[sd], Solutions[ idx2( sd, 1, 3 ) ], Ks[ idx2( sd, 1, 3 ) ], 1, 0 );
+          computeKConstantDrive( Meshes[sd], Solutions[ idx2( sd, 2, 3 ) ], Ks[ idx2( sd, 2, 3 ) ], 2, 0 );
+          std::cout << "\nDomain " << sd << ": Mesh size: " << Meshes[sd].DOF[0] << " cells \t Kxx = " << Ks[idx2(sd,0,3)] << "\t Kyy = " << Ks[idx2(sd,1,3)];
+          std::cout << "\t Kzz = " << Ks[idx2(sd,2,3)] << "\n";
+        }
+      }
+      else {
+        for (int sd = 0; sd < slices.size(); sd++) {
+          computeKConstantDrive( Meshes[sd], Solutions[ idx2( sd, 0, 2 ) ], Ks[ idx2( sd, 0, 2 ) ], 0, 0 );
+          computeKConstantDrive( Meshes[sd], Solutions[ idx2( sd, 1, 2 ) ], Ks[ idx2( sd, 1, 2 ) ], 1, 0 );
+          std::cout << "\nDomain " << sd << ": Mesh size: " << Meshes[sd].DOF[0] << " cells \t Kxx = " << Ks[idx2(sd,0,2)] << "\t Kyy = " << Ks[idx2(sd,1,2)] << "\n";
+        }
+      }
+
+      // solve pore-network model with porescale computed Ks
+
     }
   }
 
