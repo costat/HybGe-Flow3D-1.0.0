@@ -74,7 +74,8 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
 
       // Write solution to file
       writeSolutionTP ( Mesh, sol, outName );
-      computeKConstantDrive ( Mesh, sol, direction );
+      double K;
+      computeKConstantDrive ( Mesh, sol, K, direction, 1 );
 
       std::cout << "Mesh constructed in " << mesh_duration << "seconds\n";
       std::cout << "Stokes problems solved in " << stokes_duration << "seconds\n";
@@ -231,7 +232,13 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
 
           // post-process porescale solutions
           std::vector< double > Ks;
-
+          Ks.resize( 2*nSubDomains );
+          for (int sd = 0; sd < nSubDomains; sd++)
+          {
+            computeKConstantDrive( Meshes[sd], Solutions[ idx2( sd, 0, 2 ) ], Ks[ idx2( sd, 0, 2 ) ], 0, 0 );
+            computeKConstantDrive( Meshes[sd], Solutions[ idx2( sd, 1, 2 ) ], Ks[ idx2( sd, 1, 2 ) ], 1, 0 );
+            std::cout << "\nDomain " << sd << ": Mesh size: " << Meshes[sd].DOF[0] << " cells \t Kxx = " << Ks[idx2(sd,0,2)] << "\t Kyy = " << Ks[idx2(sd,1,2)] << "\n";
+          }
 
           // solve pore-network model with porescale computed Ks
 

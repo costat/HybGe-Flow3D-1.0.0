@@ -671,22 +671,25 @@ computeAveragesZ ( const FluidMesh& Mesh, \
    of a constant upscaled conductivity */
 void
 computeKConstantDrive ( const FluidMesh & Mesh, \
-                        const std::vector<double>& Solution,
-                        int direction )
+                        const std::vector<double>& Solution, \
+                        double& K, \
+                        int direction, \
+                        int print )
 {
   double V, G;
   switch ( direction )
   {
     case 0 :
-      computeAveragesX ( Mesh, Solution, V, G, 1 );
+      computeAveragesX ( Mesh, Solution, V, G, print );
       break;
     case 1 :
-      computeAveragesY ( Mesh, Solution, V, G, 1 );
+      computeAveragesY ( Mesh, Solution, V, G, print );
       break;
     case 2 :
-      computeAveragesZ ( Mesh, Solution, V, G, 1 );
+      computeAveragesZ ( Mesh, Solution, V, G, print );
       break;
   }
+  K = V/G;
 }
 
 /* writeSolutionTP writes the solution to an output file appropriate for tecplot

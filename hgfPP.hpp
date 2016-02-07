@@ -24,8 +24,10 @@ computeAveragesZ ( const FluidMesh& Mesh, \
 
 void
 computeKConstantDrive ( const FluidMesh& Mesh, \
-                        const std::vector<double>& Solution, \
-                        int direction );
+                        const std::vector<double>& Solution,
+                        double& K, \
+                        int direction, \
+                        int print );
 
 void
 writeSolutionTP ( const FluidMesh& Mesh, const std::vector<double>& sol, \
