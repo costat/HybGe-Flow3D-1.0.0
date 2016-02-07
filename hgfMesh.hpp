@@ -62,4 +62,18 @@ class FluidMesh
 */
 };
 
+class PoreNetwork
+{
+    public:
+      // Public data
+      std::vector<double> PoresXYZ;
+      std::vector<double> ThroatKs;
+      std::vector<double> PoreKs;
+      std::vector<unsigned long> Throats;
+      std::vector<unsigned long> InPores, OutPores, PeriodicPairs;
+      int DIM, nPores, nThroats;
+      // public functions
+      BuildUniformPN( );
+};
+
 #endif
