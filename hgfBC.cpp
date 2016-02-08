@@ -21,7 +21,7 @@ FlowComponent3d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
                   const std::vector<double>& CellWidthsUD, \
                   const std::vector<unsigned long>& componentConnectivity, \
                   const std::vector<unsigned long>& PressureNeighbor, \
-                  double visc, int direction, int component )
+                  double visc, int direction, int component, int shift, int pressure )
 {
   double maxin = 1.0;
   double xmin = Mesh.xLim[0];
@@ -69,7 +69,8 @@ FlowComponent3d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
     maxLR = xmax;
     minUD = zmin;
     maxUD = zmax;
-    colShift = Mesh.DOF[1];
+    if (shift) colShift = Mesh.DOF[1];
+    else colShift = 0;
   }
   else
   {
@@ -87,7 +88,8 @@ FlowComponent3d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
     maxLR = xmax;
     minUD = ymin;
     maxUD = ymax;
-    colShift = Mesh.DOF[1] + Mesh.DOF[2];
+    if (shift) colShift = Mesh.DOF[1] + Mesh.DOF[2];
+    else colShift = 0;
   }
 
   for (unsigned long arrayIndex = 0; arrayIndex < componentBoundary.size(); arrayIndex++)
@@ -508,14 +510,17 @@ FlowComponent3d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
         entries = 6;
       }
       // Pressure component to BC
-      val[entries] = -1. * componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ] \
-                         * componentCellWidths[ idx2( cl, UD, Mesh.CellWidthsLDI ) ];
-      val[entries+1] = -val[entries];
-      colId[entries] = PressureNeighbor[ idx2( cl, 0, Mesh.VelocityCellPressureNeighborLDI ) ] \
-                       - 1 + Mesh.DOF[1] + Mesh.DOF[2] + Mesh.DOF[3];
-      colId[entries+1] = PressureNeighbor[ idx2( cl, 1, Mesh.VelocityCellPressureNeighborLDI ) ] \
-                       - 1 + Mesh.DOF[1] + Mesh.DOF[2] + Mesh.DOF[3];
-      entries = entries + 2;
+      if (pressure)
+      {
+        val[entries] = -1. * componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ] \
+                           * componentCellWidths[ idx2( cl, UD, Mesh.CellWidthsLDI ) ];
+        val[entries+1] = -val[entries];
+        colId[entries] = PressureNeighbor[ idx2( cl, 0, Mesh.VelocityCellPressureNeighborLDI ) ] \
+                         - 1 + Mesh.DOF[1] + Mesh.DOF[2] + Mesh.DOF[3];
+        colId[entries+1] = PressureNeighbor[ idx2( cl, 1, Mesh.VelocityCellPressureNeighborLDI ) ] \
+                         - 1 + Mesh.DOF[1] + Mesh.DOF[2] + Mesh.DOF[3];
+        entries = entries + 2;
+      }
     } // end !dirDown primary section
     else if (!nbrfaces[dirUp]) // !dirUp section
     {
@@ -713,15 +718,18 @@ FlowComponent3d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
         }
         entries = 6;
       }
-      // Pressure component to BC
-      val[entries] = -1. * componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ] \
-                         * componentCellWidths[ idx2( cl, UD, Mesh.CellWidthsLDI ) ];
-      val[entries+1] = -val[entries];
-      colId[entries] = PressureNeighbor[ idx2( cl, 0, Mesh.VelocityCellPressureNeighborLDI ) ] \
-                       - 1 + Mesh.DOF[1] + Mesh.DOF[2] + Mesh.DOF[3];
-      colId[entries+1] = PressureNeighbor[ idx2( cl, 1, Mesh.VelocityCellPressureNeighborLDI ) ] \
-                       - 1 + Mesh.DOF[1] + Mesh.DOF[2] + Mesh.DOF[3];
-      entries = entries + 2;
+      if (pressure)
+      {
+        // Pressure component to BC
+        val[entries] = -1. * componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ] \
+                           * componentCellWidths[ idx2( cl, UD, Mesh.CellWidthsLDI ) ];
+        val[entries+1] = -val[entries];
+        colId[entries] = PressureNeighbor[ idx2( cl, 0, Mesh.VelocityCellPressureNeighborLDI ) ] \
+                         - 1 + Mesh.DOF[1] + Mesh.DOF[2] + Mesh.DOF[3];
+        colId[entries+1] = PressureNeighbor[ idx2( cl, 1, Mesh.VelocityCellPressureNeighborLDI ) ] \
+                         - 1 + Mesh.DOF[1] + Mesh.DOF[2] + Mesh.DOF[3];
+        entries = entries + 2;
+      }
     } // end !dirUp primary section
     else if (!nbrfaces[dirLeft]) // !dirLeft section
     {
@@ -809,15 +817,18 @@ FlowComponent3d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
         colId[5] = cl2;
         entries = 6;
       }
-      // Pressure component to BC
-      val[entries] = -1. * componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ] \
-                         * componentCellWidths[ idx2( cl, UD, Mesh.CellWidthsLDI ) ];
-      val[entries+1] = -val[entries];
-      colId[entries] = PressureNeighbor[ idx2( cl, 0, Mesh.VelocityCellPressureNeighborLDI ) ] \
-                       - 1 + Mesh.DOF[1] + Mesh.DOF[2] + Mesh.DOF[3];
-      colId[entries+1] = PressureNeighbor[ idx2( cl, 1, Mesh.VelocityCellPressureNeighborLDI ) ] \
-                       - 1 + Mesh.DOF[1] + Mesh.DOF[2] + Mesh.DOF[3];
-      entries = entries + 2;
+      if (pressure)
+      {
+        // Pressure component to BC
+        val[entries] = -1. * componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ] \
+                           * componentCellWidths[ idx2( cl, UD, Mesh.CellWidthsLDI ) ];
+        val[entries+1] = -val[entries];
+        colId[entries] = PressureNeighbor[ idx2( cl, 0, Mesh.VelocityCellPressureNeighborLDI ) ] \
+                         - 1 + Mesh.DOF[1] + Mesh.DOF[2] + Mesh.DOF[3];
+        colId[entries+1] = PressureNeighbor[ idx2( cl, 1, Mesh.VelocityCellPressureNeighborLDI ) ] \
+                         - 1 + Mesh.DOF[1] + Mesh.DOF[2] + Mesh.DOF[3];
+        entries = entries + 2;
+      }
     } // end !dirLeft primary section
     else if (!nbrfaces[dirRight]) // !dirRight section
     {
@@ -861,15 +872,18 @@ FlowComponent3d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
                             / componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ];
       }
       entries = 6;
-      // Pressure component to BC
-      val[entries] = -1. * componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ] \
-                         * componentCellWidths[ idx2( cl, UD, Mesh.CellWidthsLDI ) ];
-      val[entries+1] = -val[entries];
-      colId[entries] = PressureNeighbor[ idx2( cl, 0, Mesh.VelocityCellPressureNeighborLDI ) ] \
-                       - 1 + Mesh.DOF[1] + Mesh.DOF[2] + Mesh.DOF[3];
-      colId[entries+1] = PressureNeighbor[ idx2( cl, 1, Mesh.VelocityCellPressureNeighborLDI ) ] \
-                       - 1 + Mesh.DOF[1] + Mesh.DOF[2] + Mesh.DOF[3];
-      entries = entries + 2;
+      if (pressure)
+      {
+        // Pressure component to BC
+        val[entries] = -1. * componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ] \
+                           * componentCellWidths[ idx2( cl, UD, Mesh.CellWidthsLDI ) ];
+        val[entries+1] = -val[entries];
+        colId[entries] = PressureNeighbor[ idx2( cl, 0, Mesh.VelocityCellPressureNeighborLDI ) ] \
+                         - 1 + Mesh.DOF[1] + Mesh.DOF[2] + Mesh.DOF[3];
+        colId[entries+1] = PressureNeighbor[ idx2( cl, 1, Mesh.VelocityCellPressureNeighborLDI ) ] \
+                         - 1 + Mesh.DOF[1] + Mesh.DOF[2] + Mesh.DOF[3];
+        entries = entries + 2;
+      }
     } // end !dirRight primary section
     // Enter values
     for (int col = 0; col < entries; col++)
@@ -891,7 +905,7 @@ FlowComponent2d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
                   const std::vector<double>& CellWidthsLR, \
                   const std::vector<unsigned long>& componentConnectivity, \
                   const std::vector<unsigned long>& PressureNeighbor, \
-                  double visc, int direction, int component
+                  double visc, int direction, int component, int shift, int pressure
                 )
 {
   double maxin = 1.0;
@@ -928,7 +942,8 @@ FlowComponent2d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
     componentMax = ymax;
     minLR = xmin;
     maxLR = xmax;
-    colShift = Mesh.DOF[1];
+    if (shift) colShift = Mesh.DOF[1];
+    else colShift = 0;
   }
 
   for (unsigned long arrayIndex = 0; arrayIndex < componentBoundary.size(); arrayIndex++)
@@ -1040,14 +1055,17 @@ FlowComponent2d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
         colId[3] = cl2;
         entries = 4;
       }
-      // Pressure component
-      val[entries] = -1. * componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ];
-      val[entries+1] = -val[entries];
-      colId[entries] = PressureNeighbor[ idx2( cl, 0, Mesh.VelocityCellPressureNeighborLDI ) ] \
-                       - 1 + Mesh.DOF[1] + Mesh.DOF[2];
-      colId[entries+1] = PressureNeighbor[ idx2( cl, 1, Mesh.VelocityCellPressureNeighborLDI ) ] \
-                       - 1 + Mesh.DOF[1] + Mesh.DOF[2];
-      entries = entries + 2;
+      if (pressure)
+      {
+        // Pressure component
+        val[entries] = -1. * componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ];
+        val[entries+1] = -val[entries];
+        colId[entries] = PressureNeighbor[ idx2( cl, 0, Mesh.VelocityCellPressureNeighborLDI ) ] \
+                         - 1 + Mesh.DOF[1] + Mesh.DOF[2];
+        colId[entries+1] = PressureNeighbor[ idx2( cl, 1, Mesh.VelocityCellPressureNeighborLDI ) ] \
+                         - 1 + Mesh.DOF[1] + Mesh.DOF[2];
+        entries = entries + 2;
+      }
     }
     else if (!nbrfaces[dirRight]) // !dirRight section
     {
@@ -1077,14 +1095,17 @@ FlowComponent2d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
                  + 2 * visc * componentCellWidths[ idx2( cl, component, Mesh.CellWidthsLDI ) ] \
                             / componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ];
       }
-      // Pressure component
-      val[entries] = -1. * componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ];
-      val[entries+1] = -val[entries];
-      colId[entries] = PressureNeighbor[ idx2( cl, 0, Mesh.VelocityCellPressureNeighborLDI ) ] \
-                       - 1 + Mesh.DOF[1] + Mesh.DOF[2];
-      colId[entries+1] = PressureNeighbor[ idx2( cl, 1, Mesh.VelocityCellPressureNeighborLDI ) ] \
-                       - 1 + Mesh.DOF[1] + Mesh.DOF[2];
-      entries = entries + 2;
+      if (pressure)
+      {
+        // Pressure component
+        val[entries] = -1. * componentCellWidths[ idx2( cl, LR, Mesh.CellWidthsLDI ) ];
+        val[entries+1] = -val[entries];
+        colId[entries] = PressureNeighbor[ idx2( cl, 0, Mesh.VelocityCellPressureNeighborLDI ) ] \
+                         - 1 + Mesh.DOF[1] + Mesh.DOF[2];
+        colId[entries+1] = PressureNeighbor[ idx2( cl, 1, Mesh.VelocityCellPressureNeighborLDI ) ] \
+                         - 1 + Mesh.DOF[1] + Mesh.DOF[2];
+        entries = entries + 2;
+      }
     }
     // Enter values
     for (int col = 0; col < entries; col++)
@@ -1116,7 +1137,7 @@ AxisFlowDrive ( const FluidMesh& Mesh, std::vector<int>& matIs, \
       FlowComponent2d( Mesh, matIs, matJs, matVals, \
                        force, componentBoundary, componentCellCenters, componentCellWidths, \
                        cellWidthsLR, componentConnectivity, PressureNeighbor, \
-                       visc, direction, 0 );
+                       visc, direction, 0, 1, 1 );
       // Set V boundary conditions
       const std::vector<unsigned long>& componentBoundary1 = Mesh.VBoundaryCells;
       const std::vector<double>& componentCellWidths1 = Mesh.VCellWidths;
@@ -1127,7 +1148,7 @@ AxisFlowDrive ( const FluidMesh& Mesh, std::vector<int>& matIs, \
       FlowComponent2d( Mesh, matIs, matJs, matVals, \
                        force, componentBoundary1, componentCellCenters1, componentCellWidths1, \
                        cellWidthsLR1, componentConnectivity1, PressureNeighbor1, \
-                       visc, direction, 1 );
+                       visc, direction, 1, 1, 1 );
       break;
     }
     default :
@@ -1143,7 +1164,7 @@ AxisFlowDrive ( const FluidMesh& Mesh, std::vector<int>& matIs, \
       FlowComponent3d( Mesh, matIs, matJs, matVals, \
                        force, componentBoundary, componentCellCenters, componentCellWidths, \
                        cellWidthsLR, cellWidthsUD, componentConnectivity, PressureNeighbor, \
-                       visc, direction, 0 );
+                       visc, direction, 0, 1, 1 );
       // Set V boundary conditions
       const std::vector<unsigned long>& componentBoundary1 = Mesh.VBoundaryCells;
       const std::vector<double>& componentCellWidths1 = Mesh.VCellWidths;
@@ -1155,7 +1176,7 @@ AxisFlowDrive ( const FluidMesh& Mesh, std::vector<int>& matIs, \
       FlowComponent3d( Mesh, matIs, matJs, matVals, \
                        force, componentBoundary1, componentCellCenters1, componentCellWidths1, \
                        cellWidthsLR1, cellWidthsUD1, componentConnectivity1, PressureNeighbor1, \
-                       visc, direction, 1 );
+                       visc, direction, 1, 1, 1 );
       // Set W boundary conditions
       const std::vector<unsigned long>& componentBoundary2 = Mesh.WBoundaryCells;
       const std::vector<double>& componentCellWidths2 = Mesh.WCellWidths;
@@ -1167,8 +1188,112 @@ AxisFlowDrive ( const FluidMesh& Mesh, std::vector<int>& matIs, \
       FlowComponent3d( Mesh, matIs, matJs, matVals, \
                        force, componentBoundary2, componentCellCenters2, componentCellWidths2, \
                        cellWidthsLR2, cellWidthsUD2, componentConnectivity2, PressureNeighbor2, \
-                       visc, direction, 2 );
+                       visc, direction, 2, 1, 1 );
       break;
     }
   }
+}
+
+void
+AxisFlowSingleComponent ( const FluidMesh& Mesh, std::vector<int>& matIs, \
+                          std::vector<int>& matJs, std::vector<double>& matVals, \
+                          std::vector<double>& force, double visc, int direction, int component )
+{
+
+  switch (Mesh.DIM)
+  {
+    case 2 :
+    {
+      switch ( component )
+      {
+        case 0 :
+        {
+          const std::vector<unsigned long>& componentBoundary = Mesh.UBoundaryCells;
+          const std::vector<double>& componentCellWidths = Mesh.UCellWidths;
+          const std::vector<double>& componentCellCenters = Mesh.UCellCenters;
+          const std::vector<unsigned long>& componentConnectivity = Mesh.UFaceConnectivity;
+          const std::vector<double>& cellWidthsLR = Mesh.VCellWidths;
+          const std::vector<unsigned long>& PressureNeighbor = Mesh.UCellPressureNeighbor;
+          FlowComponent2d( Mesh, matIs, matJs, matVals, \
+                           force, componentBoundary, componentCellCenters, componentCellWidths, \
+                           cellWidthsLR, componentConnectivity, PressureNeighbor, \
+                           visc, direction, 0, 0, 0 );
+          break; // u component break;
+        }
+        case 1 :
+        {
+          const std::vector<unsigned long>& componentBoundary = Mesh.VBoundaryCells;
+          const std::vector<double>& componentCellWidths = Mesh.VCellWidths;
+          const std::vector<double>& componentCellCenters = Mesh.VCellCenters;
+          const std::vector<unsigned long>& componentConnectivity = Mesh.VFaceConnectivity;
+          const std::vector<double>& cellWidthsLR = Mesh.UCellWidths;
+          const std::vector<unsigned long>& PressureNeighbor = Mesh.VCellPressureNeighbor;
+          FlowComponent2d( Mesh, matIs, matJs, matVals, \
+                           force, componentBoundary, componentCellCenters, componentCellWidths, \
+                           cellWidthsLR, componentConnectivity, PressureNeighbor, \
+                           visc, direction, 1, 0, 0 );
+          break; // v component break;
+        }
+      }
+      break; // dim 2 break;
+    }
+    case 3 :
+    {
+      switch ( component )
+      {
+        case 0 :
+        {
+          // Set U boundary conditions
+          const std::vector<unsigned long>& componentBoundary = Mesh.UBoundaryCells;
+          const std::vector<double>& componentCellWidths = Mesh.UCellWidths;
+          const std::vector<double>& componentCellCenters = Mesh.UCellCenters;
+          const std::vector<unsigned long>& componentConnectivity = Mesh.UFaceConnectivity;
+          const std::vector<double>& cellWidthsLR = Mesh.VCellWidths;
+          const std::vector<double>& cellWidthsUD = Mesh.WCellWidths;
+          const std::vector<unsigned long>& PressureNeighbor = Mesh.UCellPressureNeighbor;
+          FlowComponent3d( Mesh, matIs, matJs, matVals, \
+                           force, componentBoundary, componentCellCenters, componentCellWidths, \
+                           cellWidthsLR, cellWidthsUD, componentConnectivity, PressureNeighbor, \
+                           visc, direction, 0, 0, 0 );
+          break; // u component break;
+        }
+        case 1 :
+        {
+          // Set V boundary conditions
+          const std::vector<unsigned long>& componentBoundary = Mesh.VBoundaryCells;
+          const std::vector<double>& componentCellWidths = Mesh.VCellWidths;
+          const std::vector<double>& componentCellCenters = Mesh.VCellCenters;
+          const std::vector<unsigned long>& componentConnectivity = Mesh.VFaceConnectivity;
+          const std::vector<double>& cellWidthsLR = Mesh.UCellWidths;
+          const std::vector<double>& cellWidthsUD = Mesh.WCellWidths;
+          const std::vector<unsigned long>& PressureNeighbor = Mesh.VCellPressureNeighbor;
+          FlowComponent3d( Mesh, matIs, matJs, matVals, \
+                           force, componentBoundary, componentCellCenters, componentCellWidths, \
+                           cellWidthsLR, cellWidthsUD, componentConnectivity, PressureNeighbor, \
+                           visc, direction, 1, 0, 0 );
+
+          break; // v component break;
+        }
+        case 2 :
+        {
+          // Set U boundary conditions
+          const std::vector<unsigned long>& componentBoundary = Mesh.WBoundaryCells;
+          const std::vector<double>& componentCellWidths = Mesh.WCellWidths;
+          const std::vector<double>& componentCellCenters = Mesh.WCellCenters;
+          const std::vector<unsigned long>& componentConnectivity = Mesh.WFaceConnectivity;
+          const std::vector<double>& cellWidthsLR = Mesh.VCellWidths;
+          const std::vector<double>& cellWidthsUD = Mesh.VCellWidths;
+          const std::vector<unsigned long>& PressureNeighbor = Mesh.WCellPressureNeighbor;
+          FlowComponent3d( Mesh, matIs, matJs, matVals, \
+                           force, componentBoundary, componentCellCenters, componentCellWidths, \
+                           cellWidthsLR, cellWidthsUD, componentConnectivity, PressureNeighbor, \
+                           visc, direction, 2, 0, 0 );
+
+          break; // w component break;
+        }
+      }
+      break; // dim 3 break;
+    }
+  }
+
 }

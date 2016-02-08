@@ -121,16 +121,44 @@ StokesSolveRich( const FluidMesh& Mesh, double visc, int direction, \
   }
 
   // interior cells
+  VelocityArray( Mesh, visc, matIsU, matJsU, matValsU, 0 );
+  VelocityArray( Mesh, visc, matIsV, matJsV, matValsV, 1 );
+  if ( Mesh.DIM == 3 ) VelocityArray( Mesh, visc, matIsW, matJsW, matValsW, 2 );
 
   // boundary conditions
+  AxisFlowSingleComponent( Mesh, matIsU, matJsU, matValsU, forceU, visc, direction, 0 );
+  AxisFlowSingleComponent( Mesh, matIsV, matJsV, matValsV, forceV, visc, direction, 1 );
+  if ( Mesh.DIM == 3 ) AxisFlowSingleComponent( Mesh, matIsW, matJsW, matValsW, forceW, visc, direction, 2 );
 
   // immersed boundary
+  immersedBoundarySingleComponent( Mesh, matIsU, matJsU, matValsU, 0 );
+  immersedBoundarySingleComponent( Mesh, matIsV, matJsV, matValsV, 1 );
+  if ( Mesh.DIM == 3 ) immersedBounarySingleComponent( Mesh, matIsW, matJsW, matValsW, 2 );
 
   set_omp_threads_paralution(nThreads);
 
   // paralution arrays
+  LocalVector<double> solU, solV, solW;
+  LocalVector<double> forceUP, forceVP, forceWP;
+  LocalMatrix<double> matU, matV, matW;
 
   // initialize solution and force, define initial guess for pressure
+  forceUP.Allocate("force vector U", Mesh.DOF[1]);
+  forceUP.Zeros();
+  solU.Allocate("solution U", Mesh.DOF[1]);
+  solU.Zeros();
+  forceVP.Allocate("force vector V", Mesh.DOF[2]);
+  forceVP.Zeros();
+  solV.Allocate("solution V", Mesh.DOF[2]);
+  solV.Zeros();
+  if ( Mesh.DIM == 3 )
+  {
+    forceWP.Allocate("force vector W", Mesh.DOF[2]);
+    forceWP.Zeros();
+    solW.Allocate("solution W", Mesh.DOF[2]);
+    solW.Zeros();
+  }
+  initPressure( );
 
   // assemble the matrix from COO data
 

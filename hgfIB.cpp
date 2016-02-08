@@ -58,16 +58,17 @@ immersedBoundary ( const FluidMesh& Mesh, std::vector<int>& matIs, \
               idx2( cl, 1, Mesh.PressureCellVelocityNeighborLDI ) ] \
               + Mesh.DOF[1]);
           matVals.push_back(pen);
-          matIs.push_back( Mesh.PressureCellVNeighbor[ \
+          matIs.push_back( Mesh.PressureCellWNeighbor[ \
               idx2( cl, 0, Mesh.PressureCellVelocityNeighborLDI ) ] + Mesh.DOF[1] + Mesh.DOF[2]);
-          matJs.push_back( Mesh.PressureCellVNeighbor[ \
+          matJs.push_back( Mesh.PressureCellWNeighbor[ \
               idx2( cl, 0, Mesh.PressureCellVelocityNeighborLDI ) ] + Mesh.DOF[1] + Mesh.DOF[2]);
-          matIs.push_back( Mesh.PressureCellVNeighbor[ \
+          matIs.push_back( Mesh.PressureCellWNeighbor[ \
               idx2( cl, 1, Mesh.PressureCellVelocityNeighborLDI ) ] + Mesh.DOF[1] + Mesh.DOF[2]);
-          matJs.push_back( Mesh.PressureCellVNeighbor[ \
+          matJs.push_back( Mesh.PressureCellWNeighbor[ \
               idx2( cl, 1, Mesh.PressureCellVelocityNeighborLDI ) ] + Mesh.DOF[1] + Mesh.DOF[2]);
         }
       }
+      break;
     }
     case 2 :
     {
@@ -108,6 +109,76 @@ immersedBoundary ( const FluidMesh& Mesh, std::vector<int>& matIs, \
           matVals.push_back(pen);
         }
       }
+      break;
+    }
+  }
+}
+void
+immersedBoundarySingleComponent ( const FluidMesh& Mesh, std::vector<int>& matIs, \
+                                  std::vector<int>& matJs, std::vector<double>& matVals, \
+                                  int component )
+{
+
+  double pen = 10000;
+
+  switch ( component )
+  {
+    case 0 :
+    {
+       for (int cl = 0; cl < Mesh.DOF[0]; cl++) {
+        // Check if pressure cell is an IB voxel
+        if (Mesh.ImmersedBoundary[cl] == 2) {
+          matIs.push_back( Mesh.PressureCellUNeighbor[ \
+              idx2( cl, 0, Mesh.PressureCellVelocityNeighborLDI ) ] );
+          matJs.push_back( Mesh.PressureCellUNeighbor[ \
+              idx2( cl, 0, Mesh.PressureCellVelocityNeighborLDI ) ] );
+          matVals.push_back(pen);
+          matIs.push_back( Mesh.PressureCellUNeighbor[ \
+              idx2( cl, 1, Mesh.PressureCellVelocityNeighborLDI ) ] );
+          matJs.push_back( Mesh.PressureCellUNeighbor[ \
+              idx2( cl, 1, Mesh.PressureCellVelocityNeighborLDI ) ] );
+          matVals.push_back(pen);
+        }
+      }
+      break;
+    }
+    case 1 :
+    {
+      for (int cl = 0; cl < Mesh.DOF[0]; cl++) {
+        // Check if pressure cell is an IB voxel
+        if (Mesh.ImmersedBoundary[cl] == 2) {
+          matIs.push_back( Mesh.PressureCellVNeighbor[ \
+              idx2( cl, 0, Mesh.PressureCellVelocityNeighborLDI ) ] );
+          matJs.push_back( Mesh.PressureCellVNeighbor[ \
+              idx2( cl, 0, Mesh.PressureCellVelocityNeighborLDI ) ] );
+          matVals.push_back(pen);
+          matIs.push_back( Mesh.PressureCellVNeighbor[ \
+              idx2( cl, 1, Mesh.PressureCellVelocityNeighborLDI ) ] );
+          matJs.push_back( Mesh.PressureCellVNeighbor[ \
+              idx2( cl, 1, Mesh.PressureCellVelocityNeighborLDI ) ] );
+          matVals.push_back(pen);
+        }
+      }
+      break;
+    }
+    case 2 :
+    {
+      for (int cl = 0; cl < Mesh.DOF[0]; cl++) {
+        // Check if pressure cell is an IB voxel
+        if (Mesh.ImmersedBoundary[cl] == 2) {
+          matIs.push_back( Mesh.PressureCellWNeighbor[ \
+              idx2( cl, 0, Mesh.PressureCellVelocityNeighborLDI ) ] );
+          matJs.push_back( Mesh.PressureCellWNeighbor[ \
+              idx2( cl, 0, Mesh.PressureCellVelocityNeighborLDI ) ] );
+          matVals.push_back(pen);
+          matIs.push_back( Mesh.PressureCellWNeighbor[ \
+              idx2( cl, 1, Mesh.PressureCellVelocityNeighborLDI ) ] );
+          matJs.push_back( Mesh.PressureCellWNeighbor[ \
+              idx2( cl, 1, Mesh.PressureCellVelocityNeighborLDI ) ] );
+          matVals.push_back(pen);
+        }
+      }
+      break;
     }
   }
 }

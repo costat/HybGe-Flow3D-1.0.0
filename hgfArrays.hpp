@@ -43,3 +43,8 @@ continuityDrive ( const FluidMesh& Mesh, std::vector<int>& matIs, \
 void
 StokesArray ( const FluidMesh& Mesh, double visc, std::vector<int>& matIs, \
               std::vector<int>& matJs, std::vector<double>& matVals );
+
+void
+VelocityArray ( const FluidMesh& Mesh, double visc, std::vector<int>& matIs, \
+                std::vector<int>& matJs, std::vector<double>& matVals, int component );
+

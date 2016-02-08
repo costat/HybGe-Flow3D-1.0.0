@@ -434,3 +434,46 @@ StokesArray ( const FluidMesh& Mesh, double visc, std::vector<int>& matIs, \
     }
   }
 }
+void
+VelocityArray ( const FluidMesh& Mesh, double visc, std::vector<int>& matIs, \
+                std::vector<int>& matJs, std::vector<double>& matVals, int component )
+{
+  int velShift;
+
+  switch ( component )
+  {
+    case 0 :
+    {
+      const std::vector<unsigned long>& velint = Mesh.UInteriorCells;
+      const std::vector<unsigned long>& fconn = Mesh.UFaceConnectivity;
+      const std::vector<double>& dxyz = Mesh.UCellWidths;
+      velShift = 0;
+      diffusionArrays( Mesh, matIs, matJs, matVals, velint, fconn, \
+                       dxyz, visc, velShift );
+      break;
+    }
+    case 1 :
+    {
+      const std::vector<unsigned long>& velint = Mesh.VInteriorCells;
+      const std::vector<unsigned long>& fconn = Mesh.VFaceConnectivity;
+      const std::vector<double>& dxyz = Mesh.VCellWidths;
+      velShift = 0;
+      diffusionArrays( Mesh, matIs, matJs, matVals, velint, fconn, \
+                       dxyz, visc, velShift );
+
+      break;
+    }
+    case 2 :
+    {
+      const std::vector<unsigned long>& velint = Mesh.WInteriorCells;
+      const std::vector<unsigned long>& fconn = Mesh.WFaceConnectivity;
+      const std::vector<double>& dxyz = Mesh.WCellWidths;
+      velShift = 0;
+      diffusionArrays( Mesh, matIs, matJs, matVals, velint, fconn, \
+                       dxyz, visc, velShift );
+
+      break;
+    }
+  }
+}
+
