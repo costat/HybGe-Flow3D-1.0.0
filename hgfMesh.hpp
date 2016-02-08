@@ -15,6 +15,9 @@ void MeshSubdivide( unsigned long *gridin, int ldi1, int ldi2, \
                     std::vector<int>& nxs, \
                     std::vector<int>& nys, \
                     std::vector<int>& nzs );
+void innerFaceConnectivity( std::vector<unsigned long>& ComponentFaceConnectivity, \
+                            std::vector<double> ComponentCellCenters, \
+                            double dx, double dy, double dz, int nCells, int DIM );
 
 class FluidMesh
 {
@@ -48,32 +51,21 @@ class FluidMesh
                   double dx, double dy, double dz, int nNodes );
     int isNear3d( std::vector<double>& Vector1, std::vector<double>& Vector2, \
                   double dx, double dy, double dz, int nNodes );
-    void innerFaceConnectivity( std::vector<unsigned long>& ComponentFaceConnectivity, \
-                                std::vector<double> ComponentCellCenters, \
-                                double dx, double dy, double dz, int nCells );
     void TotalDOF( void );
     void MaxNonZero( void );
     void sortPV( void );
-/*  Some upcoming functions not yet implemented
-    void AddCell( double *Nodes, int isIB );
-    void RemoveCell( int GlobalCellNumber  );
-    void IBGrowth( int GlobalCellNumber );
-    void IBShrink( int GlobalCellNumber );
-*/
 };
 
 class PoreNetwork
 {
-    public:
-      // Public data
-      std::vector<double> PoresXYZ;
-      std::vector<double> ThroatKs;
-      std::vector<double> PoreKs;
-      std::vector<unsigned long> Throats;
-      std::vector<unsigned long> InPores, OutPores, PeriodicPairs;
-      int DIM, nPores, nThroats;
-      // public functions
-      BuildUniformPN( );
+  public:
+    // Public data
+    std::vector<double> PoresXYZ;
+    std::vector<unsigned long> Throats;
+    std::vector<unsigned long> InPores, OutPores, PeriodicPairs;
+    int DIM, nPores, nThroats;
+    // public functions
+    void PNFromPS( const std::vector< FluidMesh >& Meshes );
 };
 
 #endif

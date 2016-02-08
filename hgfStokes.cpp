@@ -13,11 +13,11 @@
 #define idx2(i, j, ldi) ((i * ldi) + j)
 
 using namespace paralution;
-
+// solves the stokes system directly as a single linear system
 void
-StokesSolve( const FluidMesh& Mesh, double visc, int direction, \
-             std::vector<double>& Solution, double tolAbs, double tolRel, \
-             int maxIt, int nThreads, int prec )
+StokesSolveDirect( const FluidMesh& Mesh, double visc, int direction, \
+                   std::vector<double>& Solution, double tolAbs, double tolRel, \
+                   int maxIt, int nThreads, int prec )
 {
 
   // delcarations
@@ -63,6 +63,7 @@ StokesSolve( const FluidMesh& Mesh, double visc, int direction, \
   ls.Init(tolAbs, tolRel, 1e8, maxIt);
   ls.SetOperator(mat);
   ls.Verbose(2);
+  ls.SetBasisSize(100);
 
   // preconditioning
   ILU<LocalMatrix<double>, LocalVector<double>, double> p;
@@ -87,6 +88,63 @@ StokesSolve( const FluidMesh& Mesh, double visc, int direction, \
   p.Clear();
   forceP.Clear();
   sol.Clear();
+
+}
+/* solves the stokes system with a first order richardson scheme for the schur complement.
+   velocity solve step broken into components */
+void
+StokesSolveRich( const FluidMesh& Mesh, double visc, int direction, \
+                   std::vector<double>& Solution, double tolAbs, double tolRel, \
+                   int maxIt, int nThreads, int prec )
+{
+
+  // delcarations
+  std::vector<int> matIsU, matJsU, matIsV, matJsV, matIsW, matJsW;
+  std::vector<double> matValsU, matValsV, matValsW, forceU, forceV, forceW, bV, bW, bU;
+  matIsU.reserve( Mesh.maxNNZ );
+  matJsU.reserve( Mesh.maxNNZ );
+  matValsU.reserve( Mesh.maxNNZ );
+  forceU.resize( Mesh.DOF[1] );
+  bU.resize( Mesh.DOF[1] );
+  matIsV.reserve( Mesh.maxNNZ );
+  matJsV.reserve( Mesh.maxNNZ );
+  matValsV.reserve( Mesh.maxNNZ );
+  forceV.resize( Mesh.DOF[2] );
+  bV.resize( Mesh.DOF[2] );
+  if ( Mesh.DIM == 3 )
+  {
+    matIsW.reserve( Mesh.maxNNZ );
+    matJsW.reserve( Mesh.maxNNZ );
+    matValsW.reserve( Mesh.maxNNZ );
+    forceW.resize( Mesh.DOF[3] );
+    bW.resize( Mesh.DOF[3] );
+  }
+
+  // interior cells
+
+  // boundary conditions
+
+  // immersed boundary
+
+  set_omp_threads_paralution(nThreads);
+
+  // paralution arrays
+
+  // initialize solution and force, define initial guess for pressure
+
+  // assemble the matrix from COO data
+
+  // GMRES object
+
+  // preconditioning
+
+  // build
+
+  // richardson loop
+
+  // pass solution from paralution object to std vector input
+
+  // clear paralution objects
 
 }
 

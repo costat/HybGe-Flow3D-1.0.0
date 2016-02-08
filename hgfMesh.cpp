@@ -131,7 +131,166 @@ MeshSubdivide( unsigned long *gridin, int ldi1, int ldi2, \
     }
   }
 }
+// Function to compute cell face connectivity information
+void innerFaceConnectivity( \
+       std::vector<unsigned long>& ComponentFaceConnectivity, \
+       std::vector<double> ComponentCellCenters, \
+       double dx, double dy, double dz, int nCells, int DIM )
+{
+  int incr, numNeighbors, nl;
+  double xr, yr, zr, epsx, epsy, epsz, xtol, ytol, ztol;
 
+  epsx = 0.2 * dx;
+  epsy = 0.2 * dy;
+  epsz = 0.2 * dz;
+  xtol = 1.2 * dx;
+  ytol = 1.2 * dy;
+  ztol = 1.2 * dz;
+
+  switch ( DIM )
+  {
+    case 2 :
+    {
+      double cccl0, cccl1;
+      int int0, int1, int2, int3;
+      for (int cl = 0; cl < nCells; cl++) {
+        numNeighbors = 0;
+        nl = 0;
+        cccl0 = ComponentCellCenters[ idx2( cl, 0, 2 ) ];
+        cccl1 = ComponentCellCenters[ idx2( cl, 1, 2 ) ];
+        int0 = 0;
+        int1 = 0;
+        int2 = 0;
+        int3 = 0;
+        do
+        {
+          incr = nl + 1;
+          xr = ComponentCellCenters[ idx2(nl, 0, 2) ] \
+               - cccl0;
+          yr = ComponentCellCenters[ idx2(nl, 1, 2) ] \
+               - cccl1;
+          if (fabs(xr) < epsx) {
+            if (fabs(yr) < ytol) {
+              if (yr < 0)
+              {
+                int0 = incr;
+                numNeighbors++;
+              }
+              else if (yr > 0)
+              {
+                int2 = incr;
+                numNeighbors++;
+              }
+            }
+          }
+          else if (fabs(yr) < epsy) {
+            if (fabs(xr) < xtol) {
+              if (xr < 0)
+              {
+                int3 = incr;
+                numNeighbors++;
+              }
+              else if (xr > 0)
+              {
+                int1 = incr;
+                numNeighbors++;
+              }
+            }
+          }
+          nl++;
+        } while (nl < nCells && numNeighbors < 4);
+        ComponentFaceConnectivity[ idx2(cl, 0, 4) ] = int0;
+        ComponentFaceConnectivity[ idx2(cl, 1, 4) ] = int1;
+        ComponentFaceConnectivity[ idx2(cl, 2, 4) ] = int2;
+        ComponentFaceConnectivity[ idx2(cl, 3, 4) ] = int3;
+      }
+      break;
+    }
+    default :
+    {
+      double cccl0, cccl1, cccl2;
+      int int0, int1, int2, int3, int4, int5;
+      for (int cl = 0; cl < nCells; cl++) {
+        numNeighbors = 0;
+        cccl0 = ComponentCellCenters[ idx2( cl, 0, 3 ) ];
+        cccl1 = ComponentCellCenters[ idx2( cl, 1, 3 ) ];
+        cccl2 = ComponentCellCenters[ idx2( cl, 2, 3 ) ];
+        int0 = 0;
+        int1 = 0;
+        int2 = 0;
+        int3 = 0;
+        int4 = 0;
+        int5 = 0;
+        nl = 0;
+        do
+        {
+          incr = nl + 1;
+          xr = ComponentCellCenters[ idx2(nl, 0, 3) ] \
+               - cccl0;
+          yr = ComponentCellCenters[ idx2(nl, 1, 3) ] \
+               - cccl1;
+          zr = ComponentCellCenters[ idx2(nl, 2, 3) ] \
+               - cccl2;
+
+          if (fabs(xr) < epsx) {
+            if (fabs(yr) < epsy) {
+              if (fabs(zr) < ztol) {
+                if (zr < 0)
+                {
+                  int0 = incr;
+                  numNeighbors++;
+                }
+                else if (zr > 0)
+                {
+                  int2 = incr;
+                  numNeighbors++;
+                }
+              }
+            }
+            if (fabs(zr) < epsz) {
+              if (fabs(yr) < ytol) {
+                if (yr < 0)
+                {
+                  int5 = incr;
+                  numNeighbors++;
+                }
+                else if (yr > 0)
+                {
+                  int4 = incr;
+                  numNeighbors++;
+                }
+              }
+            }
+          }
+          else if (fabs(yr) < epsy) {
+            if (fabs(zr) < epsz) {
+              if (fabs(xr) < xtol) {
+                if (xr < 0)
+                {
+                  int3 = incr;
+                  numNeighbors++;
+                }
+                else if (xr > 0)
+                {
+                  int1 = incr;
+                  numNeighbors++;
+                }
+              }
+            }
+          }
+          nl++;
+        } while (nl < nCells && numNeighbors < 6);
+        ComponentFaceConnectivity[ idx2(cl, 0, 6) ] = int0;
+        ComponentFaceConnectivity[ idx2(cl, 1, 6) ] = int1;
+        ComponentFaceConnectivity[ idx2(cl, 2, 6) ] = int2;
+        ComponentFaceConnectivity[ idx2(cl, 3, 6) ] = int3;
+        ComponentFaceConnectivity[ idx2(cl, 4, 6) ] = int4;
+        ComponentFaceConnectivity[ idx2(cl, 5, 6) ] = int5;
+       }
+      break;
+    }
+  }
+}
 // Function to construct the mesh from voxel array input
 void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
                                   int nx, int ny, int nz, \
@@ -264,7 +423,7 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
         { // Final P computations
           DOF[0] = numPCells;
           PFaceConnectivity.resize((numPCells * 4));
-          innerFaceConnectivity( PFaceConnectivity, PCellCenters, dx, dy, dz, numPCells );
+          innerFaceConnectivity( PFaceConnectivity, PCellCenters, dx, dy, dz, numPCells, DIM );
           PCellWidths.resize((DOF[0] * CellWidthsLDI));
           for (int cl = 0; cl < DOF[0]; cl++) {
             PCellWidths[ idx2( cl, 0, CellWidthsLDI ) ] = dx;
@@ -342,7 +501,7 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
           UCellPressureNeighbor.resize((DOF[1] * 2));
           UFaceConnectivity.resize((countUCells * 4));
           innerFaceConnectivity( UFaceConnectivity, UCellCenters, \
-                                 dx, dy, dz, countUCells );
+                                 dx, dy, dz, countUCells, DIM );
           UInteriorCells.reserve(DOF[1]);
           UBoundaryCells.reserve(DOF[1]);
           int nbrsu;
@@ -441,7 +600,7 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
           VCellPressureNeighbor.resize((DOF[2] * 2));
           VFaceConnectivity.resize((countVCells * 4));
           innerFaceConnectivity( VFaceConnectivity, VCellCenters, \
-                                 dx, dy, dz, countVCells );
+                                 dx, dy, dz, countVCells, DIM );
           VInteriorCells.reserve(DOF[2]);
           VBoundaryCells.reserve(DOF[2]);
           int nbrsv;
@@ -616,7 +775,7 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
         { // Final P computations
           DOF[0] = numPCells;
           PFaceConnectivity.resize((numPCells * 6));
-          innerFaceConnectivity( PFaceConnectivity, PCellCenters, dx, dy, dz, numPCells );
+          innerFaceConnectivity( PFaceConnectivity, PCellCenters, dx, dy, dz, numPCells, DIM );
           PCellWidths.resize((DOF[0] * CellWidthsLDI));
           for (int cl = 0; cl < DOF[0]; cl++) {
             PCellWidths[ idx2( cl, 0, CellWidthsLDI ) ] = dx;
@@ -702,7 +861,7 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
           UCellPressureNeighbor.resize((DOF[1] * 2));
           UFaceConnectivity.resize((countUCells * 6));
           innerFaceConnectivity( UFaceConnectivity, UCellCenters, \
-                                 dx, dy, dz, countUCells );
+                                 dx, dy, dz, countUCells, DIM );
           UInteriorCells.reserve(DOF[1]);
           UBoundaryCells.reserve(DOF[1]);
           int nbrsu;
@@ -809,7 +968,7 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
           VCellPressureNeighbor.resize((DOF[2] * 2));
           VFaceConnectivity.resize((countVCells * 6));
           innerFaceConnectivity( VFaceConnectivity, VCellCenters, \
-                                 dx, dy, dz, countVCells );
+                                 dx, dy, dz, countVCells, DIM );
           VInteriorCells.reserve(DOF[2]);
           VBoundaryCells.reserve(DOF[2]);
           int nbrsv;
@@ -916,7 +1075,7 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
           WCellPressureNeighbor.resize((DOF[3] * 2));
           WFaceConnectivity.resize((countWCells * 6));
           innerFaceConnectivity( WFaceConnectivity, WCellCenters, \
-                                 dx, dy, dz, countWCells );
+                                 dx, dy, dz, countWCells, DIM );
           WInteriorCells.reserve(DOF[3]);
           WBoundaryCells.reserve(DOF[3]);
           int nbrsw;
@@ -1010,167 +1169,6 @@ int FluidMesh::isNear3d( std::vector<double>& Vector1, std::vector<double>& Vect
   } while (prox == -1 && cl > 0);
   return prox;
 }
-
-// Function to compute cell face connectivity information
-void FluidMesh::innerFaceConnectivity( \
-                std::vector<unsigned long>& ComponentFaceConnectivity, \
-                std::vector<double> ComponentCellCenters, \
-                double dx, double dy, double dz, int nCells )
-{
-  int incr, numNeighbors, nl;
-  double xr, yr, zr, epsx, epsy, epsz, xtol, ytol, ztol;
-
-  epsx = 0.2 * dx;
-  epsy = 0.2 * dy;
-  epsz = 0.2 * dz;
-  xtol = 1.2 * dx;
-  ytol = 1.2 * dy;
-  ztol = 1.2 * dz;
-
-  switch ( DIM )
-  {
-    case 2 :
-    {
-      double cccl0, cccl1;
-      int int0, int1, int2, int3;
-      for (int cl = 0; cl < nCells; cl++) {
-        numNeighbors = 0;
-        nl = 0;
-        cccl0 = ComponentCellCenters[ idx2( cl, 0, 2 ) ];
-        cccl1 = ComponentCellCenters[ idx2( cl, 1, 2 ) ];
-        int0 = 0;
-        int1 = 0;
-        int2 = 0;
-        int3 = 0;
-        do
-        {
-          incr = nl + 1;
-          xr = ComponentCellCenters[ idx2(nl, 0, 2) ] \
-               - cccl0;
-          yr = ComponentCellCenters[ idx2(nl, 1, 2) ] \
-               - cccl1;
-          if (fabs(xr) < epsx) {
-            if (fabs(yr) < ytol) {
-              if (yr < 0)
-              {
-                int0 = incr;
-                numNeighbors++;
-              }
-              else if (yr > 0)
-              {
-                int2 = incr;
-                numNeighbors++;
-              }
-            }
-          }
-          else if (fabs(yr) < epsy) {
-            if (fabs(xr) < xtol) {
-              if (xr < 0)
-              {
-                int3 = incr;
-                numNeighbors++;
-              }
-              else if (xr > 0)
-              {
-                int1 = incr;
-                numNeighbors++;
-              }
-            }
-          }
-          nl++;
-        } while (nl < nCells && numNeighbors < 4);
-        ComponentFaceConnectivity[ idx2(cl, 0, 4) ] = int0;
-        ComponentFaceConnectivity[ idx2(cl, 1, 4) ] = int1;
-        ComponentFaceConnectivity[ idx2(cl, 2, 4) ] = int2;
-        ComponentFaceConnectivity[ idx2(cl, 3, 4) ] = int3;
-      }
-      break;
-    }
-    default :
-    {
-      double cccl0, cccl1, cccl2;
-      int int0, int1, int2, int3, int4, int5;
-      for (int cl = 0; cl < nCells; cl++) {
-        numNeighbors = 0;
-        cccl0 = ComponentCellCenters[ idx2( cl, 0, 3 ) ];
-        cccl1 = ComponentCellCenters[ idx2( cl, 1, 3 ) ];
-        cccl2 = ComponentCellCenters[ idx2( cl, 2, 3 ) ];
-        int0 = 0;
-        int1 = 0;
-        int2 = 0;
-        int3 = 0;
-        int4 = 0;
-        int5 = 0;
-        nl = 0;
-        do
-        {
-          incr = nl + 1;
-          xr = ComponentCellCenters[ idx2(nl, 0, 3) ] \
-               - cccl0;
-          yr = ComponentCellCenters[ idx2(nl, 1, 3) ] \
-               - cccl1;
-          zr = ComponentCellCenters[ idx2(nl, 2, 3) ] \
-               - cccl2;
-
-          if (fabs(xr) < epsx) {
-            if (fabs(yr) < epsy) {
-              if (fabs(zr) < ztol) {
-                if (zr < 0)
-                {
-                  int0 = incr;
-                  numNeighbors++;
-                }
-                else if (zr > 0)
-                {
-                  int2 = incr;
-                  numNeighbors++;
-                }
-              }
-            }
-            if (fabs(zr) < epsz) {
-              if (fabs(yr) < ytol) {
-                if (yr < 0)
-                {
-                  int5 = incr;
-                  numNeighbors++;
-                }
-                else if (yr > 0)
-                {
-                  int4 = incr;
-                  numNeighbors++;
-                }
-              }
-            }
-          }
-          else if (fabs(yr) < epsy) {
-            if (fabs(zr) < epsz) {
-              if (fabs(xr) < xtol) {
-                if (xr < 0)
-                {
-                  int3 = incr;
-                  numNeighbors++;
-                }
-                else if (xr > 0)
-                {
-                  int1 = incr;
-                  numNeighbors++;
-                }
-              }
-            }
-          }
-          nl++;
-        } while (nl < nCells && numNeighbors < 6);
-        ComponentFaceConnectivity[ idx2(cl, 0, 6) ] = int0;
-        ComponentFaceConnectivity[ idx2(cl, 1, 6) ] = int1;
-        ComponentFaceConnectivity[ idx2(cl, 2, 6) ] = int2;
-        ComponentFaceConnectivity[ idx2(cl, 3, 6) ] = int3;
-        ComponentFaceConnectivity[ idx2(cl, 4, 6) ] = int4;
-        ComponentFaceConnectivity[ idx2(cl, 5, 6) ] = int5;
-       }
-      break;
-    }
-  }
-}
 // Compute total DOF
 void FluidMesh::TotalDOF( void )
 {
@@ -1262,3 +1260,37 @@ void FluidMesh::sortPV( void )
     }
   }
 }
+// create the pore-network from porescale meshes
+void PoreNetwork::PNFromPS( const std::vector< FluidMesh >& Meshes )
+{
+  double dx, dy, dz;
+  DIM = Meshes[0].DIM;
+  nPores = Meshes.size();
+  PoresXYZ.reserve( nPores * DIM );
+  Throats.reserve( nPores * DIM * 2 );
+  // set pore locations
+  for (int pore = 0; pore < nPores; pore++)
+  {
+    PoresXYZ[ idx2( pore, 0, DIM ) ] = 0.5 * (Meshes[ pore ].xLim[0] + Meshes[ pore ].xLim[1]);
+    PoresXYZ[ idx2( pore, 1, DIM ) ] = 0.5 * (Meshes[ pore ].yLim[0] + Meshes[ pore ].yLim[1]);
+    if ( DIM == 3 ) PoresXYZ[ idx2( pore, 2, DIM ) ] = 0.5 * (Meshes[ pore ].zLim[0] + Meshes[ pore ].zLim[1]);
+  }
+  dx = fabs(PoresXYZ[ idx2( 0, 0, DIM ) ] - PoresXYZ[ idx2( 1, 0, DIM ) ]);
+  dy = fabs(PoresXYZ[ idx2( 0, 1, DIM ) ] - PoresXYZ[ idx2( 1, 1, DIM ) ]);
+  if (DIM == 3) dz = fabs(PoresXYZ[ idx2( 0, 2, DIM ) ] - PoresXYZ[ idx2( 1, 2, DIM ) ]);
+  else dz = 0;
+  for (int pore = 1; pore < nPores; pore++)
+  {
+    if (fabs(PoresXYZ[ idx2( 0, 0, DIM ) ] - PoresXYZ[ idx2( pore, 0, DIM ) ]) < dx) \
+          dx = fabs(PoresXYZ[ idx2( 0, 0, DIM ) ] - PoresXYZ[ idx2( pore, 0, DIM ) ]);
+    if (fabs(PoresXYZ[ idx2( 0, 1, DIM ) ] - PoresXYZ[ idx2( pore, 1, DIM ) ]) < dy) \
+          dy = fabs(PoresXYZ[ idx2( 0, 1, DIM ) ] - PoresXYZ[ idx2( pore, 1, DIM ) ]);
+    if (DIM == 3) {
+      if (fabs(PoresXYZ[ idx2( 0, 2, DIM ) ] - PoresXYZ[ idx2( pore, 2, DIM ) ]) < dz) \
+          dz = fabs(PoresXYZ[ idx2( 0, 2, DIM ) ] - PoresXYZ[ idx2( pore, 2, DIM ) ]);
+    }
+  }
+  // define throat connectivity
+  innerFaceConnectivity( Throats, PoresXYZ, dx, dy, dz, nPores, DIM );
+}
+
