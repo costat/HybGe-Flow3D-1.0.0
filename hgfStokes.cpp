@@ -1,5 +1,6 @@
 #include <vector>
 #include <omp.h>
+#include <math.h>
 
 #include <paralution.hpp>
 
@@ -90,6 +91,107 @@ StokesSolveDirect( const FluidMesh& Mesh, double visc, int direction, \
   sol.Clear();
 
 }
+void
+initPressure( const FluidMesh& Mesh, std::vector<double>& Solution )
+{
+  int shift, cl2;
+  if (Mesh.DIM == 2) shift = Mesh.DOF[1] + Mesh.DOF[2];
+  else shift = Mesh.DOF[1] + Mesh.DOF[2] + Mesh.DOF[3];
+  for (int cl = 0; cl < Mesh.DOF[0]; cl++)
+  {
+    cl2 = cl + shift;
+    Solution[ cl2 ] = 1 - (Mesh.xLim[0] - Mesh.PCellCenters[ idx2( cl, 0, Mesh.DIM ) ]) / (Mesh.xLim[1] - Mesh.xLim[0]);
+  }
+}
+
+void
+setForceRich( const FluidMesh& Mesh, const std::vector<double>& Solution, std::vector<double>& b, \
+                                                   const std::vector<double>& force, int component )
+{
+  int velShift;
+  if ( Mesh.DIM == 3 ) velShift = Mesh.DOF[1] + Mesh.DOF[2] + Mesh.DOF[3];
+  else velShift = Mesh.DOF[1] + Mesh.DOF[2];
+  switch (component)
+  {
+    case 0 :
+    {
+      for (int cl = 0; cl < Mesh.DOF[1]; cl++) {
+        if ( Mesh.UCellPressureNeighbor[ idx2( cl, 0, 2 ) ] && Mesh.UCellPressureNeighbor[ idx2( cl, 1, 2 ) ] )
+        { // has two pressure neighbors, treated as interior cell with regards to pressure in force
+          b[cl] = force[cl] - ( Solution[ Mesh.UCellPressureNeighbor[ idx2( cl, 1, 2 ) ] + velShift - 1 ] \
+                               -Solution[ Mesh.UCellPressureNeighbor[ idx2( cl, 0, 2 ) ] + velShift - 1 ] ) \
+                              / Mesh.UCellWidths[ idx2( cl, 0, Mesh.DIM ) ];
+        }
+        else // this cell center is on the true geo boundary - no adjacent pressure term in 1 direction, no pressure term in force
+        {
+          b[cl] = force[cl];
+        }
+      }
+      break; // case 0 break
+    }
+    case 1 :
+    {
+      for (int cl = 0; cl < Mesh.DOF[2]; cl++) {
+        if ( Mesh.VCellPressureNeighbor[ idx2( cl, 0, 2 ) ] && Mesh.VCellPressureNeighbor[ idx2( cl, 1, 2 ) ] )
+        { // has two pressure neighbors, treated as interior cell with regards to pressure in force
+          b[cl] = force[cl] - ( Solution[ Mesh.VCellPressureNeighbor[ idx2( cl, 1, 2 ) ] + velShift - 1 ] \
+                               -Solution[ Mesh.VCellPressureNeighbor[ idx2( cl, 0, 2 ) ] + velShift - 1 ] ) \
+                              / Mesh.VCellWidths[ idx2( cl, 1, Mesh.DIM ) ];
+        }
+        else // this cell center is on the true geo boundary - no adjacent pressure term in 1 direction, no pressure term in force
+        {
+          b[cl] = force[cl];
+        }
+      }
+      break; // case 1 break
+    }
+    case 2 :
+    {
+      for (int cl = 0; cl < Mesh.DOF[3]; cl++) {
+        if ( Mesh.WCellPressureNeighbor[ idx2( cl, 0, 2 ) ] && Mesh.WCellPressureNeighbor[ idx2( cl, 1, 2 ) ] )
+        { // has two pressure neighbors, treated as interior cell with regards to pressure in force
+          b[cl] = force[cl] - ( Solution[ Mesh.WCellPressureNeighbor[ idx2( cl, 1, 2 ) ] + velShift - 1 ] \
+                               -Solution[ Mesh.WCellPressureNeighbor[ idx2( cl, 0, 2 ) ] + velShift - 1 ] ) \
+                              / Mesh.WCellWidths[ idx2( cl, 1, Mesh.DIM ) ];
+        }
+        else // this cell center is on the true geo boundary - no adjacent pressure term in 1 direction, no pressure term in force
+        {
+          b[cl] = force[cl];
+        }
+      }
+      break; // case 2 break
+    }
+  }
+}
+void
+updatePressureRich( const FluidMesh& Mesh, std::vector<double>& Solution, \
+                    const paralution::LocalVector<double>& solU, const paralution::LocalVector<double>& solV, \
+                    double& residual )
+{
+  int velShift;
+  double alpha = 0.0005;
+  std::vector<double> pressureHold;
+  pressureHold.resize( Mesh.DOF[0] );
+
+  velShift = Mesh.DOF[1] + Mesh.DOF[2];
+  for (int cl = 0; cl < Mesh.DOF[0]; cl++)
+  {
+    pressureHold[cl] = Solution[ (velShift + cl) ] - alpha * ( \
+                       ( solU[ Mesh.PressureCellUNeighbor[ idx2( cl, 1, 2 ) ]-1 ] - solU[ Mesh.PressureCellUNeighbor[ idx2( cl, 0, 2 ) ]-1 ] ) \
+                       / Mesh.PCellWidths[ idx2( cl, 0, Mesh.DIM ) ] + \
+                       ( solV[ Mesh.PressureCellVNeighbor[ idx2( cl, 1, 2 ) ]-1 ] - solV[ Mesh.PressureCellVNeighbor[ idx2( cl, 0, 2 ) ]-1 ] ) \
+                       / Mesh.PCellWidths[ idx2( cl, 1, Mesh.DIM ) ] );
+  }
+  // loop over vector components, calc residual contribution then set new pressure
+  residual = 0;
+  for (int cl = 0; cl < Mesh.DOF[0]; cl++)
+  {
+    residual = residual + pow( (pressureHold[ cl ] - Solution[ (velShift + cl) ]), 2.0 );
+    Solution[ (velShift + cl) ] = pressureHold[ cl ];
+  }
+  residual = sqrt( residual );
+}
+
 /* solves the stokes system with a first order richardson scheme for the schur complement.
    velocity solve step broken into components */
 void
@@ -98,66 +200,57 @@ StokesSolveRich( const FluidMesh& Mesh, double visc, int direction, \
                  int maxIt, int nThreads, int prec )
 {
 
+  int richIt = 0;
+  int richItMax = 1000;
+  double residual = 1.0;
+  double tolerance = 1e-10;
+
   // delcarations
-  std::vector<int> matIsU, matJsU, matIsV, matJsV, matIsW, matJsW;
-  std::vector<double> matValsU, matValsV, matValsW, forceU, forceV, forceW, bV, bW, bU;
+  std::vector<int> matIsU, matJsU, matIsV, matJsV;
+  std::vector<double> matValsU, matValsV, forceU, forceV, bU, bV;
+
   matIsU.reserve( Mesh.maxNNZ );
   matJsU.reserve( Mesh.maxNNZ );
   matValsU.reserve( Mesh.maxNNZ );
   forceU.resize( Mesh.DOF[1] );
   bU.resize( Mesh.DOF[1] );
+
   matIsV.reserve( Mesh.maxNNZ );
   matJsV.reserve( Mesh.maxNNZ );
   matValsV.reserve( Mesh.maxNNZ );
   forceV.resize( Mesh.DOF[2] );
   bV.resize( Mesh.DOF[2] );
-  if ( Mesh.DIM == 3 )
-  {
-    matIsW.reserve( Mesh.maxNNZ );
-    matJsW.reserve( Mesh.maxNNZ );
-    matValsW.reserve( Mesh.maxNNZ );
-    forceW.resize( Mesh.DOF[3] );
-    bW.resize( Mesh.DOF[3] );
-  }
 
   // interior cells
   VelocityArray( Mesh, visc, matIsU, matJsU, matValsU, 0 );
   VelocityArray( Mesh, visc, matIsV, matJsV, matValsV, 1 );
-  if ( Mesh.DIM == 3 ) VelocityArray( Mesh, visc, matIsW, matJsW, matValsW, 2 );
 
   // boundary conditions
   AxisFlowSingleComponent( Mesh, matIsU, matJsU, matValsU, forceU, visc, direction, 0 );
   AxisFlowSingleComponent( Mesh, matIsV, matJsV, matValsV, forceV, visc, direction, 1 );
-  if ( Mesh.DIM == 3 ) AxisFlowSingleComponent( Mesh, matIsW, matJsW, matValsW, forceW, visc, direction, 2 );
 
   // immersed boundary
   immersedBoundarySingleComponent( Mesh, matIsU, matJsU, matValsU, 0 );
   immersedBoundarySingleComponent( Mesh, matIsV, matJsV, matValsV, 1 );
-  if ( Mesh.DIM == 3 ) immersedBounarySingleComponent( Mesh, matIsW, matJsW, matValsW, 2 );
 
   set_omp_threads_paralution(nThreads);
 
   // paralution arrays
-  LocalVector<double> solU, solV, solW;
-  LocalVector<double> forceUP, forceVP, forceWP;
-  LocalMatrix<double> matU, matV, matW;
+  LocalVector<double> solU, solV;
+  LocalVector<double> forceUP, forceVP;
+  LocalMatrix<double> matU, matV;
 
   // initialize solution and force, define initial guess for pressure
   forceUP.Allocate("force vector U", Mesh.DOF[1]);
   forceUP.Zeros();
   solU.Allocate("solution U", Mesh.DOF[1]);
   solU.Zeros();
+
   forceVP.Allocate("force vector V", Mesh.DOF[2]);
   forceVP.Zeros();
   solV.Allocate("solution V", Mesh.DOF[2]);
   solV.Zeros();
-  if ( Mesh.DIM == 3 )
-  {
-    forceWP.Allocate("force vector W", Mesh.DOF[2]);
-    forceWP.Zeros();
-    solW.Allocate("solution W", Mesh.DOF[2]);
-    solW.Zeros();
-  }
+
   initPressure( Mesh, Solution );
 
   // assemble the matrices from COO data
@@ -165,8 +258,6 @@ StokesSolveRich( const FluidMesh& Mesh, double visc, int direction, \
                  "U operator", Mesh.DOF[1], Mesh.DOF[1]);
   matV.Assemble( &matIsV[0], &matJsV[0], &matValsV[0], matIsV.size(), \
                  "V operator", Mesh.DOF[2], Mesh.DOF[2]);
-  if (Mesh.DIM == 3) matW.Assemble( &matIsW[0], &matJsW[0], &matValsW[0], matIsW.size(), \
-                     "W operator", Mesh.DOF[3], Mesh.DOF[3]);
 
   // GMRES object
   GMRES<LocalMatrix<double>, LocalVector<double>, double> lsU;
@@ -174,46 +265,33 @@ StokesSolveRich( const FluidMesh& Mesh, double visc, int direction, \
   lsU.SetOperator(matU);
   lsU.Verbose(1);
   lsU.SetBasisSize(100);
+
   GMRES<LocalMatrix<double>, LocalVector<double>, double> lsV;
   lsV.Init(tolAbs, tolRel, 1e8, maxIt);
   lsV.SetOperator(matV);
   lsV.Verbose(1);
   lsV.SetBasisSize(100);
-  GMRES<LocalMatrix<double>, LocalVector<double>, double> lsW;
-  if ( Mesh.DIM == 3) {
-    lsW.Init(tolAbs, tolRel, 1e8, maxIt);
-    lsW.SetOperator(matW);
-    lsW.Verbose(1);
-    lsW.SetBasisSize(100);
-  }
 
   // preconditioning
   ILU<LocalMatrix<double>, LocalVector<double>, double> pU;
   pU.Set(prec);
   lsU.SetPreconditioner(pU);
+
   ILU<LocalMatrix<double>, LocalVector<double>, double> pV;
   pV.Set(prec);
   lsV.SetPreconditioner(pV);
-  ILU<LocalMatrix<double>, LocalVector<double>, double> pW;
-  if ( Mesh.DIM == 3)
-  {
-    pW.Set(prec);
-    lsW.SetPreconditioner(pW);
-  }
 
   // build
   lsU.Build();
   lsV.Build();
-  if ( Mesh.DIM == 3 ) lsW.Build();
 
   // richardson loop
   while (1)
   {
-
+    richIt++;
     // compute new forces
     setForceRich( Mesh, Solution, bU, forceU, 0 );
     setForceRich( Mesh, Solution, bV, forceV, 1 );
-    if (Mesh.DIM == 3) setForceRich( Mesh, Solution, bW, forceW, 2 );
     // set paralution force object
     for (int cl = 0; cl < Mesh.DOF[1]; cl++) {
       forceUP[cl] = bU[cl];
@@ -221,83 +299,48 @@ StokesSolveRich( const FluidMesh& Mesh, double visc, int direction, \
     for (int cl = 0; cl < Mesh.DOF[2]; cl++) {
       forceVP[cl] = bV[cl];
     }
-    if ( Mesh.DIM == 3 ) {
-      for (int cl = 0; cl < Mesh.DOF[3]; cl++) {
-        forceWP[cl] = bW[cl];
-      }
-    }
 
     // solve systems
     lsU.Solve(forceUP, &solU);
     lsV.Solve(forceVP, &solV);
-    if (Mesh.DIM == 3) lsW.Solve(forceWP, &solW);
 
     // update the pressure vector and compute residual
-    updatePressureRich( Mesh, Solution, solU, solV, solW, residual );
+    updatePressureRich( Mesh, Solution, solU, solV, residual );
 
-    if ( (residual < tolerance) || (richIt > richItMax) ) break;
+    std::cout << "\nRichardson Iteration " << richIt << " \t Residual: " << residual << "\n";
+
+    if ( residual < tolerance )
+    {
+      std::cout << "\n Residual tolerance criteria satisfied, exiting Richardson loop.";
+      break;
+    }
+    else if ( richIt >= richItMax )
+    {
+      std::cout << "\n Maximum iterations reached, exiting Richardson loop.";
+      break;
+    }
 
   }
   // pass solution from paralution object to std vector input
   for (int cl = 0; cl < Mesh.DOF[1]; cl++) {
     Solution[cl] = solU[cl];
   }
-  for (int cl = Mesh.DOF[1]; cl < (Mesh.DOF[1]+Mesh.DOF[2]); cl++)
+  for (int cl = 0; cl < Mesh.DOF[2]; cl++)
   {
-    Solution[cl] = solV[cl];
+    Solution[cl+Mesh.DOF[1]] = solV[cl];
   }
-  if (Mesh.DIM == 3) {
-    for (int cl = (Mesh.DOF[1]+Mesh.DOF[2]); cl < (Mesh.DOF[1]+Mesh.DOF[2]+Mesh.DOF[3]); cl++) {
-      Solution[cl] = solW[cl];
-    }
-  }
-
+  "\nCheck\n";
   // clear paralution objects
   lsU.Clear();
   matU.Clear();
   pU.Clear();
-  forcePU.Clear();
+  forceUP.Clear();
   solU.Clear();
 
   lsV.Clear();
   matV.Clear();
   pV.Clear();
-  forcePV.Clear();
+  forceVP.Clear();
   solV.Clear();
-
-  lsW.Clear();
-  matW.Clear();
-  pW.Clear();
-  forcePW.Clear();
-  solW.Clear();
-
-}
-
-void
-initPressure( const FluidMesh& Mesh, std::vector<double>& Solution )
-{
-  int shift, cl2;
-  if (Mesh.DIM == 2) shift = Mesh.DOF[1] + Mesh.DOF[2];
-  else shift = Mesh.DOF[1] + Mesh.DOF[2] + Mehs.DOF[3];
-  for (int cl = 0; cl < Mesh.DOF[0]; cl++)
-  {
-    cl2 = cl + shift;
-    Solution[ cl2 ] = 1 - (Mesh.xLim[0] - Mesh.PCellCenters[ idx( cl, 0, Mesh.DIM ) ]) / (Mesh.xLim[1] - Mesh.xLim[0]);
-  }
-}
-
-void
-setForceRich( const FluidMesh& Mesh, const std::vector<double>& Solution, std::vector<double>& b, \
-                                                         std::vector<double>& force, int component )
-{
-
-}
-
-void
-updatePressureRich( const FluidMesh& Mesh, const std::vector<double>& Solution, \
-                    paralution::LocalVector<double>& solU, paralution::LocalVector<double>& solV, \
-                    paralution::LocalVector<double>& solW )
-{
-
 }
 
