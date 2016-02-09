@@ -18,9 +18,9 @@ main( int argc, const char* argv[] )
   nx = atoi(argv[1]);
   ny = atoi(argv[2]);
   nz = atoi(argv[3]);
-  int MX = 2;
-  int MY = 2;
-  int MZ = 2;
+  int MX = 4;
+  int MY = 4;
+  int MZ = 4;
 
   ldi1 = ny;
   ldi2 = nz;

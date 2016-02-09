@@ -159,14 +159,6 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
                      length, width, height, MX, MY, MZ, \
                      slices, lengths, widths, heights, \
                      nxs, nys, nzs );
-      for (unsigned long sd = 0; sd < slices.size(); sd++)
-      {
-        std::cout << "\nMesh # " << sd << "; size = " << slices[sd].size() << ".\n";
-        for (unsigned long jj = 0; jj < slices[sd].size(); jj++)
-        {
-          std::cout << slices[sd][jj] << "\n";
-        }
-      }
 
       // build meshes
       std::vector< FluidMesh > Meshes;
@@ -234,7 +226,8 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
       // solve pore-network model with porescale computed Ks
       PoreNetwork pn;
       pn.UniformPN( length, width, height, MX, MY, MZ );
-
+      double KPN;
+      //PoreNetworkSolveDirect( pn, Ks, KPN, direction );
     }
   }
 

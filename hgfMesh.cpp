@@ -1306,6 +1306,23 @@ void PoreNetwork::UniformPN( double length, double width, double height, int nx,
       }
     }
   }
+  int nConnections;
   innerFaceConnectivity( Throats, PoresXYZ, dx, dy, dz, nPores, DIM );
+  for (int pore = 0; pore < nPores; pore++)
+  {
+    nConnections = 0;
+    for (int side = 0; side < (2*DIM); side++)
+    {
+      if (Throats[ idx2( pore, side, 2*DIM ) ]) nConnections++;
+    }
+    if (nConnections == 2*DIM)
+    {
+      InteriorPores.push_back( pore );
+    }
+    else
+    {
+      BoundaryPores.push_back( pore );
+    }
+  }
 }
 

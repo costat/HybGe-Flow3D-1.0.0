@@ -7,15 +7,15 @@ import shutil
 import math
 
 # PARENT GRID LOCATION
-gridfiles = './grids/2dsquare.dat'
+gridfiles = './grids/simpleGrid'
 # GRID DIMENSIONS
-L = 1.
-W = 1.
+L = 8.
+W = 8.
 H = 1.
 
 # DOMAIN SUBDIVISION INFO
-MX = 2
-MY = 2
+MX = 8
+MY = 8
 MZ = 0
 totalGrids = MX * MY
 
@@ -27,10 +27,10 @@ nThreads = 1
 
 # SET SOLVER PARAMETERS: ILU PRECONDITIONER LEVEL,
 # ABSOLUTE AND RELATIVE RESIDUAL TOLERANCES, AND MAXIMUM ITERATIONS
-prec = 1
-tolAbs = 1e-12;
-tolRel = 1e-12;
-maxIt = 5000;
+prec = 4
+tolAbs = 1e-8;
+tolRel = 1e-8;
+maxIt = 3000;
 solver = 0;
 relax = 0;
 
@@ -79,7 +79,7 @@ elif not nz:
 
       hgf.hgfDrive( gridin, gridin_ldi2, gridin_ldi3, nxG, nyG, nz, \
                     lG, wG, H, 0, visc, nThreads, prec, gridTotal, gridCount, \
-                    tolAbs, tolRel, maxIt, solver, relax )
+                    tolAbs, tolRel, maxIt, 1, 1, 1, solver, relax )
       sol1 = 'SOL_grid%d_x.dat' % (subgrid)
       shutil.copy('flowrun.dat', sol1)
 
@@ -98,7 +98,7 @@ elif not nz:
       gridCount = gridCount + 1
       hgf.hgfDrive( gridin, gridin_ldi2, gridin_ldi3, nxG, nyG, nz, \
                     lG, wG, H, 1, visc, nThreads, prec, gridTotal, gridCount, \
-                    tolAbs, tolRel, maxIt, solver, relax )
+                    tolAbs, tolRel, maxIt, 1, 1, 1, solver, relax )
       sol2 = 'SOL_grid%d_y.dat' % (subgrid)
       shutil.copy('flowrun.dat', sol2)
 
