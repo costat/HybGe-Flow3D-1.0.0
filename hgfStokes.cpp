@@ -325,22 +325,20 @@ StokesSolveRich( const FluidMesh& Mesh, double visc, int direction, \
                  "U operator", Mesh.DOF[1], Mesh.DOF[1]);
   matV.Assemble( &matIsV[0], &matJsV[0], &matValsV[0], matIsV.size(), \
                  "V operator", Mesh.DOF[2], Mesh.DOF[2]);
-  std::cout << "\nCheck\n";
   if (Mesh.DIM == 3)  matW.Assemble( &matIsW[0], &matJsW[0], &matValsW[0], matIsW.size(), \
                       "W operator", Mesh.DOF[3], Mesh.DOF[3]);
-  std::cout << "\nCheck\n";
 
   // GMRES object
   GMRES<LocalMatrix<double>, LocalVector<double>, double> lsU;
   lsU.Init(tolAbs, tolRel, 1e8, maxIt);
   lsU.SetOperator(matU);
-  lsU.Verbose(1);
+  lsU.Verbose(0);
   lsU.SetBasisSize(100);
 
   GMRES<LocalMatrix<double>, LocalVector<double>, double> lsV;
   lsV.Init(tolAbs, tolRel, 1e8, maxIt);
   lsV.SetOperator(matV);
-  lsV.Verbose(1);
+  lsV.Verbose(0);
   lsV.SetBasisSize(100);
 
   GMRES<LocalMatrix<double>, LocalVector<double>, double> lsW;
@@ -348,7 +346,7 @@ StokesSolveRich( const FluidMesh& Mesh, double visc, int direction, \
   {
     lsW.Init(tolAbs, tolRel, 1e8, maxIt);
     lsW.SetOperator(matW);
-    lsW.Verbose(1);
+    lsW.Verbose(0);
     lsW.SetBasisSize(100);
   }
 
@@ -432,7 +430,6 @@ StokesSolveRich( const FluidMesh& Mesh, double visc, int direction, \
     }
   }
 
-  "\nCheck\n";
   // clear paralution objects
   lsU.Clear();
   matU.Clear();

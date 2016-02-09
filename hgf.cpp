@@ -159,10 +159,10 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
                      length, width, height, MX, MY, MZ, \
                      slices, lengths, widths, heights, \
                      nxs, nys, nzs );
-      for (int sd = 0; sd < slices.size(); sd++)
+      for (unsigned long sd = 0; sd < slices.size(); sd++)
       {
         std::cout << "\nMesh # " << sd << "; size = " << slices[sd].size() << ".\n";
-        for (int jj = 0; jj < slices[sd].size(); jj++)
+        for (unsigned long jj = 0; jj < slices[sd].size(); jj++)
         {
           std::cout << slices[sd][jj] << "\n";
         }
@@ -171,7 +171,7 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
       // build meshes
       std::vector< FluidMesh > Meshes;
       Meshes.resize( slices.size() );
-      for (int sd = 0; sd < slices.size(); sd++) {
+      for (unsigned long sd = 0; sd < slices.size(); sd++) {
         Meshes[sd].BuildUniformMesh( slices[sd].data(), nys[sd], nzs[sd], nxs[sd], nys[sd], nzs[sd], lengths[sd], widths[sd], heights[sd] );
       }
 
@@ -179,7 +179,7 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
       std::vector< std::vector< double > > Solutions;
       Solutions.resize( Meshes[0].DIM*slices.size() );
       if ( nz ) {
-        for (int sd = 0; sd < slices.size(); sd++) {
+        for (unsigned long sd = 0; sd < slices.size(); sd++) {
           Solutions[ idx2( sd, 0, 3 ) ].resize( Meshes[sd].dofTotal );
           Solutions[ idx2( sd, 1, 3 ) ].resize( Meshes[sd].dofTotal );
           Solutions[ idx2( sd, 2, 3 ) ].resize( Meshes[sd].dofTotal );
@@ -196,7 +196,7 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
         }
       }
       else {
-        for (int sd = 0; sd < slices.size(); sd++) {
+        for (unsigned long sd = 0; sd < slices.size(); sd++) {
           Solutions[ idx2( sd, 0, 2 ) ].resize( Meshes[sd].dofTotal );
           Solutions[ idx2( sd, 1, 2 ) ].resize( Meshes[sd].dofTotal );
           if (solver == 0) {
@@ -213,7 +213,7 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
       std::vector< double > Ks;
       Ks.resize( Meshes[0].DIM*slices.size() );
       if ( nz ) {
-        for (int sd = 0; sd < slices.size(); sd++)
+        for (unsigned long sd = 0; sd < slices.size(); sd++)
         {
           computeKConstantDrive( Meshes[sd], Solutions[ idx2( sd, 0, 3 ) ], Ks[ idx2( sd, 0, 3 ) ], 0, 0 );
           computeKConstantDrive( Meshes[sd], Solutions[ idx2( sd, 1, 3 ) ], Ks[ idx2( sd, 1, 3 ) ], 1, 0 );
@@ -223,7 +223,7 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
         }
       }
       else {
-        for (int sd = 0; sd < slices.size(); sd++) {
+        for (unsigned long sd = 0; sd < slices.size(); sd++) {
           computeKConstantDrive( Meshes[sd], Solutions[ idx2( sd, 0, 2 ) ], Ks[ idx2( sd, 0, 2 ) ], 0, 0 );
           computeKConstantDrive( Meshes[sd], Solutions[ idx2( sd, 1, 2 ) ], Ks[ idx2( sd, 1, 2 ) ], 1, 0 );
           std::cout << "\nDomain " << sd << ": Mesh size: " << Meshes[sd].DOF[0] << " cells \t Kxx = " << Ks[idx2(sd,0,2)] << "\t Kyy = " << Ks[idx2(sd,1,2)] << "\n";

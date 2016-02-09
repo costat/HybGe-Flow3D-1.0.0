@@ -1219,14 +1219,14 @@ void FluidMesh::sortPV( void )
     {
       std::vector< sortStruc2 > pYtrans2( (PCellCenters.size()/2) );
       PresListByY.reserve( PCellCenters.size()/2 );
-      for (int cl = 0; cl < (PCellCenters.size()/2); cl++)
+      for (unsigned long cl = 0; cl < (PCellCenters.size()/2); cl++)
       {
         pYtrans2[cl].xx = PCellCenters[ idx2( cl, 0, 2 ) ];
         pYtrans2[cl].yy = PCellCenters[ idx2( cl, 1, 2 ) ];
         pYtrans2[cl].ind = cl;
       }
       std::sort(pYtrans2.begin(), pYtrans2.end(), byXbyY());
-      for (int cl = 0; cl < (PCellCenters.size()/2); cl++)
+      for (unsigned long cl = 0; cl < (PCellCenters.size()/2); cl++)
       {
         PresListByY.push_back( pYtrans2[cl].ind );
       }
@@ -1238,7 +1238,7 @@ void FluidMesh::sortPV( void )
       std::vector< sortStruc3 > pZtrans3( (PCellCenters.size()/3) );
       PresListByY.reserve( PCellCenters.size()/3 );
       PresListByZ.reserve( PCellCenters.size()/3 );
-      for (int cl = 0; cl < (PCellCenters.size()/3); cl++)
+      for (unsigned long cl = 0; cl < (PCellCenters.size()/3); cl++)
       {
         pYtrans3[cl].xx = PCellCenters[ idx2( cl, 0, 3 ) ];
         pYtrans3[cl].yy = PCellCenters[ idx2( cl, 1, 3 ) ];
@@ -1251,7 +1251,7 @@ void FluidMesh::sortPV( void )
       }
       std::sort(pYtrans3.begin(), pYtrans3.end(), byZbyXbyY());
       std::sort(pZtrans3.begin(), pZtrans3.end(), byYbyXbyZ());
-      for (int cl = 0; cl < (PCellCenters.size()/3); cl++)
+      for (unsigned long cl = 0; cl < (PCellCenters.size()/3); cl++)
       {
         PresListByY.push_back( pYtrans3[cl].ind );
         PresListByZ.push_back( pZtrans3[cl].ind );

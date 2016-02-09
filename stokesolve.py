@@ -33,6 +33,8 @@ prec = 2
 tolAbs = 1e-12;
 tolRel = 1e-12;
 maxIt = 5000;
+solver = 0;
+relax = 0;
 
 ##########################################################
 ### SWIG TRANSLATION, USER SHOULD NOT EDIT BELOW HERE ####
@@ -70,4 +72,4 @@ print 'Solving the stationary Stokes problem...\n'
 
 hgf.hgfDrive ( gridin, gridin_ldi2, gridin_ldi3, nx, ny, nz, \
                L, W, H, direction, visc, nThreads, prec, 1, 1, \
-               tolAbs, tolRel, maxIt )
+               tolAbs, tolRel, maxIt, solver, relax )

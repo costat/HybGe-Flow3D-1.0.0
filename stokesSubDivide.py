@@ -31,6 +31,8 @@ prec = 1
 tolAbs = 1e-12;
 tolRel = 1e-12;
 maxIt = 5000;
+solver = 0;
+relax = 0;
 
 ###################################
 ### SETUP AND SWIG TRANSLATION ####
@@ -77,7 +79,7 @@ elif not nz:
 
       hgf.hgfDrive( gridin, gridin_ldi2, gridin_ldi3, nxG, nyG, nz, \
                     lG, wG, H, 0, visc, nThreads, prec, gridTotal, gridCount, \
-                    tolAbs, tolRel, maxIt )
+                    tolAbs, tolRel, maxIt, solver, relax )
       sol1 = 'SOL_grid%d_x.dat' % (subgrid)
       shutil.copy('flowrun.dat', sol1)
 
@@ -96,7 +98,7 @@ elif not nz:
       gridCount = gridCount + 1
       hgf.hgfDrive( gridin, gridin_ldi2, gridin_ldi3, nxG, nyG, nz, \
                     lG, wG, H, 1, visc, nThreads, prec, gridTotal, gridCount, \
-                    tolAbs, tolRel, maxIt )
+                    tolAbs, tolRel, maxIt, solver, relax )
       sol2 = 'SOL_grid%d_y.dat' % (subgrid)
       shutil.copy('flowrun.dat', sol2)
 

@@ -35,6 +35,8 @@ prec = 1
 tolAbs = 1e-12;
 tolRel = 1e-12;
 maxIt = 5000;
+solver = 0;
+relax = 0;
 
 ####################################################################
 ### SETUP AND SWIG TRANSLATION, USER SHOULD NOT EDIT BELOW HERE ####
@@ -79,7 +81,7 @@ for root, dirs, filenames in os.walk(infolder):
 
     hgf.hgfDrive ( gridin, gridin_ldi2, gridin_ldi3, nx, ny, nz, \
                    L, W, H, direction, visc, nThreads, prec, nGrids, gridCount, \
-                   tolAbs, tolRel, maxIt )
+                   tolAbs, tolRel, maxIt, solver, relax )
 
     ### Grab computed K ###
     KLoc = outfolder + 'Ks.dat'
