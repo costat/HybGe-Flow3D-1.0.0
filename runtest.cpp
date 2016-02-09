@@ -12,8 +12,8 @@ int
 main( int argc, const char* argv[] )
 {
 
-  int nx, ny, nz, nThreads, prec, numSims, simNum, size1, ldi1, ldi2, direction;
-  double length, width, height, visc;
+  int nx, ny, nz, nThreads, prec, numSims, simNum, size1, ldi1, ldi2, direction, solver;
+  double length, width, height, visc, relax;
 
   nx = atoi(argv[1]);
   ny = atoi(argv[2]);
@@ -30,6 +30,9 @@ main( int argc, const char* argv[] )
   direction = atoi(argv[4]);
   nThreads = atoi(argv[5]);
   prec = atoi(argv[6]);
+
+  solver = atoi(argv[7]);
+  relax = atof(argv[8]);
 
   length = 1;
   width = 1;
@@ -53,7 +56,7 @@ main( int argc, const char* argv[] )
 
   hgfDrive( gridin, size1, ldi1, ldi2, nx, ny, nz, \
                  length, width, height, direction, visc, \
-                 nThreads, prec, numSims, simNum, 1e-12, 1e-12, 5000, MX, MY, MZ );
+                 nThreads, prec, numSims, simNum, 1e-12, 1e-12, 5000, MX, MY, MZ, solver, relax );
 
   delete[] gridin;
 

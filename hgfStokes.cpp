@@ -192,10 +192,9 @@ setForceRich( const FluidMesh& Mesh, const std::vector<double>& Solution, std::v
 void
 updatePressureRich( const FluidMesh& Mesh, std::vector<double>& Solution, \
                     const paralution::LocalVector<double>& solU, const paralution::LocalVector<double>& solV, \
-                    const paralution::LocalVector<double>& solW, double& residual )
+                    const paralution::LocalVector<double>& solW, double& residual, double relax )
 {
   int velShift;
-  double alpha = 0.00025;
   std::vector<double> pressureHold;
   pressureHold.resize( Mesh.DOF[0] );
 
@@ -206,7 +205,7 @@ updatePressureRich( const FluidMesh& Mesh, std::vector<double>& Solution, \
       velShift = Mesh.DOF[1] + Mesh.DOF[2];
       for (int cl = 0; cl < Mesh.DOF[0]; cl++)
       {
-        pressureHold[cl] = Solution[ (velShift + cl) ] - alpha * ( \
+        pressureHold[cl] = Solution[ (velShift + cl) ] - relax * ( \
                            ( solU[ Mesh.PressureCellUNeighbor[ idx2( cl, 1, 2 ) ]-1 ] - solU[ Mesh.PressureCellUNeighbor[ idx2( cl, 0, 2 ) ]-1 ] ) \
                            / Mesh.PCellWidths[ idx2( cl, 0, Mesh.DIM ) ] + \
                            ( solV[ Mesh.PressureCellVNeighbor[ idx2( cl, 1, 2 ) ]-1 ] - solV[ Mesh.PressureCellVNeighbor[ idx2( cl, 0, 2 ) ]-1 ] ) \
@@ -219,7 +218,7 @@ updatePressureRich( const FluidMesh& Mesh, std::vector<double>& Solution, \
       velShift = Mesh.DOF[1] + Mesh.DOF[2] + Mesh.DOF[3];
       for (int cl = 0; cl < Mesh.DOF[0]; cl++)
       {
-        pressureHold[cl] = Solution[ (velShift + cl) ] - alpha * ( \
+        pressureHold[cl] = Solution[ (velShift + cl) ] - relax * ( \
                            ( solU[ Mesh.PressureCellUNeighbor[ idx2( cl, 1, 2 ) ]-1 ] - solU[ Mesh.PressureCellUNeighbor[ idx2( cl, 0, 2 ) ]-1 ] ) \
                            / Mesh.PCellWidths[ idx2( cl, 0, Mesh.DIM ) ] + \
                            ( solV[ Mesh.PressureCellVNeighbor[ idx2( cl, 1, 2 ) ]-1 ] - solV[ Mesh.PressureCellVNeighbor[ idx2( cl, 0, 2 ) ]-1 ] ) \
@@ -245,7 +244,7 @@ updatePressureRich( const FluidMesh& Mesh, std::vector<double>& Solution, \
 void
 StokesSolveRich( const FluidMesh& Mesh, double visc, int direction, \
                  std::vector<double>& Solution, double tolAbs, double tolRel, \
-                 int maxIt, int nThreads, int prec )
+                 int maxIt, int nThreads, int prec, double relax )
 {
 
   int richIt = 0;
@@ -401,7 +400,7 @@ StokesSolveRich( const FluidMesh& Mesh, double visc, int direction, \
     if (Mesh.DIM == 3) lsW.Solve(forceWP, &solW);
 
     // update the pressure vector and compute residual
-    updatePressureRich( Mesh, Solution, solU, solV, solW, residual );
+    updatePressureRich( Mesh, Solution, solU, solV, solW, residual, relax );
 
     std::cout << "\nRichardson Iteration " << richIt << " \t Residual: " << residual << "\n";
 

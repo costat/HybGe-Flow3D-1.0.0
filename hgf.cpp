@@ -29,7 +29,7 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
           double length, double width, double height, int direction, \
           double visc, int nThreads, int prec, int numSims, int simNum, \
           double tolAbs, double tolRel, int maxIt, \
-          int MX, int MY, int MZ )
+          int MX, int MY, int MZ, int solver, double relax )
 {
 
   int type;
@@ -67,7 +67,8 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
       // call Stokes' solver
       std::vector< double > sol;
       sol.resize( Mesh.dofTotal );
-      StokesSolveDirect( Mesh, visc, direction, sol, tolAbs, tolRel, maxIt, nThreads, prec );
+      if (solver == 0) StokesSolveDirect( Mesh, visc, direction, sol, tolAbs, tolRel, maxIt, nThreads, prec );
+      else StokesSolveRich( Mesh, visc, direction, sol, tolAbs, tolRel, maxIt, nThreads, prec, relax );
 
       // Linear solve timer
       stokes_duration = ( omp_get_wtime() - stokes_start );
@@ -111,13 +112,24 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
       std::vector< double > solZ;
       solX.resize( Mesh.dofTotal );
       solY.resize( Mesh.dofTotal );
-      StokesSolveDirect( Mesh, visc, 0, solX, tolAbs, tolRel, maxIt, nThreads, prec );
-      StokesSolveDirect( Mesh, visc, 1, solY, tolAbs, tolRel, maxIt, nThreads, prec );
-      if ( Mesh.DIM == 3) {
-        solZ.resize( Mesh.dofTotal );
-        StokesSolveDirect( Mesh, visc, 2, solZ, tolAbs, tolRel, maxIt, nThreads, prec );
+      if (solver == 0) {
+        StokesSolveDirect( Mesh, visc, 0, solX, tolAbs, tolRel, maxIt, nThreads, prec );
+        StokesSolveDirect( Mesh, visc, 1, solY, tolAbs, tolRel, maxIt, nThreads, prec );
+        if ( Mesh.DIM == 3) {
+          solZ.resize( Mesh.dofTotal );
+          StokesSolveDirect( Mesh, visc, 2, solZ, tolAbs, tolRel, maxIt, nThreads, prec );
+        }
+        else solZ.resize( 1 );
       }
-      else solZ.resize( 1 );
+      else {
+        StokesSolveRich( Mesh, visc, 0, solX, tolAbs, tolRel, maxIt, nThreads, prec, relax );
+        StokesSolveRich( Mesh, visc, 1, solY, tolAbs, tolRel, maxIt, nThreads, prec, relax );
+        if ( Mesh.DIM == 3) {
+          solZ.resize( Mesh.dofTotal );
+          StokesSolveRich( Mesh, visc, 2, solZ, tolAbs, tolRel, maxIt, nThreads, prec, relax );
+        }
+        else solZ.resize( 1 );
+      }
 
       // stokes timer
       stokes_duration = ( omp_get_wtime() - stokes_start );
@@ -171,17 +183,30 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
           Solutions[ idx2( sd, 0, 3 ) ].resize( Meshes[sd].dofTotal );
           Solutions[ idx2( sd, 1, 3 ) ].resize( Meshes[sd].dofTotal );
           Solutions[ idx2( sd, 2, 3 ) ].resize( Meshes[sd].dofTotal );
-          StokesSolveDirect( Meshes[sd], visc, 0, Solutions[ idx2( sd, 0, 3 ) ], tolAbs, tolRel, maxIt, nThreads, prec );
-          StokesSolveDirect( Meshes[sd], visc, 1, Solutions[ idx2( sd, 1, 3 ) ], tolAbs, tolRel, maxIt, nThreads, prec );
-          StokesSolveDirect( Meshes[sd], visc, 2, Solutions[ idx2( sd, 2, 3 ) ], tolAbs, tolRel, maxIt, nThreads, prec );
+          if (solver == 0) {
+            StokesSolveDirect( Meshes[sd], visc, 0, Solutions[ idx2( sd, 0, 3 ) ], tolAbs, tolRel, maxIt, nThreads, prec );
+            StokesSolveDirect( Meshes[sd], visc, 1, Solutions[ idx2( sd, 1, 3 ) ], tolAbs, tolRel, maxIt, nThreads, prec );
+            StokesSolveDirect( Meshes[sd], visc, 2, Solutions[ idx2( sd, 2, 3 ) ], tolAbs, tolRel, maxIt, nThreads, prec );
+          }
+          else {
+            StokesSolveRich( Meshes[sd], visc, 0, Solutions[ idx2( sd, 0, 3 ) ], tolAbs, tolRel, maxIt, nThreads, prec, relax );
+            StokesSolveRich( Meshes[sd], visc, 1, Solutions[ idx2( sd, 1, 3 ) ], tolAbs, tolRel, maxIt, nThreads, prec, relax );
+            StokesSolveRich( Meshes[sd], visc, 2, Solutions[ idx2( sd, 2, 3 ) ], tolAbs, tolRel, maxIt, nThreads, prec, relax );
+          }
         }
       }
       else {
         for (int sd = 0; sd < slices.size(); sd++) {
           Solutions[ idx2( sd, 0, 2 ) ].resize( Meshes[sd].dofTotal );
           Solutions[ idx2( sd, 1, 2 ) ].resize( Meshes[sd].dofTotal );
-          StokesSolveDirect( Meshes[sd], visc, 0, Solutions[ idx2( sd, 0, 2 ) ], tolAbs, tolRel, maxIt, nThreads, prec );
-          StokesSolveDirect( Meshes[sd], visc, 1, Solutions[ idx2( sd, 1, 2 ) ], tolAbs, tolRel, maxIt, nThreads, prec );
+          if (solver == 0) {
+            StokesSolveDirect( Meshes[sd], visc, 0, Solutions[ idx2( sd, 0, 2 ) ], tolAbs, tolRel, maxIt, nThreads, prec );
+            StokesSolveDirect( Meshes[sd], visc, 1, Solutions[ idx2( sd, 1, 2 ) ], tolAbs, tolRel, maxIt, nThreads, prec );
+          }
+          else {
+            StokesSolveRich( Meshes[sd], visc, 0, Solutions[ idx2( sd, 0, 2 ) ], tolAbs, tolRel, maxIt, nThreads, prec, relax );
+            StokesSolveRich( Meshes[sd], visc, 1, Solutions[ idx2( sd, 1, 2 ) ], tolAbs, tolRel, maxIt, nThreads, prec, relax );
+          }
         }
       }
       // post-process porescale solutions
