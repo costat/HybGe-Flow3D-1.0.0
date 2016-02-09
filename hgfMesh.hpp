@@ -65,7 +65,7 @@ class PoreNetwork
     std::vector<unsigned long> InPores, OutPores, PeriodicPairs;
     int DIM, nPores, nThroats;
     // public functions
-    void PNFromPS( const std::vector< FluidMesh >& Meshes );
+    void UniformPN( double length, double width, double height, int nx, int ny, int nz );
 };
 
 #endif

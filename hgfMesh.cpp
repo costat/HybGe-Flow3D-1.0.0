@@ -1261,36 +1261,51 @@ void FluidMesh::sortPV( void )
   }
 }
 // create the pore-network from porescale meshes
-void PoreNetwork::PNFromPS( const std::vector< FluidMesh >& Meshes )
+void PoreNetwork::UniformPN( double length, double width, double height, int nx, int ny, int nz )
 {
   double dx, dy, dz;
-  DIM = Meshes[0].DIM;
-  nPores = Meshes.size();
-  PoresXYZ.reserve( nPores * DIM );
-  Throats.reserve( nPores * DIM * 2 );
-  // set pore locations
-  for (int pore = 0; pore < nPores; pore++)
+  if (nz)
   {
-    PoresXYZ[ idx2( pore, 0, DIM ) ] = 0.5 * (Meshes[ pore ].xLim[0] + Meshes[ pore ].xLim[1]);
-    PoresXYZ[ idx2( pore, 1, DIM ) ] = 0.5 * (Meshes[ pore ].yLim[0] + Meshes[ pore ].yLim[1]);
-    if ( DIM == 3 ) PoresXYZ[ idx2( pore, 2, DIM ) ] = 0.5 * (Meshes[ pore ].zLim[0] + Meshes[ pore ].zLim[1]);
+    DIM = 3;
+    nPores = nx * ny * nz;
+    dx = length/nx;
+    dy = width/ny;
+    dz = height/nz;
   }
-  dx = fabs(PoresXYZ[ idx2( 0, 0, DIM ) ] - PoresXYZ[ idx2( 1, 0, DIM ) ]);
-  dy = fabs(PoresXYZ[ idx2( 0, 1, DIM ) ] - PoresXYZ[ idx2( 1, 1, DIM ) ]);
-  if (DIM == 3) dz = fabs(PoresXYZ[ idx2( 0, 2, DIM ) ] - PoresXYZ[ idx2( 1, 2, DIM ) ]);
-  else dz = 0;
-  for (int pore = 1; pore < nPores; pore++)
+  else
   {
-    if (fabs(PoresXYZ[ idx2( 0, 0, DIM ) ] - PoresXYZ[ idx2( pore, 0, DIM ) ]) < dx) \
-          dx = fabs(PoresXYZ[ idx2( 0, 0, DIM ) ] - PoresXYZ[ idx2( pore, 0, DIM ) ]);
-    if (fabs(PoresXYZ[ idx2( 0, 1, DIM ) ] - PoresXYZ[ idx2( pore, 1, DIM ) ]) < dy) \
-          dy = fabs(PoresXYZ[ idx2( 0, 1, DIM ) ] - PoresXYZ[ idx2( pore, 1, DIM ) ]);
-    if (DIM == 3) {
-      if (fabs(PoresXYZ[ idx2( 0, 2, DIM ) ] - PoresXYZ[ idx2( pore, 2, DIM ) ]) < dz) \
-          dz = fabs(PoresXYZ[ idx2( 0, 2, DIM ) ] - PoresXYZ[ idx2( pore, 2, DIM ) ]);
+    DIM = 2;
+    nPores = nx * ny;
+    dx = length/nx;
+    dy = width/ny;
+  }
+  PoresXYZ.resize( nPores * DIM );
+  Throats.resize( nPores * DIM * 2 );
+  // set pore locations
+  if (DIM == 2) {
+    for (int porey = 0; porey < ny; porey++)
+    {
+      for (int porex = 0; porex < nx; porex++)
+      {
+        PoresXYZ[ idx2( idx2( porex, porey, ny ), 0, 2 ) ] = 0.5 * dx + dx * ( porex );
+        PoresXYZ[ idx2( idx2( porex, porey, ny ), 1, 2 ) ] = 0.5 * dy + dy * ( porey );
+      }
     }
   }
-  // define throat connectivity
+  else {
+    for (int porez = 0; porez < nz; porez++)
+    {
+      for (int porey = 0; porey < ny; porey++)
+      {
+        for (int porex = 0; porex < nx; porex++)
+        {
+          PoresXYZ[ idx2( idx3( porex, porey, porez, ny, nz ), 0, 3 ) ] = 0.5 * dx + dx * ( porex );
+          PoresXYZ[ idx2( idx3( porex, porey, porez, ny, nz ), 1, 3 ) ] = 0.5 * dy + dy * ( porey );
+          PoresXYZ[ idx2( idx3( porex, porey, porez, ny, nz ), 2, 3 ) ] = 0.5 * dz + dz * ( porez );
+        }
+      }
+    }
+  }
   innerFaceConnectivity( Throats, PoresXYZ, dx, dy, dz, nPores, DIM );
 }
 
