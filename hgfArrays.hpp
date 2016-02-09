@@ -48,3 +48,8 @@ void
 VelocityArray ( const FluidMesh& Mesh, double visc, std::vector<int>& matIs, \
                 std::vector<int>& matJs, std::vector<double>& matVals, int component );
 
+void
+PoreNetworkArray ( const PoreNetwork& pn, std::vector<int>& matIs, \
+                   std::vector<int>& matJs, std::vector<double>& matVals, \
+                   const std::vector<double>& Ks );
+

@@ -31,6 +31,7 @@ PoreNetworkSolveDirect( const PoreNetwork& pn, const std::vector<double> Ks, \
   PoreNetworkArray( pn, matIs, matJs, matVals, Ks );
 
   // boundary pores
+  PoreNetworkBoundary( pn, matIs, matJs, matVals, Ks );
 
   // solve the problem
 

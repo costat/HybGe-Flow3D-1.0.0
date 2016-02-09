@@ -1297,3 +1297,11 @@ AxisFlowSingleComponent ( const FluidMesh& Mesh, std::vector<int>& matIs, \
   }
 
 }
+void
+PoreNetworkBoundary( const PoreNetwork& pn, std::vector<int>& matIs, \
+                     std::vector<int>& matJs, std::vector<double>& matVals, \
+                     const std::vector<double>& Ks )
+{
+
+}
+

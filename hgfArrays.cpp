@@ -476,4 +476,62 @@ VelocityArray ( const FluidMesh& Mesh, double visc, std::vector<int>& matIs, \
     }
   }
 }
+void
+PoreNetworkArray( const PoreNetwork& pn, std::vector<int>& matIs, \
+                  std::vector<int>& matJs, std::vector<double>& matVals, \
+                  const std::vector<double>& Ks )
+{
+  double val[ 2*np.DIM + 1 ];
+  int colId[ 2*np.DIM + 1 ];
+  int pore;
+  switch (np.DIM)
+  {
+    case 2 :
+    {
+      for (int ip = 0; ip < np.InteriorPores.size(); ip++)
+      {
+        pore = np.InteriorPores[ ip ];
+        for (int dir = 0; dir < (np.DIM * 2); dir++) {
+          colId[dir] = Throats[ idx2( pore, dir, (2*np.DIM) ) ];
+        }
+        colId[4] = pore;
+        val[0] = -0.5 * ( Ks[ idx2( colId[0], 1, np.DIM ) ] + Ks[ idx2( pore, 1, np.DIM ) ] );
+        val[1] = -0.5 * ( Ks[ idx2( colId[1], 0, np.DIM ) ] + Ks[ idx2( pore, 0, np.DIM ) ] );
+        val[2] = -0.5 * ( Ks[ idx2( colId[2], 1, np.DIM ) ] + Ks[ idx2( pore, 1, np.DIM ) ] );
+        val[3] = -0.5 * ( Ks[ idx2( colId[3], 0, np.DIM ) ] + Ks[ idx2( pore, 0, np.DIM ) ] );
+        val[4] = -(val[0] + val[1] + val[2] + val[3]);
+        for (int dir = 0; dir < (np.DIM * 2+1); dir++) {
+          matIs.push_back( pore );
+          matJs.push_back( colId[dir] );
+          matVals.push_back( val[dir] );
+        }
+      }
+      break;
+    }
+    default :
+    {
+      for (int ip = 0; ip < np.InteriorPores.size(); ip++)
+      {
+        pore = np.InteriorPores[ ip ];
+        for (int dir = 0; dir < (np.DIM * 2); dir++) {
+          colId[dir] = Throats[ idx2( pore, dir, (2*np.DIM) ) ];
+        }
+        colId[6] = pore;
+        val[0] = -0.5 * ( Ks[ idx2( colId[0], 2, np.DIM ) ] + Ks[ idx2( pore, 2, np.DIM ) ] );
+        val[1] = -0.5 * ( Ks[ idx2( colId[1], 0, np.DIM ) ] + Ks[ idx2( pore, 0, np.DIM ) ] );
+        val[2] = -0.5 * ( Ks[ idx2( colId[2], 2, np.DIM ) ] + Ks[ idx2( pore, 2, np.DIM ) ] );
+        val[3] = -0.5 * ( Ks[ idx2( colId[3], 0, np.DIM ) ] + Ks[ idx2( pore, 0, np.DIM ) ] );
+        val[4] = -0.5 * ( Ks[ idx2( colId[4], 1, np.DIM ) ] + Ks[ idx2( pore, 1, np.DIM ) ] );
+        val[5] = -0.5 * ( Ks[ idx2( colId[5], 1, np.DIM ) ] + Ks[ idx2( pore, 1, np.DIM ) ] );
+        val[6] = -(val[0] + val[1] + val[2] + val[3] + val[4] + val[5]);
+        for (int dir = 0; dir < (np.DIM * 2+1); dir++) {
+          matIs.push_back( pore );
+          matJs.push_back( colId[dir] );
+          matVals.push_back( val[dir] );
+        }
+      }
+      break;
+    }
+  }
+}
 
