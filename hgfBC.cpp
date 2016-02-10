@@ -1302,7 +1302,7 @@ PoreNetworkBoundary( const PoreNetwork& pn, std::vector<int>& matIs, \
                      std::vector<int>& matJs, std::vector<double>& matVals, \
                      const std::vector<double>& Ks, int direction )
 {
-
+/*
   switch (pn.DIM)
   {
     case 2 :
@@ -1394,6 +1394,6 @@ PoreNetworkBoundary( const PoreNetwork& pn, std::vector<int>& matIs, \
       break;
     }
   }
-
+*/
 }
 
