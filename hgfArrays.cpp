@@ -481,8 +481,8 @@ PoreNetworkArray( const PoreNetwork& pn, std::vector<int>& matIs, \
                   std::vector<int>& matJs, std::vector<double>& matVals, \
                   const std::vector<double>& Ks )
 {
-  double val[ 2*pn.DIM + 1 ];
-  int colId[ 2*pn.DIM + 1 ];
+  double *val = new double[ 2*pn.DIM + 1 ];
+  int *colId = new int[ 2*pn.DIM + 1 ];
   int pore;
   switch (pn.DIM)
   {
