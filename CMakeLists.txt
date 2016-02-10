@@ -2,30 +2,18 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.7 FATAL_ERROR)
 
 PROJECT(hgf)
 
-SET(HGF_BUILD_PYTHON_HOOKS OFF CACHE BOOL "Build HGF Python Hooks using Swig")
+SET(HGF_BUILD_PYTHON_HOOKS ON CACHE BOOL "Build HGF Python Hooks using Swig.")
+SET(HGF_BUILD_EXECUTABLE ON CACHE BOOL "Build HGF Driver Executable.")
 
-macro (add_sources)
-    file (RELATIVE_PATH _relPath "${CMAKE_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
-    foreach (_src ${ARGN})
-        if (_relPath)
-            list (APPEND SRCS "${_relPath}/${_src}")
-        else()
-            list (APPEND SRCS "${_src}")
-        endif()
-    endforeach()
-    if (_relPath)
-        # propagate SRCS to parent directory
-        set (SRCS ${SRCS} PARENT_SCOPE)
-    endif()
-endmacro()
+SET(LIBRARY_SRCS hgf.cpp
+                 hgfMesh.cpp
+                 hgfStokes.cpp
+                 hgfArrays.cpp
+                 hgfBC.cpp
+                 hgfIB.cpp
+                 hgfPP.cpp)
 
-add_sources(hgf.cpp)
-add_sources(hgfMesh.cpp)
-add_sources(hgfStokes.cpp)
-add_sources(hgfArrays.cpp)
-add_sources(hgfBC.cpp)
-add_sources(hgfIB.cpp)
-add_sources(hgfPP.cpp)
+SET(EXECUTABLE_SRCS driver.cpp)
 
 SET(CMAKE_MODULE_PATH ${CMAKE_HOME_DIRECTORY}/cmake)
 
@@ -34,18 +22,26 @@ INCLUDE_DIRECTORIES(${PARALUTION_INCLUDE_DIR})
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR} ${PARALUTION_INCLUDE_DIR})
 
+ADD_LIBRARY(libhgf ${LIBRARY_SRCS})
+
 IF(HGF_BUILD_PYTHON_HOOKS)
   FIND_PACKAGE(SWIG REQUIRED)
   INCLUDE(${SWIG_USE_FILE})
 
-  FIND_PACKAGE(PythonLibs)
-  INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
+  FIND_PACKAGE(PythonInterp REQUIRED)
+  FIND_PACKAGE(PythonLibs REQUIRED)
+  FIND_PACKAGE(NumPy REQUIRED)
+  INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_DIRS} ${NUMPY_INCLUDE_DIRS})
 
   SET(CMAKE_SWIG_FLAGS "")
-
   SET_SOURCE_FILES_PROPERTIES(hgf.i PROPERTIES CPLUSPLUS ON)
+  SET_SOURCE_FILES_PROPERTIES(hgf.i PROPERTIES SWIG_FLAGS "-includeall")
+  SET_SOURCE_FILES_PROPERTIES(hgf.i PROPERTIES SWIG_FLAGS "-cpperraswarn")
   SWIG_ADD_MODULE(hgf python hgf.i ${SRCS})
-  SWIG_LINK_LIBRARIES(hgf ${PYTHON_LIBRARIES})
+  SWIG_LINK_LIBRARIES(hgf ${PARALUTION_LIBRARY} ${PYTHON_LIBRARIES} libhgf)
 ENDIF()
 
-ADD_EXECUTABLE(hgf ${SRCS})
+IF(HGF_BUILD_EXECUTABLE)
+  ADD_EXECUTABLE(hgf ${EXECUTABLE_SRCS})
+  TARGET_LINK_LIBRARIES(hgf ${PARALUTION_LIBRARY} libhgf)
+ENDIF()
