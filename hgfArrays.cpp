@@ -134,33 +134,27 @@ diffusionDrive ( const FluidMesh& Mesh, std::vector<int>& matIs, \
   {
     case 0 :
     {
-      const std::vector<unsigned long>& velint = Mesh.UInteriorCells;
-      const std::vector<unsigned long>& fconn = Mesh.UFaceConnectivity;
-      const std::vector<double>& dxyz = Mesh.UCellWidths;
       velShift = 0;
-      diffusionArrays( Mesh, matIs, matJs, matVals, velint, fconn, \
-                       dxyz, visc, velShift );
+      diffusionArrays( Mesh, matIs, matJs, matVals, Mesh.UInteriorCells, \
+                       Mesh.UFaceConnectivity, \
+                       Mesh.UCellWidths, visc, velShift );
       break;
     }
     case 1 :
     {
-      const std::vector<unsigned long>& velint = Mesh.VInteriorCells;
-      const std::vector<unsigned long>& fconn = Mesh.VFaceConnectivity;
-      const std::vector<double>& dxyz = Mesh.VCellWidths;
       velShift = Mesh.DOF[1];
-      diffusionArrays( Mesh, matIs, matJs, matVals, velint, fconn, \
-                       dxyz, visc, velShift );
+      diffusionArrays( Mesh, matIs, matJs, matVals, Mesh.VInteriorCells,
+                       Mesh.VFaceConnectivity, \
+                       Mesh.VCellWidths, visc, velShift );
 
       break;
     }
     case 2 :
     {
-      const std::vector<unsigned long>& velint = Mesh.WInteriorCells;
-      const std::vector<unsigned long>& fconn = Mesh.WFaceConnectivity;
-      const std::vector<double>& dxyz = Mesh.WCellWidths;
       velShift = Mesh.DOF[1] + Mesh.DOF[2];
-      diffusionArrays( Mesh, matIs, matJs, matVals, velint, fconn, \
-                       dxyz, visc, velShift );
+      diffusionArrays( Mesh, matIs, matJs, matVals, Mesh.WInteriorCells,
+                       Mesh.WFaceConnectivity, \
+                       Mesh.WCellWidths, visc, velShift );
 
       break;
     }
@@ -248,38 +242,32 @@ pressureGradDrive ( const FluidMesh& Mesh, std::vector<int>& matIs, \
   {
     case 0 :
     {
-      const std::vector<unsigned long> &velint = Mesh.UInteriorCells;
-      const std::vector<unsigned long> &vcpn = Mesh.UCellPressureNeighbor;
-      const std::vector<double> &dxyz = Mesh.UCellWidths;
       velShift = 0;
       done = 1;
       dtwo = 2;
-      pressureGrad ( Mesh, matIs, matJs, matVals, velint, vcpn, \
-                     dxyz, velShift, done, dtwo );
+      pressureGrad ( Mesh, matIs, matJs, matVals, Mesh.UInteriorCells, \
+                     Mesh.UCellPressureNeighbor, \
+                     Mesh.UCellWidths, velShift, done, dtwo );
       break;
     }
     case 1 :
     {
-      const std::vector<unsigned long> &velint = Mesh.VInteriorCells;
-      const std::vector<unsigned long> &vcpn = Mesh.VCellPressureNeighbor;
-      const std::vector<double> &dxyz = Mesh.VCellWidths;
       velShift = Mesh.DOF[1];
       done = 0;
       dtwo = 2;
-      pressureGrad ( Mesh, matIs, matJs, matVals, velint, vcpn, \
-                     dxyz, velShift, done, dtwo );
+      pressureGrad ( Mesh, matIs, matJs, matVals, Mesh.VInteriorCells, \
+                     Mesh.VCellPressureNeighbor, \
+                     Mesh.VCellWidths, velShift, done, dtwo );
       break;
     }
     case 2 :
     {
-      const std::vector<unsigned long> &velint = Mesh.WInteriorCells;
-      const std::vector<unsigned long> &vcpn = Mesh.WCellPressureNeighbor;
-      const std::vector<double> &dxyz = Mesh.WCellWidths;
       velShift = Mesh.DOF[1] + Mesh.DOF[2];
       done = 0;
       dtwo = 1;
-      pressureGrad ( Mesh, matIs, matJs, matVals, velint, vcpn, \
-                             dxyz, velShift, done, dtwo );
+      pressureGrad ( Mesh, matIs, matJs, matVals, Mesh.WInteriorCells, \
+                             Mesh.WCellPressureNeighbor, \
+                             Mesh.WCellWidths, velShift, done, dtwo );
       break;
     }
   }
@@ -356,31 +344,28 @@ continuityDrive ( const FluidMesh& Mesh, std::vector<int>& matIs, \
   {
     case 0 :
     {
-      const std::vector<unsigned long> &pcvn = Mesh.PressureCellUNeighbor;
       velShift = 0;
       done = 1;
       dtwo = 2;
-      continuityEq ( Mesh, matIs, matJs, matVals, pcvn, velShift, \
+      continuityEq ( Mesh, matIs, matJs, matVals, Mesh.PressureCellUNeighbor, velShift, \
                      done, dtwo );
       break;
     }
     case 1 :
     {
-      const std::vector<unsigned long> &pcvn = Mesh.PressureCellVNeighbor;
       velShift = Mesh.DOF[1];
       done = 0;
       dtwo = 2;
-      continuityEq ( Mesh, matIs, matJs, matVals, pcvn, velShift, \
+      continuityEq ( Mesh, matIs, matJs, matVals, Mesh.PressureCellVNeighbor, velShift, \
                      done, dtwo );
       break;
     }
     case 2 :
     {
-      const std::vector<unsigned long> &pcvn = Mesh.PressureCellWNeighbor;
       velShift = Mesh.DOF[1] + Mesh.DOF[2];
       done = 0;
       dtwo = 1;
-      continuityEq ( Mesh, matIs, matJs, matVals, pcvn, velShift, \
+      continuityEq ( Mesh, matIs, matJs, matVals, Mesh.PressureCellWNeighbor, velShift, \
                      done, dtwo );
       break;
     }
@@ -444,33 +429,27 @@ VelocityArray ( const FluidMesh& Mesh, double visc, std::vector<int>& matIs, \
   {
     case 0 :
     {
-      const std::vector<unsigned long>& velint = Mesh.UInteriorCells;
-      const std::vector<unsigned long>& fconn = Mesh.UFaceConnectivity;
-      const std::vector<double>& dxyz = Mesh.UCellWidths;
       velShift = 0;
-      diffusionArrays( Mesh, matIs, matJs, matVals, velint, fconn, \
-                       dxyz, visc, velShift );
+      diffusionArrays( Mesh, matIs, matJs, matVals, Mesh.UInteriorCells, \
+                       Mesh.UFaceConnectivity, \
+                       Mesh.UCellWidths, visc, velShift );
       break;
     }
     case 1 :
     {
-      const std::vector<unsigned long>& velint = Mesh.VInteriorCells;
-      const std::vector<unsigned long>& fconn = Mesh.VFaceConnectivity;
-      const std::vector<double>& dxyz = Mesh.VCellWidths;
       velShift = 0;
-      diffusionArrays( Mesh, matIs, matJs, matVals, velint, fconn, \
-                       dxyz, visc, velShift );
+      diffusionArrays( Mesh, matIs, matJs, matVals, Mesh.VInteriorCells, \
+                       Mesh.VFaceConnectivity, \
+                       Mesh.VCellWidths, visc, velShift );
 
       break;
     }
     case 2 :
     {
-      const std::vector<unsigned long>& velint = Mesh.WInteriorCells;
-      const std::vector<unsigned long>& fconn = Mesh.WFaceConnectivity;
-      const std::vector<double>& dxyz = Mesh.WCellWidths;
       velShift = 0;
-      diffusionArrays( Mesh, matIs, matJs, matVals, velint, fconn, \
-                       dxyz, visc, velShift );
+      diffusionArrays( Mesh, matIs, matJs, matVals, Mesh.WInteriorCells, \
+                       Mesh.WFaceConnectivity, \
+                       Mesh.WCellWidths, visc, velShift );
 
       break;
     }

@@ -1,12 +1,12 @@
 #include <vector>
 #include <omp.h>
 #include <math.h>
-
 #include <paralution.hpp>
 
 #include "hgfMesh.hpp"
 #include "hgfArrays.hpp"
 #include "hgfBC.hpp"
+#include "hgfPoreNetwork.hpp"
 
 /* Define a 2d -> 1d array index,
    uses row major indexing */
@@ -15,7 +15,7 @@
 using namespace paralution;
 
 void
-PoreNetworkSolveDirect( const PoreNetwork& pn, const std::vector<double> Ks, \
+PoreNetworkSolveDirect( const PoreNetwork& pn, const std::vector<double>& Ks, \
                         double& KPN, int direction )
 {
 
@@ -28,14 +28,40 @@ PoreNetworkSolveDirect( const PoreNetwork& pn, const std::vector<double> Ks, \
   force.resize( pn.nPores );
 
   // interior pores
-  //PoreNetworkArray( pn, matIs, matJs, matVals, Ks );
+  PoreNetworkArray( pn, matIs, matJs, matVals, Ks );
 
   // boundary pores
   //PoreNetworkBoundary( pn, matIs, matJs, matVals, Ks );
 
-  // solve the problem
+  // paralution arrays
+  LocalVector<double> sol;
+  LocalVector<double> forceP;
+  LocalMatrix<double> mat;
 
+  // initialize force and solution vectors
+  forceP.Allocate("force vector", pn.nPores);
+  forceP.Zeros();
+  sol.Allocate("solution", pn.nPores);
+  sol.Zeros();
+
+  // assemble paralution arrays from COO data
+
+  // GMRES object
+  GMRES<LocalMatrix<double>, LocalVector<double>, double> ls;
+  // ls.SetOperator(mat);
+
+  // build
+  //ls.Build();
+
+  // solve the system
+  //ls.Solve(forceP, &sol);
 
   // compute K
+
+  // clear paralution objects
+  ls.Clear();
+  mat.Clear();
+  forceP.Clear();
+  sol.Clear();
 
 }

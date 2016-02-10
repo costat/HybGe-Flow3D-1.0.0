@@ -33,9 +33,8 @@ void
 AxisFlowSingleComponent( const FluidMesh& Mesh, std::vector<int>& matIs, \
                          std::vector<int>& matJs, std::vector<double>& matVals, \
                          std::vector<double>& force, double visc, int direction, int component );
-/*
 void
 PoreNetworkBoundary( const PoreNetwork& pn, std::vector<int>& matIs, \
                      std::vector<int>& matJs, std::vector<double>& matVals, \
                      const std::vector<double>& Ks );
-*/
+

@@ -1128,66 +1128,33 @@ AxisFlowDrive ( const FluidMesh& Mesh, std::vector<int>& matIs, \
     case 2 :
     {
       // Set U boundary conditions
-      const std::vector<unsigned long>& componentBoundary = Mesh.UBoundaryCells;
-      const std::vector<double>& componentCellWidths = Mesh.UCellWidths;
-      const std::vector<double>& componentCellCenters = Mesh.UCellCenters;
-      const std::vector<unsigned long>& componentConnectivity = Mesh.UFaceConnectivity;
-      const std::vector<double>& cellWidthsLR = Mesh.VCellWidths;
-      const std::vector<unsigned long>& PressureNeighbor = Mesh.UCellPressureNeighbor;
       FlowComponent2d( Mesh, matIs, matJs, matVals, \
-                       force, componentBoundary, componentCellCenters, componentCellWidths, \
-                       cellWidthsLR, componentConnectivity, PressureNeighbor, \
+                       force, Mesh.UBoundaryCells, Mesh.UCellCenters, Mesh.UCellWidths, \
+                       Mesh.VCellWidths, Mesh.UFaceConnectivity, Mesh.UCellPressureNeighbor, \
                        visc, direction, 0, 1, 1 );
       // Set V boundary conditions
-      const std::vector<unsigned long>& componentBoundary1 = Mesh.VBoundaryCells;
-      const std::vector<double>& componentCellWidths1 = Mesh.VCellWidths;
-      const std::vector<double>& componentCellCenters1 = Mesh.VCellCenters;
-      const std::vector<unsigned long>& componentConnectivity1 = Mesh.VFaceConnectivity;
-      const std::vector<double>& cellWidthsLR1 = Mesh.UCellWidths;
-      const std::vector<unsigned long>& PressureNeighbor1 = Mesh.VCellPressureNeighbor;
       FlowComponent2d( Mesh, matIs, matJs, matVals, \
-                       force, componentBoundary1, componentCellCenters1, componentCellWidths1, \
-                       cellWidthsLR1, componentConnectivity1, PressureNeighbor1, \
+                       force, Mesh.VBoundaryCells, Mesh.VCellCenters, Mesh.VCellWidths, \
+                       Mesh.UCellWidths, Mesh.VFaceConnectivity, Mesh.VCellPressureNeighbor, \
                        visc, direction, 1, 1, 1 );
       break;
     }
     default :
     {
       // Set U boundary conditions
-      const std::vector<unsigned long>& componentBoundary = Mesh.UBoundaryCells;
-      const std::vector<double>& componentCellWidths = Mesh.UCellWidths;
-      const std::vector<double>& componentCellCenters = Mesh.UCellCenters;
-      const std::vector<unsigned long>& componentConnectivity = Mesh.UFaceConnectivity;
-      const std::vector<double>& cellWidthsLR = Mesh.VCellWidths;
-      const std::vector<double>& cellWidthsUD = Mesh.WCellWidths;
-      const std::vector<unsigned long>& PressureNeighbor = Mesh.UCellPressureNeighbor;
       FlowComponent3d( Mesh, matIs, matJs, matVals, \
-                       force, componentBoundary, componentCellCenters, componentCellWidths, \
-                       cellWidthsLR, cellWidthsUD, componentConnectivity, PressureNeighbor, \
+                       force, Mesh.UBoundaryCells, Mesh.UCellCenters, Mesh.UCellWidths, \
+                       Mesh.VCellWidths, Mesh.WCellWidths, Mesh.UFaceConnectivity, Mesh.UCellPressureNeighbor, \
                        visc, direction, 0, 1, 1 );
       // Set V boundary conditions
-      const std::vector<unsigned long>& componentBoundary1 = Mesh.VBoundaryCells;
-      const std::vector<double>& componentCellWidths1 = Mesh.VCellWidths;
-      const std::vector<double>& componentCellCenters1 = Mesh.VCellCenters;
-      const std::vector<unsigned long>& componentConnectivity1 = Mesh.VFaceConnectivity;
-      const std::vector<double>& cellWidthsLR1 = Mesh.UCellWidths;
-      const std::vector<double>& cellWidthsUD1 = Mesh.WCellWidths;
-      const std::vector<unsigned long>& PressureNeighbor1 = Mesh.VCellPressureNeighbor;
       FlowComponent3d( Mesh, matIs, matJs, matVals, \
-                       force, componentBoundary1, componentCellCenters1, componentCellWidths1, \
-                       cellWidthsLR1, cellWidthsUD1, componentConnectivity1, PressureNeighbor1, \
+                       force, Mesh.VBoundaryCells, Mesh.VCellCenters, Mesh.VCellWidths, \
+                       Mesh.UCellWidths, Mesh.WCellWidths, Mesh.VFaceConnectivity, Mesh.VCellPressureNeighbor, \
                        visc, direction, 1, 1, 1 );
       // Set W boundary conditions
-      const std::vector<unsigned long>& componentBoundary2 = Mesh.WBoundaryCells;
-      const std::vector<double>& componentCellWidths2 = Mesh.WCellWidths;
-      const std::vector<double>& componentCellCenters2 = Mesh.WCellCenters;
-      const std::vector<unsigned long>& componentConnectivity2 = Mesh.WFaceConnectivity;
-      const std::vector<double>& cellWidthsLR2 = Mesh.UCellWidths;
-      const std::vector<double>& cellWidthsUD2 = Mesh.VCellWidths;
-      const std::vector<unsigned long>& PressureNeighbor2 = Mesh.WCellPressureNeighbor;
       FlowComponent3d( Mesh, matIs, matJs, matVals, \
-                       force, componentBoundary2, componentCellCenters2, componentCellWidths2, \
-                       cellWidthsLR2, cellWidthsUD2, componentConnectivity2, PressureNeighbor2, \
+                       force, Mesh.WBoundaryCells, Mesh.WCellCenters, Mesh.WCellWidths, \
+                       Mesh.UCellWidths, Mesh.VCellWidths, Mesh.WFaceConnectivity, Mesh.WCellPressureNeighbor, \
                        visc, direction, 2, 1, 1 );
       break;
     }
@@ -1208,29 +1175,18 @@ AxisFlowSingleComponent ( const FluidMesh& Mesh, std::vector<int>& matIs, \
       {
         case 0 :
         {
-          const std::vector<unsigned long>& componentBoundary = Mesh.UBoundaryCells;
-          const std::vector<double>& componentCellWidths = Mesh.UCellWidths;
-          const std::vector<double>& componentCellCenters = Mesh.UCellCenters;
-          const std::vector<unsigned long>& componentConnectivity = Mesh.UFaceConnectivity;
-          const std::vector<double>& cellWidthsLR = Mesh.VCellWidths;
-          const std::vector<unsigned long>& PressureNeighbor = Mesh.UCellPressureNeighbor;
           FlowComponent2d( Mesh, matIs, matJs, matVals, \
-                           force, componentBoundary, componentCellCenters, componentCellWidths, \
-                           cellWidthsLR, componentConnectivity, PressureNeighbor, \
+                           force, Mesh.UBoundaryCells, Mesh.UCellCenters, Mesh.UCellWidths, \
+                           Mesh.VCellWidths, Mesh.UFaceConnectivity, Mesh.UCellPressureNeighbor, \
                            visc, direction, 0, 0, 0 );
+
           break; // u component break;
         }
         case 1 :
         {
-          const std::vector<unsigned long>& componentBoundary = Mesh.VBoundaryCells;
-          const std::vector<double>& componentCellWidths = Mesh.VCellWidths;
-          const std::vector<double>& componentCellCenters = Mesh.VCellCenters;
-          const std::vector<unsigned long>& componentConnectivity = Mesh.VFaceConnectivity;
-          const std::vector<double>& cellWidthsLR = Mesh.UCellWidths;
-          const std::vector<unsigned long>& PressureNeighbor = Mesh.VCellPressureNeighbor;
           FlowComponent2d( Mesh, matIs, matJs, matVals, \
-                           force, componentBoundary, componentCellCenters, componentCellWidths, \
-                           cellWidthsLR, componentConnectivity, PressureNeighbor, \
+                           force, Mesh.VBoundaryCells, Mesh.VCellCenters, Mesh.VCellWidths, \
+                           Mesh.UCellWidths, Mesh.VFaceConnectivity, Mesh.VCellPressureNeighbor, \
                            visc, direction, 1, 0, 0 );
           break; // v component break;
         }
@@ -1244,51 +1200,28 @@ AxisFlowSingleComponent ( const FluidMesh& Mesh, std::vector<int>& matIs, \
         case 0 :
         {
           // Set U boundary conditions
-          const std::vector<unsigned long>& componentBoundary = Mesh.UBoundaryCells;
-          const std::vector<double>& componentCellWidths = Mesh.UCellWidths;
-          const std::vector<double>& componentCellCenters = Mesh.UCellCenters;
-          const std::vector<unsigned long>& componentConnectivity = Mesh.UFaceConnectivity;
-          const std::vector<double>& cellWidthsLR = Mesh.VCellWidths;
-          const std::vector<double>& cellWidthsUD = Mesh.WCellWidths;
-          const std::vector<unsigned long>& PressureNeighbor = Mesh.UCellPressureNeighbor;
           FlowComponent3d( Mesh, matIs, matJs, matVals, \
-                           force, componentBoundary, componentCellCenters, componentCellWidths, \
-                           cellWidthsLR, cellWidthsUD, componentConnectivity, PressureNeighbor, \
+                           force, Mesh.UBoundaryCells, Mesh.UCellCenters, Mesh.UCellWidths, \
+                           Mesh.VCellWidths, Mesh.WCellWidths, Mesh.UFaceConnectivity, Mesh.UCellPressureNeighbor, \
                            visc, direction, 0, 0, 0 );
           break; // u component break;
         }
         case 1 :
         {
           // Set V boundary conditions
-          const std::vector<unsigned long>& componentBoundary = Mesh.VBoundaryCells;
-          const std::vector<double>& componentCellWidths = Mesh.VCellWidths;
-          const std::vector<double>& componentCellCenters = Mesh.VCellCenters;
-          const std::vector<unsigned long>& componentConnectivity = Mesh.VFaceConnectivity;
-          const std::vector<double>& cellWidthsLR = Mesh.UCellWidths;
-          const std::vector<double>& cellWidthsUD = Mesh.WCellWidths;
-          const std::vector<unsigned long>& PressureNeighbor = Mesh.VCellPressureNeighbor;
           FlowComponent3d( Mesh, matIs, matJs, matVals, \
-                           force, componentBoundary, componentCellCenters, componentCellWidths, \
-                           cellWidthsLR, cellWidthsUD, componentConnectivity, PressureNeighbor, \
+                           force, Mesh.VBoundaryCells, Mesh.VCellCenters, Mesh.VCellWidths, \
+                           Mesh.UCellWidths, Mesh.WCellWidths, Mesh.VFaceConnectivity, Mesh.VCellPressureNeighbor, \
                            visc, direction, 1, 0, 0 );
-
           break; // v component break;
         }
         case 2 :
         {
           // Set U boundary conditions
-          const std::vector<unsigned long>& componentBoundary = Mesh.WBoundaryCells;
-          const std::vector<double>& componentCellWidths = Mesh.WCellWidths;
-          const std::vector<double>& componentCellCenters = Mesh.WCellCenters;
-          const std::vector<unsigned long>& componentConnectivity = Mesh.WFaceConnectivity;
-          const std::vector<double>& cellWidthsLR = Mesh.VCellWidths;
-          const std::vector<double>& cellWidthsUD = Mesh.VCellWidths;
-          const std::vector<unsigned long>& PressureNeighbor = Mesh.WCellPressureNeighbor;
           FlowComponent3d( Mesh, matIs, matJs, matVals, \
-                           force, componentBoundary, componentCellCenters, componentCellWidths, \
-                           cellWidthsLR, cellWidthsUD, componentConnectivity, PressureNeighbor, \
+                           force, Mesh.WBoundaryCells, Mesh.WCellCenters, Mesh.WCellWidths, \
+                           Mesh.UCellWidths, Mesh.VCellWidths, Mesh.WFaceConnectivity, Mesh.WCellPressureNeighbor, \
                            visc, direction, 2, 0, 0 );
-
           break; // w component break;
         }
       }
@@ -1297,7 +1230,6 @@ AxisFlowSingleComponent ( const FluidMesh& Mesh, std::vector<int>& matIs, \
   }
 
 }
-/*
 void
 PoreNetworkBoundary( const PoreNetwork& pn, std::vector<int>& matIs, \
                      std::vector<int>& matJs, std::vector<double>& matVals, \
@@ -1308,13 +1240,14 @@ PoreNetworkBoundary( const PoreNetwork& pn, std::vector<int>& matIs, \
   {
     case 2 :
     {
-      int dirIn, dirOut, dirLeft, dirRight;
+      int dirIn, dirOut, dirLeft, dirRight, dirLR;
       if (direction == 0)
       {
         dirIn = 3;
         dirOut = 1;
         dirRight = 0;
         dirLeft = 2;
+        dirLR = 1;
       }
       else if (direction == 1)
       {
@@ -1322,14 +1255,15 @@ PoreNetworkBoundary( const PoreNetwork& pn, std::vector<int>& matIs, \
         dirOut = 2;
         dirLeft = 3;
         dirRight = 1;
+        dirLR = 0;
       }
 
       int pore, ppore;
       for (int pi = 0; pi < pn.BoundaryPores.size(); pi++)
       {
         pore = pn.BoundaryPores[ pi ];
-        if (!Throats[ idx2( pore, dirIn, (pn.DIM*2) ) ]) {
-          if (!Throats[ idx2( pore, dirLeft, (pn.DIM*2) ) ]) {
+        if (!pn.Throats[ idx2( pore, dirIn, (pn.DIM*2) ) ]) {
+          if (!pn.Throats[ idx2( pore, dirLeft, (pn.DIM*2) ) ]) {
             // this is partly a periodic pore, need to find pair node
             for (int ppi = 0; ppi < pn.BoundaryPores.size(); ppi++)
             {
@@ -1337,7 +1271,7 @@ PoreNetworkBoundary( const PoreNetwork& pn, std::vector<int>& matIs, \
             }
 
           }
-          else if (!Throats[ idx2( pore, dirRight, (pn.DIM*2) ) ]) {
+          else if (!pn.Throats[ idx2( pore, dirRight, (pn.DIM*2) ) ]) {
             // this is partly a periodic pore, need to find pair node
             for (int ppi = 0; ppi < pn.BoundaryPores.size(); ppi++)
             {
@@ -1349,8 +1283,8 @@ PoreNetworkBoundary( const PoreNetwork& pn, std::vector<int>& matIs, \
 
           }
         }
-        else if (!Throats[ idx2( pore, dirOut, (pn.DIM*2) ) ]) {
-          if (!Throats[ idx2( pore, dirLeft, (pn.DIM*2) ) ]) {
+        else if (!pn.Throats[ idx2( pore, dirOut, (pn.DIM*2) ) ]) {
+          if (!pn.Throats[ idx2( pore, dirLeft, (pn.DIM*2) ) ]) {
             // this is partly a periodic pore, need to find pair node
             for (int ppi = 0; ppi < pn.BoundaryPores.size(); ppi++)
             {
@@ -1358,7 +1292,7 @@ PoreNetworkBoundary( const PoreNetwork& pn, std::vector<int>& matIs, \
             }
 
           }
-          else if (!Throats[ idx2( pore, dirRight, (pn.DIM*2) ) ]) {
+          else if (!pn.Throats[ idx2( pore, dirRight, (pn.DIM*2) ) ]) {
             // this is partly a periodic pore, need to find pair node
             for (int ppi = 0; ppi < pn.BoundaryPores.size(); ppi++)
             {
@@ -1371,7 +1305,7 @@ PoreNetworkBoundary( const PoreNetwork& pn, std::vector<int>& matIs, \
           }
 
         }
-        else if (!Throats[ idx2( pore, dirRight, (pn.DIM*2) ) ]) {
+        else if (!pn.Throats[ idx2( pore, dirRight, (pn.DIM*2) ) ]) {
           // this is a periodic pore, need to find pair node
           for (int ppi = 0; ppi < pn.BoundaryPores.size(); ppi++)
           {
@@ -1379,7 +1313,7 @@ PoreNetworkBoundary( const PoreNetwork& pn, std::vector<int>& matIs, \
           }
 
         }
-        else if (!Throats[ idx2( pore, dirLeft, (pn.DIM*2) ) ]) {
+        else if (!pn.Throats[ idx2( pore, dirLeft, (pn.DIM*2) ) ]) {
           // this is a periodic pore, need to find pair node
           for (int ppi = 0; ppi < pn.BoundaryPores.size(); ppi++)
           {
@@ -1396,4 +1330,4 @@ PoreNetworkBoundary( const PoreNetwork& pn, std::vector<int>& matIs, \
     }
   }
 }
-*/
+

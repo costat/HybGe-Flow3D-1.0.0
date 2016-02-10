@@ -11,6 +11,7 @@
 #include "hgf.hpp"
 #include "hgfMesh.hpp"
 #include "hgfStokes.hpp"
+#include "hgfPoreNetwork.hpp"
 #include "hgfPP.hpp"
 
 /* Define a 2d -> 1d array index,
@@ -226,8 +227,8 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
       // solve pore-network model with porescale computed Ks
       PoreNetwork pn;
       pn.UniformPN( length, width, height, MX, MY, MZ );
-      //double KPN;
-      //PoreNetworkSolveDirect( pn, Ks, KPN, direction );
+      double KPN;
+      PoreNetworkSolveDirect( pn, Ks, KPN, direction );
     }
   }
 

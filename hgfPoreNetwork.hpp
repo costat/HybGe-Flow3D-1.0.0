@@ -1,5 +1,4 @@
 #include <vector>
-
 #include <paralution.hpp>
 
 #include "hgfMesh.hpp"

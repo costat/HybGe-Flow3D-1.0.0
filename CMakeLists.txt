@@ -10,6 +10,7 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 SET(LIBRARY_SRCS hgf.cpp
                  hgfMesh.cpp
                  hgfStokes.cpp
+                 hgfPoreNetwork.cpp
                  hgfArrays.cpp
                  hgfBC.cpp
                  hgfIB.cpp
