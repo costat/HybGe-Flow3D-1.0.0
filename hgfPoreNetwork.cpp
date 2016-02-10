@@ -22,10 +22,10 @@ PoreNetworkSolveDirect( const PoreNetwork& pn, const std::vector<double> Ks, \
   // delcarations
   std::vector<int> matIs, matJs;
   std::vector<double> matVals, force;
-  matIs.reserve( (np.nPores * np.DIM * 2 + 1) );
-  matJs.reserve( (np.nPores * np.DIM * 2 + 1) );
-  matVals.reserve( (np.nPores * np.DIM * 2 + 1) );
-  force.resize( np.nPores );
+  matIs.reserve( (pn.nPores * pn.DIM * 2 + 1) );
+  matJs.reserve( (pn.nPores * pn.DIM * 2 + 1) );
+  matVals.reserve( (pn.nPores * pn.DIM * 2 + 1) );
+  force.resize( pn.nPores );
 
   // interior pores
   PoreNetworkArray( pn, matIs, matJs, matVals, Ks );
