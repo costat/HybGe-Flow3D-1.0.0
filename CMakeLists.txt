@@ -38,7 +38,7 @@ IF(HGF_PARALUTION_HAS_CUDA)
   INCLUDE_DIRECTORIES(${CUDA_INCLUDE_DIRS})
 ENDIF()
 
-ADD_LIBRARY(libhgf STATIC ${LIBRARY_SRCS})
+ADD_LIBRARY(hgflib STATIC ${LIBRARY_SRCS})
 
 IF(HGF_BUILD_PYTHON_HOOKS)
   FIND_PACKAGE(SWIG REQUIRED)
@@ -60,15 +60,15 @@ IF(HGF_BUILD_PYTHON_HOOKS)
                           ${CUDA_CUBLAS_LIBRARIES}
                           ${CUDA_cusparse_LIBRARY}
                           ${PYTHON_LIBRARIES}
-                          libhgf)
+                          hgflib)
 ENDIF()
 
 IF(HGF_BUILD_EXECUTABLE)
   ADD_EXECUTABLE(hgf ${EXECUTABLE_SRCS})
-  TARGET_LINK_LIBRARIES(hgf ${PARALUTION_LIBRARY}
-                            ${OpenCL_LIBRARIES}
+  TARGET_LINK_LIBRARIES(hgf ${OpenCL_LIBRARIES}
                             ${CUDA_LIBRARIES}
                             ${CUDA_CUBLAS_LIBRARIES}
                             ${CUDA_cusparse_LIBRARY}
-                            libhgf)
+                            hgflib
+                            ${PARALUTION_LIBRARY})
 ENDIF()
