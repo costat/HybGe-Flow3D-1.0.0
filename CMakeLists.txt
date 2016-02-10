@@ -52,21 +52,58 @@ IF(HGF_BUILD_PYTHON_HOOKS)
   SET_SOURCE_FILES_PROPERTIES(hgf.i PROPERTIES SWIG_FLAGS "-includeall")
   SET_SOURCE_FILES_PROPERTIES(hgf.i PROPERTIES SWIG_FLAGS "-cpperraswarn")
   SWIG_ADD_MODULE(hgf python hgf.i ${LIBRARY_SRCS})
-  SWIG_LINK_LIBRARIES(hgf ${PARALUTION_LIBRARY}
-                          ${OpenCL_LIBRARIES}
-                          ${CUDA_LIBRARIES}
-                          ${CUDA_CUBLAS_LIBRARIES}
-                          ${CUDA_cusparse_LIBRARY}
-                          ${PYTHON_LIBRARIES}
-                          hgflib)
+  IF(CUDA_FOUND)
+    IF(OPENCL_FOUND)
+      SWIG_LINK_LIBRARIES(hgf ${PARALUTION_LIBRARY}
+                              ${OpenCL_LIBRARIES}
+                              ${CUDA_LIBRARIES}
+                              ${CUDA_CUBLAS_LIBRARIES}
+                              ${CUDA_cusparse_LIBRARY}
+                              ${PYTHON_LIBRARIES}
+                              hgflib)
+    ELSE()
+      SWIG_LINK_LIBRARIES(hgf ${PARALUTION_LIBRARY}
+                              ${CUDA_LIBRARIES}
+                              ${CUDA_CUBLAS_LIBRARIES}
+                              ${CUDA_cusparse_LIBRARY}
+                              ${PYTHON_LIBRARIES}
+                              hgflib)
+    ENDIF()
+  ELSEIF(OPENCL_FOUND)
+    SWIG_LINK_LIBRARIES(hgf ${PARALUTION_LIBRARY}
+                            ${OpenCL_LIBRARIES}
+                            ${PYTHON_LIBRARIES}
+                            hgflib)
+  ELSE()
+    SWIG_LINK_LIBRARIES(hgf ${PARALUTION_LIBRARY}
+                            ${PYTHON_LIBRARIES}
+                            hgflib)
+  ENDIF()
 ENDIF()
 
 IF(HGF_BUILD_EXECUTABLE)
   ADD_EXECUTABLE(hgf ${EXECUTABLE_SRCS})
-  TARGET_LINK_LIBRARIES(hgf ${OpenCL_LIBRARIES}
-                            ${CUDA_LIBRARIES}
-                            ${CUDA_CUBLAS_LIBRARIES}
-                            ${CUDA_cusparse_LIBRARY}
-                            hgflib
-                            ${PARALUTION_LIBRARY})
+  IF(CUDA_FOUND)
+    IF(OPENCL_FOUND)
+      TARGET_LINK_LIBRARIES(hgf ${OpenCL_LIBRARIES}
+                                ${CUDA_LIBRARIES}
+                                ${CUDA_CUBLAS_LIBRARIES}
+                                ${CUDA_cusparse_LIBRARY}
+                                hgflib
+                                ${PARALUTION_LIBRARY})
+    ELSE()
+      TARGET_LINK_LIBRARIES(hgf ${CUDA_LIBRARIES}
+                                ${CUDA_CUBLAS_LIBRARIES}
+                                ${CUDA_cusparse_LIBRARY}
+                                hgflib
+                                ${PARALUTION_LIBRARY})
+    ENDIF()
+  ELSEIF(OPENCL_FOUND)
+    TARGET_LINK_LIBRARIES(hgf ${OpenCL_LIBRARIES}
+                              hgflib
+                              ${PARALUTION_LIBRARY})
+  ELSE()
+    TARGET_LINK_LIBRARIES(hgf hgflib
+                          ${PARALUTION_LIBRARY})
+  ENDIF()
 ENDIF()
