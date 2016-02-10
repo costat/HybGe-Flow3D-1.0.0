@@ -1300,8 +1300,100 @@ AxisFlowSingleComponent ( const FluidMesh& Mesh, std::vector<int>& matIs, \
 void
 PoreNetworkBoundary( const PoreNetwork& pn, std::vector<int>& matIs, \
                      std::vector<int>& matJs, std::vector<double>& matVals, \
-                     const std::vector<double>& Ks )
+                     const std::vector<double>& Ks, int direction )
 {
+
+  switch (pn.DIM)
+  {
+    case 2 :
+    {
+      int dirIn, dirOut, dirLeft, dirRight;
+      if (direction == 0)
+      {
+        dirIn = 3;
+        dirOut = 1;
+        dirRight = 0;
+        dirLeft = 2;
+      }
+      else if (direction == 1)
+      {
+        dirIn = 0;
+        dirOut = 2;
+        dirLeft = 3;
+        dirRight = 1;
+      }
+
+      int pore, ppore;
+      for (int pi = 0; pi < pn.BoundaryPores.size(); pi++)
+      {
+        pore = pn.BoundaryPores[ pi ];
+        if (!Throats[ idx2( pore, dirIn, (pn.DIM*2) ) ]) {
+          if (!Throats[ idx2( pore, dirLeft, (pn.DIM*2) ) ]) {
+            // this is partly a periodic pore, need to find pair node
+            for (int ppi = 0; ppi < pn.BoundaryPores.size(); ppi++)
+            {
+
+            }
+
+          }
+          else if (!Throats[ idx2( pore, dirRight, (pn.DIM*2) ) ]) {
+            // this is partly a periodic pore, need to find pair node
+            for (int ppi = 0; ppi < pn.BoundaryPores.size(); ppi++)
+            {
+
+            }
+
+          }
+          else {
+
+          }
+        }
+        else if (!Throats[ idx2( pore, dirOut, (pn.DIM*2) ) ]) {
+          if (!Throats[ idx2( pore, dirLeft, (pn.DIM*2) ) ]) {
+            // this is partly a periodic pore, need to find pair node
+            for (int ppi = 0; ppi < pn.BoundaryPores.size(); ppi++)
+            {
+
+            }
+
+          }
+          else if (!Throats[ idx2( pore, dirRight, (pn.DIM*2) ) ]) {
+            // this is partly a periodic pore, need to find pair node
+            for (int ppi = 0; ppi < pn.BoundaryPores.size(); ppi++)
+            {
+
+            }
+
+          }
+          else {
+
+          }
+
+        }
+        else if (!Throats[ idx2( pore, dirRight, (pn.DIM*2) ) ]) {
+          // this is a periodic pore, need to find pair node
+          for (int ppi = 0; ppi < pn.BoundaryPores.size(); ppi++)
+          {
+
+          }
+
+        }
+        else if (!Throats[ idx2( pore, dirLeft, (pn.DIM*2) ) ]) {
+          // this is a periodic pore, need to find pair node
+          for (int ppi = 0; ppi < pn.BoundaryPores.size(); ppi++)
+          {
+
+          }
+
+        }
+      }
+      break;
+    }
+    case 3 :
+    {
+      break;
+    }
+  }
 
 }
 
