@@ -226,11 +226,10 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
       // solve pore-network model with porescale computed Ks
       PoreNetwork pn;
       pn.UniformPN( length, width, height, MX, MY, MZ );
-      double KPN;
+      //double KPN;
       //PoreNetworkSolveDirect( pn, Ks, KPN, direction );
     }
   }
 
   if (simNum == numSims) stop_paralution();
 }
-

@@ -28,10 +28,10 @@ PoreNetworkSolveDirect( const PoreNetwork& pn, const std::vector<double> Ks, \
   force.resize( pn.nPores );
 
   // interior pores
-  PoreNetworkArray( pn, matIs, matJs, matVals, Ks );
+  //PoreNetworkArray( pn, matIs, matJs, matVals, Ks );
 
   // boundary pores
-  PoreNetworkBoundary( pn, matIs, matJs, matVals, Ks );
+  //PoreNetworkBoundary( pn, matIs, matJs, matVals, Ks );
 
   // solve the problem
 
