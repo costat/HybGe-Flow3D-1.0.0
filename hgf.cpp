@@ -230,6 +230,9 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
       PoreNetworkSolveDirect( pn, Ks, KPN, PNSolution, 0 );
 
       // Write PN
+      std::string outName;
+      outName = "PNSolution.dat";
+      writePoreNetworkSolutionTP ( pn, PNSolution, outName );
 
       // compute and save K
 

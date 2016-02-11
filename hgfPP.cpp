@@ -999,3 +999,49 @@ writeSolutionTP ( const FluidMesh& Mesh, const std::vector<double>& sol, \
   }
   flowrun.close();
 }
+void
+writePoreNetworkSolutionTP ( const PoreNetwork& pn, const std::vector<double>& sol, \
+                             std::string& outName )
+{
+
+  std::vector<unsigned long> ThroatConns;
+  ThroatConns.reserve( pn.nPores*4 );
+  for (int ii = 0; ii < pn.nPores; ii++) {
+    for (int jj = 0; jj < (pn.DIM*2); jj++) {
+      if ((int)(pn.Throats[ idx2( ii, jj, (pn.DIM*2) ) ]-1) > ii) {
+        ThroatConns.push_back(ii);
+        ThroatConns.push_back(pn.Throats[ idx2( ii, jj, (pn.DIM*2) ) ]-1);
+      }
+    }
+  }
+  int nThroats = ThroatConns.size()/2;
+
+  std::ofstream flowrun;
+  flowrun.open ( outName.c_str() );
+  flowrun << "Title = Pore-Network Solution\n";
+  flowrun << "Variables = X, Y, Z, P\n";
+  flowrun << "ZONE N=" << pn.nPores << ", E=" << nThroats << ", F=FEPOINT\n";
+
+  switch (pn.DIM)
+  {
+    case 2 :
+    {
+      for (int ii = 0; ii < pn.nPores; ii++) {
+        flowrun << pn.PoresXYZ[ idx2( ii, 0, 2 ) ] << "\t" << pn.PoresXYZ[ idx2( ii, 1, 2 ) ] << "\t" << 0.0 << "\t" << sol[ ii ] << "\n";
+      }
+      break;
+    }
+    case 3 :
+    {
+      for (int ii = 0; ii < pn.nPores; ii++) {
+        flowrun << pn.PoresXYZ[ idx2( ii, 0, 3 ) ] << "\t" << pn.PoresXYZ[ idx2( ii, 1, 3 ) ] << "\t" << pn.PoresXYZ[ idx2( ii, 2, 3 ) ] << "\t" << sol[ ii ] << "\n";
+      }
+      break;
+    }
+  }
+  for (int ii = 0; ii < nThroats; ii++) {
+    flowrun << ThroatConns[ idx2( ii, 0, 2 ) ]+1 << "\t" << ThroatConns[ idx2( ii, 0, 2 ) ]+1 << "\t" << ThroatConns[ idx2( ii, 0, 2 ) ]+1;
+    flowrun << "\t" << ThroatConns[ idx2( ii, 1, 2 ) ]+1 << "\n";
+  }
+}
+

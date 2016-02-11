@@ -32,3 +32,8 @@ computeKConstantDrive ( const FluidMesh& Mesh, \
 void
 writeSolutionTP ( const FluidMesh& Mesh, const std::vector<double>& sol, \
                   std::string& outName );
+
+void
+writePoreNetworkSolutionTP ( const PoreNetwork& pn, const std::vector<double>& sol, \
+                             std::string& outName );
+
