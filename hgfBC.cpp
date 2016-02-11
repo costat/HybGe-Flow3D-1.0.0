@@ -2,6 +2,7 @@
 #include <vector>
 #include <cstdlib>
 #include <string.h>
+#include <math.h>
 
 #include "hgfMesh.hpp"
 #include "hgfBC.hpp"
@@ -1230,12 +1231,30 @@ AxisFlowSingleComponent ( const FluidMesh& Mesh, std::vector<int>& matIs, \
   }
 
 }
+int
+FindPeriodicPair( const PoreNetwork& pn, int pore, int dir, int side )
+{
+  double dt;
+  if (dir == 0) dt = pn.dx;
+  else if (dir == 1) dt = pn.dy;
+  else dt = pn.dz;
+  for (int potp = 0; potp < (pn.BoundaryPores.size()); potp)
+  {
+    if (!pn.Throats[ idx2( potp, side, pn.DIM*2 ) ]) {
+      if (fabs(pn.PoresXYZ[ idx2( pore, dir, pn.DIM ) ] - pn.PoresXYZ[ idx2( potp, dir, pn.DIM ) ]) < 0.2*dt) {
+        return potp;
+      }
+    }
+  }
+}
 void
 PoreNetworkBoundary( const PoreNetwork& pn, std::vector<int>& matIs, \
                      std::vector<int>& matJs, std::vector<double>& matVals, \
+                     std::vector<double>& force, \
                      const std::vector<double>& Ks, int direction )
 {
-
+  double *val = new double[ 2*pn.DIM + 1 ];
+  int *colId = new int[ 2*pn.DIM + 1 ];
   switch (pn.DIM)
   {
     case 2 :
@@ -1258,68 +1277,131 @@ PoreNetworkBoundary( const PoreNetwork& pn, std::vector<int>& matIs, \
         dirLR = 0;
       }
 
-      int pore, ppore;
+      int pore, ppore, entries;
       for (int pi = 0; pi < pn.BoundaryPores.size(); pi++)
       {
         pore = pn.BoundaryPores[ pi ];
         if (!pn.Throats[ idx2( pore, dirIn, (pn.DIM*2) ) ]) {
           if (!pn.Throats[ idx2( pore, dirLeft, (pn.DIM*2) ) ]) {
             // this is partly a periodic pore, need to find pair node
-            for (int ppi = 0; ppi < pn.BoundaryPores.size(); ppi++)
-            {
-
-            }
-
+            ppore = FindPeriodicPair( pn, pore, direction, dirRight );
+            colId[0] = pn.Throats[ idx2( pore, dirRight, (pn.DIM*2) ) ]-1;
+            colId[1] = pn.Throats[ idx2( pore, dirOut, (pn.DIM*2) ) ]-1;
+            colId[2] = ppore;
+            colId[3] = pore;
+            val[0] = -0.5 * ( Ks[ idx2( colId[0], dirLR, pn.DIM ) ] + Ks[ idx2( pore, dirLR, pn.DIM ) ] );
+            val[1] = -0.5 * ( Ks[ idx2( colId[1], direction, pn.DIM ) ] + Ks[ idx2( pore, direction, pn.DIM ) ] );
+            val[2] = -0.5 * ( Ks[ idx2( colId[2], dirLR, pn.DIM ) ] + Ks[ idx2( pore, dirLR, pn.DIM ) ] );
+            val[3] = -(val[0] + val[1] + val[2]) + \
+                     0.5 * Ks[ idx2( pore, direction, pn.DIM ) ];
+            force[pore] = force[pore] + 0.5 * Ks[ idx2( pore, direction, pn.DIM ) ];
+            entries = 4;
           }
           else if (!pn.Throats[ idx2( pore, dirRight, (pn.DIM*2) ) ]) {
             // this is partly a periodic pore, need to find pair node
-            for (int ppi = 0; ppi < pn.BoundaryPores.size(); ppi++)
-            {
-
-            }
-
+            ppore = FindPeriodicPair( pn, pore, direction, dirLeft );
+            colId[0] = pn.Throats[ idx2( pore, dirLeft, (pn.DIM*2) ) ]-1;
+            colId[1] = pn.Throats[ idx2( pore, dirOut, (pn.DIM*2) ) ]-1;
+            colId[2] = ppore;
+            colId[3] = pore;
+            val[0] = -0.5 * ( Ks[ idx2( colId[0], dirLR, pn.DIM ) ] + Ks[ idx2( pore, dirLR, pn.DIM ) ] );
+            val[1] = -0.5 * ( Ks[ idx2( colId[1], direction, pn.DIM ) ] + Ks[ idx2( pore, direction, pn.DIM ) ] );
+            val[2] = -0.5 * ( Ks[ idx2( colId[2], dirLR, pn.DIM ) ] + Ks[ idx2( pore, dirLR, pn.DIM ) ] );
+            val[3] = -(val[0] + val[1] + val[2]) + \
+                     0.5 * Ks[ idx2( pore, direction, pn.DIM ) ];
+            force[pore] = force[pore] + 0.5 * Ks[ idx2( pore, direction, pn.DIM ) ];
+            entries = 4;
           }
           else {
-
+            colId[0] = pn.Throats[ idx2( pore, dirRight, (pn.DIM*2) ) ]-1;
+            colId[1] = pn.Throats[ idx2( pore, dirOut, (pn.DIM*2) ) ]-1;
+            colId[2] = pn.Throats[ idx2( pore, dirLeft, (pn.DIM*2) ) ]-1;
+            colId[3] = pore;
+            val[0] = -0.5 * ( Ks[ idx2( colId[0], dirLR, pn.DIM ) ] + Ks[ idx2( pore, dirLR, pn.DIM ) ] );
+            val[1] = -0.5 * ( Ks[ idx2( colId[1], direction, pn.DIM ) ] + Ks[ idx2( pore, direction, pn.DIM ) ] );
+            val[2] = -0.5 * ( Ks[ idx2( colId[2], dirLR, pn.DIM ) ] + Ks[ idx2( pore, dirLR, pn.DIM ) ] );
+            val[3] = -(val[0] + val[1] + val[2]) + \
+                     0.5 * Ks[ idx2( pore, direction, pn.DIM ) ];
+            force[pore] = force[pore] + 0.5 * Ks[ idx2( pore, direction, pn.DIM ) ];
+            entries = 4;
           }
         }
         else if (!pn.Throats[ idx2( pore, dirOut, (pn.DIM*2) ) ]) {
           if (!pn.Throats[ idx2( pore, dirLeft, (pn.DIM*2) ) ]) {
             // this is partly a periodic pore, need to find pair node
-            for (int ppi = 0; ppi < pn.BoundaryPores.size(); ppi++)
-            {
-
-            }
-
+            ppore = FindPeriodicPair( pn, pore, direction, dirRight );
+            colId[0] = pn.Throats[ idx2( pore, dirRight, (pn.DIM*2) ) ]-1;
+            colId[1] = pn.Throats[ idx2( pore, dirIn, (pn.DIM*2) ) ]-1;
+            colId[2] = ppore;
+            colId[3] = pore;
+            val[0] = -0.5 * ( Ks[ idx2( colId[0], dirLR, pn.DIM ) ] + Ks[ idx2( pore, dirLR, pn.DIM ) ] );
+            val[1] = -0.5 * ( Ks[ idx2( colId[1], direction, pn.DIM ) ] + Ks[ idx2( pore, direction, pn.DIM ) ] );
+            val[2] = -0.5 * ( Ks[ idx2( colId[2], dirLR, pn.DIM ) ] + Ks[ idx2( pore, dirLR, pn.DIM ) ] );
+            val[3] = -(val[0] + val[1] + val[2]) + \
+                     0.5 * Ks[ idx2( pore, direction, pn.DIM ) ];
+            entries = 4;
           }
           else if (!pn.Throats[ idx2( pore, dirRight, (pn.DIM*2) ) ]) {
             // this is partly a periodic pore, need to find pair node
-            for (int ppi = 0; ppi < pn.BoundaryPores.size(); ppi++)
-            {
-
-            }
-
+            ppore = FindPeriodicPair( pn, pore, direction, dirLeft );
+            colId[0] = pn.Throats[ idx2( pore, dirLeft, (pn.DIM*2) ) ]-1;
+            colId[1] = pn.Throats[ idx2( pore, dirIn, (pn.DIM*2) ) ]-1;
+            colId[2] = ppore;
+            colId[3] = pore;
+            val[0] = -0.5 * ( Ks[ idx2( colId[0], dirLR, pn.DIM ) ] + Ks[ idx2( pore, dirLR, pn.DIM ) ] );
+            val[1] = -0.5 * ( Ks[ idx2( colId[1], direction, pn.DIM ) ] + Ks[ idx2( pore, direction, pn.DIM ) ] );
+            val[2] = -0.5 * ( Ks[ idx2( colId[2], dirLR, pn.DIM ) ] + Ks[ idx2( pore, dirLR, pn.DIM ) ] );
+            val[3] = -(val[0] + val[1] + val[2]) + \
+                     0.5 * Ks[ idx2( pore, direction, pn.DIM ) ];
+            entries = 4;
           }
           else {
-
+            colId[0] = pn.Throats[ idx2( pore, dirRight, (pn.DIM*2) ) ]-1;
+            colId[1] = pn.Throats[ idx2( pore, dirIn, (pn.DIM*2) ) ]-1;
+            colId[2] = pn.Throats[ idx2( pore, dirLeft, (pn.DIM*2) ) ]-1;
+            colId[3] = pore;
+            val[0] = -0.5 * ( Ks[ idx2( colId[0], dirLR, pn.DIM ) ] + Ks[ idx2( pore, dirLR, pn.DIM ) ] );
+            val[1] = -0.5 * ( Ks[ idx2( colId[1], direction, pn.DIM ) ] + Ks[ idx2( pore, direction, pn.DIM ) ] );
+            val[2] = -0.5 * ( Ks[ idx2( colId[2], dirLR, pn.DIM ) ] + Ks[ idx2( pore, dirLR, pn.DIM ) ] );
+            val[3] = -(val[0] + val[1] + val[2]) + \
+                     0.5 * Ks[ idx2( pore, direction, pn.DIM ) ];
+            entries = 4;
           }
-
         }
         else if (!pn.Throats[ idx2( pore, dirRight, (pn.DIM*2) ) ]) {
           // this is a periodic pore, need to find pair node
-          for (int ppi = 0; ppi < pn.BoundaryPores.size(); ppi++)
-          {
-
-          }
-
+          ppore = FindPeriodicPair( pn, pore, direction, dirLeft );
+          colId[0] = pn.Throats[ idx2( pore, dirOut, (pn.DIM*2) ) ]-1;
+          colId[1] = pn.Throats[ idx2( pore, dirIn, (pn.DIM*2) ) ]-1;
+          colId[2] = pn.Throats[ idx2( pore, dirLeft, (pn.DIM*2) ) ]-1;
+          colId[3] = ppore;
+          colId[4] = pore;
+          val[0] = -0.5 * ( Ks[ idx2( colId[0], direction, pn.DIM ) ] + Ks[ idx2( pore, direction, pn.DIM ) ] );
+          val[1] = -0.5 * ( Ks[ idx2( colId[1], direction, pn.DIM ) ] + Ks[ idx2( pore, direction, pn.DIM ) ] );
+          val[2] = -0.5 * ( Ks[ idx2( colId[2], dirLR, pn.DIM ) ] + Ks[ idx2( pore, dirLR, pn.DIM ) ] );
+          val[3] = -0.5 * ( Ks[ idx2( colId[3], dirLR, pn.DIM ) ] + Ks[ idx2( pore, dirLR, pn.DIM ) ] );
+          val[4] = -(val[0] + val[1] + val[2] + val[3]);
+          entries = 5;
         }
         else if (!pn.Throats[ idx2( pore, dirLeft, (pn.DIM*2) ) ]) {
           // this is a periodic pore, need to find pair node
-          for (int ppi = 0; ppi < pn.BoundaryPores.size(); ppi++)
-          {
-
-          }
-
+          ppore = FindPeriodicPair( pn, pore, direction, dirRight );
+          colId[0] = pn.Throats[ idx2( pore, dirOut, (pn.DIM*2) ) ]-1;
+          colId[1] = pn.Throats[ idx2( pore, dirIn, (pn.DIM*2) ) ]-1;
+          colId[2] = pn.Throats[ idx2( pore, dirRight, (pn.DIM*2) ) ]-1;
+          colId[3] = ppore;
+          colId[4] = pore;
+          val[0] = -0.5 * ( Ks[ idx2( colId[0], direction, pn.DIM ) ] + Ks[ idx2( pore, direction, pn.DIM ) ] );
+          val[1] = -0.5 * ( Ks[ idx2( colId[1], direction, pn.DIM ) ] + Ks[ idx2( pore, direction, pn.DIM ) ] );
+          val[2] = -0.5 * ( Ks[ idx2( colId[2], dirLR, pn.DIM ) ] + Ks[ idx2( pore, dirLR, pn.DIM ) ] );
+          val[3] = -0.5 * ( Ks[ idx2( colId[3], dirLR, pn.DIM ) ] + Ks[ idx2( pore, dirLR, pn.DIM ) ] );
+          val[4] = -(val[0] + val[1] + val[2] + val[3]);
+          entries = 5;
+        }
+        for (int dir = 0; dir < entries; dir++) {
+          matIs.push_back( pore );
+          matJs.push_back( colId[dir] );
+          matVals.push_back( val[dir] );
         }
       }
       break;

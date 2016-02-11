@@ -1263,7 +1263,6 @@ void FluidMesh::sortPV( void )
 // create the pore-network from porescale meshes
 void PoreNetwork::UniformPN( double length, double width, double height, int nx, int ny, int nz )
 {
-  double dx, dy, dz;
   if (nz)
   {
     DIM = 3;

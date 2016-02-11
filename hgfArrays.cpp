@@ -471,7 +471,7 @@ PoreNetworkArray( const PoreNetwork& pn, std::vector<int>& matIs, \
       {
         pore = pn.InteriorPores[ ip ];
         for (int dir = 0; dir < (pn.DIM * 2); dir++) {
-          colId[dir] = pn.Throats[ idx2( pore, dir, (2*pn.DIM) ) ];
+          colId[dir] = pn.Throats[ idx2( pore, dir, (2*pn.DIM) ) ]-1;
         }
         colId[4] = pore;
         val[0] = -0.5 * ( Ks[ idx2( colId[0], 1, pn.DIM ) ] + Ks[ idx2( pore, 1, pn.DIM ) ] );
@@ -493,7 +493,7 @@ PoreNetworkArray( const PoreNetwork& pn, std::vector<int>& matIs, \
       {
         pore = pn.InteriorPores[ ip ];
         for (int dir = 0; dir < (pn.DIM * 2); dir++) {
-          colId[dir] = pn.Throats[ idx2( pore, dir, (2*pn.DIM) ) ];
+          colId[dir] = pn.Throats[ idx2( pore, dir, (2*pn.DIM) ) ]-1;
         }
         colId[6] = pore;
         val[0] = -0.5 * ( Ks[ idx2( colId[0], 2, pn.DIM ) ] + Ks[ idx2( pore, 2, pn.DIM ) ] );

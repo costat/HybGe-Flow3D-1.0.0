@@ -227,8 +227,10 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
       // solve pore-network model with porescale computed Ks
       PoreNetwork pn;
       pn.UniformPN( length, width, height, MX, MY, MZ );
+      std::vector<double> PNSolution;
+      PNSolution.resize( pn.nPores );
       double KPN;
-      PoreNetworkSolveDirect( pn, Ks, KPN, direction );
+      PoreNetworkSolveDirect( pn, Ks, KPN, PNSolution, direction );
     }
   }
 

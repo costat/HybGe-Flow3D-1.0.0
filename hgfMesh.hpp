@@ -64,6 +64,7 @@ class PoreNetwork
     std::vector<unsigned long> Throats;
     std::vector<unsigned long> BoundaryPores, InteriorPores;
     int DIM, nPores, nThroats;
+    double dx, dy, dz;
     // public functions
     void UniformPN( double length, double width, double height, int nx, int ny, int nz );
 };
