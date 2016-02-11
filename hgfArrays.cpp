@@ -512,5 +512,7 @@ PoreNetworkArray( const PoreNetwork& pn, std::vector<int>& matIs, \
       break;
     }
   }
+  delete[] val;
+  delete[] colId;
 }
 

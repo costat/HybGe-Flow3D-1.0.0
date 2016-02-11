@@ -1238,7 +1238,7 @@ FindPeriodicPair( const PoreNetwork& pn, int pore, int dir, int side )
   if (dir == 0) dt = pn.dx;
   else if (dir == 1) dt = pn.dy;
   else dt = pn.dz;
-  for (int potp = 0; potp < (pn.BoundaryPores.size()); potp)
+  for (int potp = 0; potp < (pn.BoundaryPores.size()); potp++)
   {
     if (!pn.Throats[ idx2( potp, side, pn.DIM*2 ) ]) {
       if (fabs(pn.PoresXYZ[ idx2( pore, dir, pn.DIM ) ] - pn.PoresXYZ[ idx2( potp, dir, pn.DIM ) ]) < 0.2*dt) {
@@ -1411,5 +1411,7 @@ PoreNetworkBoundary( const PoreNetwork& pn, std::vector<int>& matIs, \
       break;
     }
   }
+  delete[] val;
+  delete[] colId;
 }
 

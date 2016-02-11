@@ -1286,8 +1286,8 @@ void PoreNetwork::UniformPN( double length, double width, double height, int nx,
     {
       for (int porex = 0; porex < nx; porex++)
       {
-        PoresXYZ[ idx2( idx2( porex, porey, ny ), 0, 2 ) ] = 0.5 * dx + dx * ( porex );
-        PoresXYZ[ idx2( idx2( porex, porey, ny ), 1, 2 ) ] = 0.5 * dy + dy * ( porey );
+        PoresXYZ[ idx2( idx2( porey, porex, ny ), 0, 2 ) ] = 0.5 * dx + dx * ( porex );
+        PoresXYZ[ idx2( idx2( porey, porex, ny ), 1, 2 ) ] = 0.5 * dy + dy * ( porey );
       }
     }
   }

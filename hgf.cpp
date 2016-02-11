@@ -211,15 +211,12 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
           computeKConstantDrive( Meshes[sd], Solutions[ idx2( sd, 0, 3 ) ], Ks[ idx2( sd, 0, 3 ) ], 0, 0 );
           computeKConstantDrive( Meshes[sd], Solutions[ idx2( sd, 1, 3 ) ], Ks[ idx2( sd, 1, 3 ) ], 1, 0 );
           computeKConstantDrive( Meshes[sd], Solutions[ idx2( sd, 2, 3 ) ], Ks[ idx2( sd, 2, 3 ) ], 2, 0 );
-          std::cout << "\nDomain " << sd << " ::: Mesh size: " << Meshes[sd].DOF[0] << " cells \t Kxx: " << Ks[idx2(sd,0,3)] << " \t Kyy: " << Ks[idx2(sd,1,3)];
-          std::cout << " \t Kzz: " << Ks[idx2(sd,2,3)] << "\n";
         }
       }
       else {
         for (unsigned long sd = 0; sd < slices.size(); sd++) {
           computeKConstantDrive( Meshes[sd], Solutions[ idx2( sd, 0, 2 ) ], Ks[ idx2( sd, 0, 2 ) ], 0, 0 );
           computeKConstantDrive( Meshes[sd], Solutions[ idx2( sd, 1, 2 ) ], Ks[ idx2( sd, 1, 2 ) ], 1, 0 );
-          std::cout << "\nDomain " << sd << " ::: Mesh size: " << Meshes[sd].DOF[0] << " cells \t Kxx: " << Ks[idx2(sd,0,2)] << " \t Kyy: " << Ks[idx2(sd,1,2)] << "\n";
         }
       }
       if (Meshes[0].DIM == 2) MZ = 0;
@@ -230,7 +227,12 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
       std::vector<double> PNSolution;
       PNSolution.resize( pn.nPores );
       double KPN;
-      PoreNetworkSolveDirect( pn, Ks, KPN, PNSolution, direction );
+      PoreNetworkSolveDirect( pn, Ks, KPN, PNSolution, 0 );
+
+      // Write PN
+
+      // compute and save K
+
     }
   }
 
