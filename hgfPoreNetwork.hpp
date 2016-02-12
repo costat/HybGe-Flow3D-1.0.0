@@ -5,5 +5,5 @@
 
 void
 PoreNetworkSolveDirect( const PoreNetwork& pn, const std::vector<double>& Ks, \
-                        double& KPN, std::vector<double>& Solution, int direction );
+                        std::vector<double>& Solution, int direction );
 

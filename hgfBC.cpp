@@ -1234,15 +1234,17 @@ AxisFlowSingleComponent ( const FluidMesh& Mesh, std::vector<int>& matIs, \
 int
 FindPeriodicPair( const PoreNetwork& pn, int pore, int dir, int side )
 {
+  int potpp;
   double dt;
   if (dir == 0) dt = pn.dx;
   else if (dir == 1) dt = pn.dy;
   else dt = pn.dz;
   for (int potp = 0; potp < (pn.BoundaryPores.size()); potp++)
   {
-    if (!pn.Throats[ idx2( potp, side, pn.DIM*2 ) ]) {
-      if (fabs(pn.PoresXYZ[ idx2( pore, dir, pn.DIM ) ] - pn.PoresXYZ[ idx2( potp, dir, pn.DIM ) ]) < 0.2*dt) {
-        return potp;
+    potpp = pn.BoundaryPores[ potp ];
+    if (!pn.Throats[ idx2( potpp, side, pn.DIM*2 ) ]) {
+      if (fabs(pn.PoresXYZ[ idx2( pore, dir, pn.DIM ) ] - pn.PoresXYZ[ idx2( potpp, dir, pn.DIM ) ]) < 0.2*dt) {
+        return potpp;
       }
     }
   }

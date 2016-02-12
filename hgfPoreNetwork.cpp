@@ -16,7 +16,7 @@ using namespace paralution;
 
 void
 PoreNetworkSolveDirect( const PoreNetwork& pn, const std::vector<double>& Ks, \
-                        double& KPN, std::vector<double>& Solution, int direction )
+                        std::vector<double>& Solution, int direction )
 {
 
   // delcarations
@@ -67,8 +67,6 @@ PoreNetworkSolveDirect( const PoreNetwork& pn, const std::vector<double>& Ks, \
   for (int cl = 0; cl < pn.nPores; cl++) {
     Solution[cl] = sol[cl];
   }
-
-  // compute K
 
   // clear paralution objects
   ls.Clear();
