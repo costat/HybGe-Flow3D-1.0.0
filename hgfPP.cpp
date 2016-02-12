@@ -1000,6 +1000,79 @@ writeSolutionTP ( const FluidMesh& Mesh, const std::vector<double>& sol, \
   flowrun.close();
 }
 void
+computeKPoreNetwork( const PoreNetwork& pn, const std::vector<double>& Solution, \
+                     const std::vector<double>& Ks, double& K, int direction, int print )
+{
+
+  int dirIn;
+  double A, L;
+  if (direction == 0) {
+    dirIn = 3;
+    if (pn.DIM == 2) {
+      L = pn.psLength;
+      A = pn.psWidth;
+    }
+    else if (pn.DIM == 3) {
+      L = pn.psLength;
+      A = pn.psWidth * pn.psHeight;
+    }
+  }
+  else if (direction == 1) {
+    if (pn.DIM == 2) {
+      dirIn = 0;
+      L = pn.psWidth;
+      A = pn.psLength;
+    }
+    else if (pn.DIM == 3) {
+      dirIn = 5;
+      L = pn.psWidth;
+      A = pn.psLength * pn.psHeight;
+    }
+  else {
+    dirIn = 0;
+    L = pn.psHeight;
+    A = pn.psWidth * pn.psLength;
+  }
+
+  int pore;
+  std::vector<unsigned long> lPores;
+  lPores.reserve( pn.BoundaryPores.size() );
+  for (int ii = 0; ii < pn.BoundaryPores.size(); ii++)
+  {
+    pore = pn.BoundaryPores[ ii ];
+    if (!pn.Throats[ idx2( pore, dirIn, (pn.DIM*2) ) ]) lPores.push_back( pore );
+  }
+  double KHOLD = 0;
+  double TK;
+  int ppore;
+  for (int ii = 0; ii < lPores.size(); ii++)
+  {
+    pore = lPores[ ii ];
+    for (int dir = 0; dir < (pn.DIM*2); dir++)
+    {
+      if ((int)pn.Throats[ idx2( pore, dir, (pn.DIM*2) ) ]-1 > pore) {
+        ppore = pn.Throats[ idx2( pore, dir, (pn.DIM*2) ) ]-1;
+        if ( dir = 1 || dir == 3 ) TK = 0.5 * ( Ks[ idx2( pore, 0, (pn.DIM*2) ) ] + Ks[ idx2( ppore, 0, (pn.DIM*2) ) ] );
+        else if ( dir == 0 || dir == 2 ) {
+          if (pn.DIM == 2) TK = 0.5 * ( Ks[ idx2( pore, 1, (pn.DIM*2) ) ] + Ks[ idx2( ppore, 1, (pn.DIM*2) ) ] );
+          else TK = 0.5 * ( Ks[ idx2( pore, 2, (pn.DIM*2) ) ] + Ks[ idx2( ppore, 2, (pn.DIM*2) ) ] );
+        }
+        else TK = 0.5 * ( Ks[ idx2( pore, 1, (pn.DIM*2) ) ] + Ks[ idx2( ppore, 1, (pn.DIM*2) ) ] );
+        KHOLD = KHOLD + TK * ( Solution[ pore ] - Solution[ ppore ] );
+      }
+    }
+  }
+  K = (KHOLD * L) / A;
+
+  if (print) {
+    // Write out K
+    std::ofstream KPNout;
+    KPNout.open("KPoreNetwork.dat");
+    KPNout << K;
+    KPNout.close();
+  }
+}
+void
 writePoreNetworkSolutionTP ( const PoreNetwork& pn, const std::vector<double>& sol, \
                              std::string& outName )
 {
@@ -1034,7 +1107,8 @@ writePoreNetworkSolutionTP ( const PoreNetwork& pn, const std::vector<double>& s
     case 3 :
     {
       for (int ii = 0; ii < pn.nPores; ii++) {
-        flowrun << pn.PoresXYZ[ idx2( ii, 0, 3 ) ] << "\t" << pn.PoresXYZ[ idx2( ii, 1, 3 ) ] << "\t" << pn.PoresXYZ[ idx2( ii, 2, 3 ) ] << "\t" << sol[ ii ] << "\n";
+        flowrun << pn.PoresXYZ[ idx2( ii, 0, 3 ) ] << "\t" << pn.PoresXYZ[ idx2( ii, 1, 3 ) ] << "\t";
+        flowrun << pn.PoresXYZ[ idx2( ii, 2, 3 ) ] << "\t" << sol[ ii ] << "\n";
       }
       break;
     }

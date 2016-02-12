@@ -261,6 +261,7 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
       writePoreNetworkSolutionTP ( pn, PNSolution, outName );
 
       // compute and save K
+      // computeKPoreNetwork( pn, PNSolution, Ks, KPN, 0, 1 );
 
       std::cout << "\nPorescale meshes constructed in " << mesh_duration << "seconds\n";
       std::cout << "Stokes problems solved in " << stokes_duration << "seconds\n";
@@ -268,8 +269,6 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
       // Total timers
       total_duration = ( omp_get_wtime() - start );
       std::cout << "Total time: " << total_duration << "seconds\n";
-
-
     }
   }
 

@@ -1278,6 +1278,9 @@ void PoreNetwork::UniformPN( double length, double width, double height, int nx,
     dx = length/nx;
     dy = width/ny;
   }
+  psLength = length;
+  psWidth = width;
+  psHeight = height;
   PoresXYZ.resize( nPores * DIM );
   Throats.resize( nPores * DIM * 2 );
   // set pore locations

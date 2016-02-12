@@ -30,6 +30,10 @@ computeKConstantDrive ( const FluidMesh& Mesh, \
                         int print );
 
 void
+computeKPoreNetwork( const PoreNetwork& pn, const std::vector<double>& Solution, \
+                     std::vector<double>& Ks, double& K, int direction, int print );
+
+void
 writeSolutionTP ( const FluidMesh& Mesh, const std::vector<double>& sol, \
                   std::string& outName );
 
