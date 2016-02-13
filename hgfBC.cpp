@@ -1458,7 +1458,7 @@ PoreNetworkBoundary( const PoreNetwork& pn, std::vector<int>& matIs, \
               colId[5] = pore;
               val[0] = -0.5 * ( Ks[ idx2( colId[0], LR, pn.DIM ) ] + Ks[ idx2( pore, LR, pn.DIM ) ] );
               val[1] = -0.5 * ( Ks[ idx2( colId[1], UD, pn.DIM ) ] + Ks[ idx2( pore, UD, pn.DIM ) ] );
-              val[2] = -0.5 * ( Ks[ idx2( colId[2], direction, pn.DIM ) ] + Ks[ idx2( pore, direction, pn.DIM ) ] ):
+              val[2] = -0.5 * ( Ks[ idx2( colId[2], direction, pn.DIM ) ] + Ks[ idx2( pore, direction, pn.DIM ) ] );
               val[3] = -0.5 * ( Ks[ idx2( colId[3], LR, pn.DIM ) ] + Ks[ idx2( pore, LR, pn.DIM ) ] );
               val[4] = -0.5 * ( Ks[ idx2( colId[4], UD, pn.DIM ) ] + Ks[ idx2( pore, UD, pn.DIM ) ] );
               val[5] = -(val[0] + val[1] + val[2] + val[3] + val[4]) + \
@@ -1478,7 +1478,7 @@ PoreNetworkBoundary( const PoreNetwork& pn, std::vector<int>& matIs, \
               colId[5] = pore;
               val[0] = -0.5 * ( Ks[ idx2( colId[0], LR, pn.DIM ) ] + Ks[ idx2( pore, LR, pn.DIM ) ] );
               val[1] = -0.5 * ( Ks[ idx2( colId[1], UD, pn.DIM ) ] + Ks[ idx2( pore, UD, pn.DIM ) ] );
-              val[2] = -0.5 * ( Ks[ idx2( colId[2], direction, pn.DIM ) ] + Ks[ idx2( pore, direction, pn.DIM ) ] ):
+              val[2] = -0.5 * ( Ks[ idx2( colId[2], direction, pn.DIM ) ] + Ks[ idx2( pore, direction, pn.DIM ) ] );
               val[3] = -0.5 * ( Ks[ idx2( colId[3], LR, pn.DIM ) ] + Ks[ idx2( pore, LR, pn.DIM ) ] );
               val[4] = -0.5 * ( Ks[ idx2( colId[4], UD, pn.DIM ) ] + Ks[ idx2( pore, UD, pn.DIM ) ] );
               val[5] = -(val[0] + val[1] + val[2] + val[3] + val[4]) + \
@@ -1497,7 +1497,7 @@ PoreNetworkBoundary( const PoreNetwork& pn, std::vector<int>& matIs, \
               colId[5] = pore;
               val[0] = -0.5 * ( Ks[ idx2( colId[0], LR, pn.DIM ) ] + Ks[ idx2( pore, LR, pn.DIM ) ] );
               val[1] = -0.5 * ( Ks[ idx2( colId[1], UD, pn.DIM ) ] + Ks[ idx2( pore, UD, pn.DIM ) ] );
-              val[2] = -0.5 * ( Ks[ idx2( colId[2], UD, pn.DIM ) ] + Ks[ idx2( pore, UD, pn.DIM ) ] ):
+              val[2] = -0.5 * ( Ks[ idx2( colId[2], UD, pn.DIM ) ] + Ks[ idx2( pore, UD, pn.DIM ) ] );
               val[3] = -0.5 * ( Ks[ idx2( colId[3], direction, pn.DIM ) ] + Ks[ idx2( pore, direction, pn.DIM ) ] );
               val[4] = -0.5 * ( Ks[ idx2( colId[4], LR, pn.DIM ) ] + Ks[ idx2( pore, LR, pn.DIM ) ] );
               val[5] = -(val[0] + val[1] + val[2] + val[3] + val[4]) + \
@@ -1519,7 +1519,7 @@ PoreNetworkBoundary( const PoreNetwork& pn, std::vector<int>& matIs, \
               colId[5] = pore;
               val[0] = -0.5 * ( Ks[ idx2( colId[0], LR, pn.DIM ) ] + Ks[ idx2( pore, LR, pn.DIM ) ] );
               val[1] = -0.5 * ( Ks[ idx2( colId[1], UD, pn.DIM ) ] + Ks[ idx2( pore, UD, pn.DIM ) ] );
-              val[2] = -0.5 * ( Ks[ idx2( colId[2], direction, pn.DIM ) ] + Ks[ idx2( pore, direction, pn.DIM ) ] ):
+              val[2] = -0.5 * ( Ks[ idx2( colId[2], direction, pn.DIM ) ] + Ks[ idx2( pore, direction, pn.DIM ) ] );
               val[3] = -0.5 * ( Ks[ idx2( colId[3], LR, pn.DIM ) ] + Ks[ idx2( pore, LR, pn.DIM ) ] );
               val[4] = -0.5 * ( Ks[ idx2( colId[4], UD, pn.DIM ) ] + Ks[ idx2( pore, UD, pn.DIM ) ] );
               val[5] = -(val[0] + val[1] + val[2] + val[3] + val[4]) + \
@@ -1539,7 +1539,7 @@ PoreNetworkBoundary( const PoreNetwork& pn, std::vector<int>& matIs, \
               colId[5] = pore;
               val[0] = -0.5 * ( Ks[ idx2( colId[0], LR, pn.DIM ) ] + Ks[ idx2( pore, LR, pn.DIM ) ] );
               val[1] = -0.5 * ( Ks[ idx2( colId[1], UD, pn.DIM ) ] + Ks[ idx2( pore, UD, pn.DIM ) ] );
-              val[2] = -0.5 * ( Ks[ idx2( colId[2], direction, pn.DIM ) ] + Ks[ idx2( pore, direction, pn.DIM ) ] ):
+              val[2] = -0.5 * ( Ks[ idx2( colId[2], direction, pn.DIM ) ] + Ks[ idx2( pore, direction, pn.DIM ) ] );
               val[3] = -0.5 * ( Ks[ idx2( colId[3], LR, pn.DIM ) ] + Ks[ idx2( pore, LR, pn.DIM ) ] );
               val[4] = -0.5 * ( Ks[ idx2( colId[4], UD, pn.DIM ) ] + Ks[ idx2( pore, UD, pn.DIM ) ] );
               val[5] = -(val[0] + val[1] + val[2] + val[3] + val[4]) + \
@@ -1558,7 +1558,7 @@ PoreNetworkBoundary( const PoreNetwork& pn, std::vector<int>& matIs, \
               colId[5] = pore;
               val[0] = -0.5 * ( Ks[ idx2( colId[0], LR, pn.DIM ) ] + Ks[ idx2( pore, LR, pn.DIM ) ] );
               val[1] = -0.5 * ( Ks[ idx2( colId[1], UD, pn.DIM ) ] + Ks[ idx2( pore, UD, pn.DIM ) ] );
-              val[2] = -0.5 * ( Ks[ idx2( colId[2], UD, pn.DIM ) ] + Ks[ idx2( pore, UD, pn.DIM ) ] ):
+              val[2] = -0.5 * ( Ks[ idx2( colId[2], UD, pn.DIM ) ] + Ks[ idx2( pore, UD, pn.DIM ) ] );
               val[3] = -0.5 * ( Ks[ idx2( colId[3], direction, pn.DIM ) ] + Ks[ idx2( pore, direction, pn.DIM ) ] );
               val[4] = -0.5 * ( Ks[ idx2( colId[4], LR, pn.DIM ) ] + Ks[ idx2( pore, LR, pn.DIM ) ] );
               val[5] = -(val[0] + val[1] + val[2] + val[3] + val[4]) + \
@@ -1578,7 +1578,7 @@ PoreNetworkBoundary( const PoreNetwork& pn, std::vector<int>& matIs, \
             colId[5] = pore;
             val[0] = -0.5 * ( Ks[ idx2( colId[0], LR, pn.DIM ) ] + Ks[ idx2( pore, LR, pn.DIM ) ] );
             val[1] = -0.5 * ( Ks[ idx2( colId[1], LR, pn.DIM ) ] + Ks[ idx2( pore, LR, pn.DIM ) ] );
-            val[2] = -0.5 * ( Ks[ idx2( colId[2], UD, pn.DIM ) ] + Ks[ idx2( pore, UD, pn.DIM ) ] ):
+            val[2] = -0.5 * ( Ks[ idx2( colId[2], UD, pn.DIM ) ] + Ks[ idx2( pore, UD, pn.DIM ) ] );
             val[3] = -0.5 * ( Ks[ idx2( colId[3], direction, pn.DIM ) ] + Ks[ idx2( pore, direction, pn.DIM ) ] );
             val[4] = -0.5 * ( Ks[ idx2( colId[4], UD, pn.DIM ) ] + Ks[ idx2( pore, UD, pn.DIM ) ] );
             val[5] = -(val[0] + val[1] + val[2] + val[3] + val[4]) + \
@@ -1597,7 +1597,7 @@ PoreNetworkBoundary( const PoreNetwork& pn, std::vector<int>& matIs, \
             colId[5] = pore;
             val[0] = -0.5 * ( Ks[ idx2( colId[0], LR, pn.DIM ) ] + Ks[ idx2( pore, LR, pn.DIM ) ] );
             val[1] = -0.5 * ( Ks[ idx2( colId[1], LR, pn.DIM ) ] + Ks[ idx2( pore, LR, pn.DIM ) ] );
-            val[2] = -0.5 * ( Ks[ idx2( colId[2], UD, pn.DIM ) ] + Ks[ idx2( pore, UD, pn.DIM ) ] ):
+            val[2] = -0.5 * ( Ks[ idx2( colId[2], UD, pn.DIM ) ] + Ks[ idx2( pore, UD, pn.DIM ) ] );
             val[3] = -0.5 * ( Ks[ idx2( colId[3], direction, pn.DIM ) ] + Ks[ idx2( pore, direction, pn.DIM ) ] );
             val[4] = -0.5 * ( Ks[ idx2( colId[4], UD, pn.DIM ) ] + Ks[ idx2( pore, UD, pn.DIM ) ] );
             val[5] = -(val[0] + val[1] + val[2] + val[3] + val[4]) + \
@@ -1615,7 +1615,7 @@ PoreNetworkBoundary( const PoreNetwork& pn, std::vector<int>& matIs, \
             colId[5] = pore;
             val[0] = -0.5 * ( Ks[ idx2( colId[0], LR, pn.DIM ) ] + Ks[ idx2( pore, LR, pn.DIM ) ] );
             val[1] = -0.5 * ( Ks[ idx2( colId[1], LR, pn.DIM ) ] + Ks[ idx2( pore, LR, pn.DIM ) ] );
-            val[2] = -0.5 * ( Ks[ idx2( colId[2], UD, pn.DIM ) ] + Ks[ idx2( pore, UD, pn.DIM ) ] ):
+            val[2] = -0.5 * ( Ks[ idx2( colId[2], UD, pn.DIM ) ] + Ks[ idx2( pore, UD, pn.DIM ) ] );
             val[3] = -0.5 * ( Ks[ idx2( colId[3], direction, pn.DIM ) ] + Ks[ idx2( pore, direction, pn.DIM ) ] );
             val[4] = -0.5 * ( Ks[ idx2( colId[4], UD, pn.DIM ) ] + Ks[ idx2( pore, UD, pn.DIM ) ] );
             val[5] = -(val[0] + val[1] + val[2] + val[3] + val[4]) + \
@@ -1659,7 +1659,7 @@ PoreNetworkBoundary( const PoreNetwork& pn, std::vector<int>& matIs, \
             }
             else {
               // !out !left
-              pore1 = FindPeriodicPair( pn, pore, direction, dirRight );
+              ppore1 = FindPeriodicPair( pn, pore, direction, dirRight );
 
             }
           }
