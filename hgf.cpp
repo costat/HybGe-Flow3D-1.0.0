@@ -209,13 +209,13 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
           if (solver == 0) {
             std::cout << "\nSolving x-flow problem on submesh " << sd << "\n\n";
             StokesSolveDirect( Meshes[sd], visc, 0, Solutions[ idx2( sd, 0, 2 ) ], tolAbs, tolRel, maxIt, nThreads, prec );
-            std::cout << "\nSolving x-flow problem on submesh " << sd << "\n\n";
+            std::cout << "\nSolving y-flow problem on submesh " << sd << "\n\n";
             StokesSolveDirect( Meshes[sd], visc, 1, Solutions[ idx2( sd, 1, 2 ) ], tolAbs, tolRel, maxIt, nThreads, prec );
           }
           else {
             std::cout << "\nSolving x-flow problem on submesh " << sd << "\n\n";
             StokesSolveRich( Meshes[sd], visc, 0, Solutions[ idx2( sd, 0, 2 ) ], tolAbs, tolRel, maxIt, nThreads, prec, relax );
-            std::cout << "\nSolving x-flow problem on submesh " << sd << "\n\n";
+            std::cout << "\nSolving y-flow problem on submesh " << sd << "\n\n";
             StokesSolveRich( Meshes[sd], visc, 1, Solutions[ idx2( sd, 1, 2 ) ], tolAbs, tolRel, maxIt, nThreads, prec, relax );
           }
         }
@@ -261,7 +261,7 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
       writePoreNetworkSolutionTP ( pn, PNSolution, outName );
 
       // compute and save K
-      // computeKPoreNetwork( pn, PNSolution, Ks, KPN, 0, 1 );
+      computeKPoreNetwork( pn, PNSolution, Ks, KPN, 0, 1 );
 
       std::cout << "\nPorescale meshes constructed in " << mesh_duration << "seconds\n";
       std::cout << "Stokes problems solved in " << stokes_duration << "seconds\n";

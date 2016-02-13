@@ -1003,35 +1003,36 @@ void
 computeKPoreNetwork( const PoreNetwork& pn, const std::vector<double>& Solution, \
                      const std::vector<double>& Ks, double& K, int direction, int print )
 {
-
+  std::cout << "\n" << pn.psLength << "\t" << pn.psWidth << "\t" << pn.psHeight << "\t" << pn.dx << "\t" << pn.dy << "\t" << pn.dz << "\n";
   int dirIn;
   double A, L;
   if (direction == 0) {
     dirIn = 3;
     if (pn.DIM == 2) {
       L = pn.psLength;
-      A = pn.psWidth;
+      A = (pn.psWidth-pn.dy) * pn.dx;
     }
     else if (pn.DIM == 3) {
       L = pn.psLength;
-      A = pn.psWidth * pn.psHeight;
+      A = (pn.psWidth-pn.dy) * (pn.psHeight-pn.dz);
     }
   }
   else if (direction == 1) {
     if (pn.DIM == 2) {
       dirIn = 0;
       L = pn.psWidth;
-      A = pn.psLength;
+      A = (pn.psLength-pn.dx) * pn.dy;
     }
     else if (pn.DIM == 3) {
       dirIn = 5;
       L = pn.psWidth;
-      A = pn.psLength * pn.psHeight;
+      A = (pn.psLength-pn.dx) * (pn.psHeight-pn.dz);
     }
+  }
   else {
     dirIn = 0;
     L = pn.psHeight;
-    A = pn.psWidth * pn.psLength;
+    A = (pn.psWidth-pn.dy) * (pn.psLength-pn.dx);
   }
 
   int pore;
@@ -1044,22 +1045,28 @@ computeKPoreNetwork( const PoreNetwork& pn, const std::vector<double>& Solution,
   }
   double KHOLD = 0;
   double TK;
-  int ppore;
   for (int ii = 0; ii < lPores.size(); ii++)
   {
     pore = lPores[ ii ];
     for (int dir = 0; dir < (pn.DIM*2); dir++)
     {
-      if ((int)pn.Throats[ idx2( pore, dir, (pn.DIM*2) ) ]-1 > pore) {
-        ppore = pn.Throats[ idx2( pore, dir, (pn.DIM*2) ) ]-1;
-        if ( dir = 1 || dir == 3 ) TK = 0.5 * ( Ks[ idx2( pore, 0, (pn.DIM*2) ) ] + Ks[ idx2( ppore, 0, (pn.DIM*2) ) ] );
-        else if ( dir == 0 || dir == 2 ) {
-          if (pn.DIM == 2) TK = 0.5 * ( Ks[ idx2( pore, 1, (pn.DIM*2) ) ] + Ks[ idx2( ppore, 1, (pn.DIM*2) ) ] );
-          else TK = 0.5 * ( Ks[ idx2( pore, 2, (pn.DIM*2) ) ] + Ks[ idx2( ppore, 2, (pn.DIM*2) ) ] );
-        }
-        else TK = 0.5 * ( Ks[ idx2( pore, 1, (pn.DIM*2) ) ] + Ks[ idx2( ppore, 1, (pn.DIM*2) ) ] );
-        KHOLD = KHOLD + TK * ( Solution[ pore ] - Solution[ ppore ] );
+      if ( dir == 1 || dir == 3 ) {
+        TK = 0.5 * Ks[ idx2( pore, 0, 2 ) ];
       }
+      else if ( dir == 0 || dir == 2 ) {
+        if (pn.DIM == 2) {
+          TK = 0.5 * Ks[ idx2( pore, 1, (pn.DIM) ) ];
+        }
+        else {
+          TK = 0.5 * Ks[ idx2( pore, 2, (pn.DIM) ) ];
+        }
+      }
+      else {
+        TK = 0.5 * Ks[ idx2( pore, 1, (pn.DIM) ) ];
+      }
+      std::cout << "\npore = " << pore << "\t TK = " << TK;
+      std::cout << "\t new term = " << TK * ( 1 - Solution[ pore ] )  << "\n";
+      KHOLD = KHOLD + TK * ( 1 - Solution[ pore ] );
     }
   }
   K = (KHOLD * L) / A;
