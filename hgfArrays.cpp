@@ -24,8 +24,7 @@ diffusionArrays( const FluidMesh& Mesh, std::vector<int>& matIs, \
                  double visc, int velShift )
 {
   int cl, rcl;
-  switch ( Mesh.DIM )
-  {
+  switch ( Mesh.DIM ) {
     case 2 :
     {
       int nbrfaces[4];
@@ -54,8 +53,7 @@ diffusionArrays( const FluidMesh& Mesh, std::vector<int>& matIs, \
         val[4] = -(val[0] + val[1] + val[2] + val[3]);
 
         /* Insert values into assembly vector matVals */
-        for (int i = 0; i < 4; i++)
-        {
+        for (int i = 0; i < 4; i++) {
           matIs.push_back(rcl);
           matJs.push_back((nbrfaces[i] + velShift));
           matVals.push_back(val[i]);
@@ -105,8 +103,7 @@ diffusionArrays( const FluidMesh& Mesh, std::vector<int>& matIs, \
         val[6] = -(val[0] + val[1] + val[2] + val[3] + val[4] + val[5]);
 
         /* Insert values into assembly vectors */
-        for (int i = 0; i < 6; i++)
-        {
+        for (int i = 0; i < 6; i++) {
           matIs.push_back(rcl);
           matJs.push_back((nbrfaces[i] + velShift));
           matVals.push_back(val[i]);
@@ -130,8 +127,7 @@ diffusionDrive ( const FluidMesh& Mesh, std::vector<int>& matIs, \
 {
   int velShift;
 
-  switch ( Shift )
-  {
+  switch ( Shift ) {
     case 0 :
     {
       velShift = 0;
@@ -175,8 +171,7 @@ pressureGrad ( const FluidMesh& Mesh, std::vector<int>& matIs, \
   int cl, rcl, totalShift, col[2];
   double val[2];
 
-  switch ( Mesh.DIM )
-  {
+  switch ( Mesh.DIM ) {
     case 3 :
     {
       totalShift = Mesh.DOF[1] + Mesh.DOF[2] + Mesh.DOF[3];
@@ -192,8 +187,7 @@ pressureGrad ( const FluidMesh& Mesh, std::vector<int>& matIs, \
         col[0] = vcpn[ idx2( cl, 0, 2 ) ] - 1 + totalShift;
         col[1] = vcpn[ idx2( cl, 1, 2 ) ] - 1 + totalShift;
         // Insert values into assembly vector matVals
-        for (int i = 0; i < 2; i++)
-        {
+        for (int i = 0; i < 2; i++) {
           matIs.push_back(rcl);
           matJs.push_back(col[i]);
           matVals.push_back(val[i]);
@@ -216,8 +210,7 @@ pressureGrad ( const FluidMesh& Mesh, std::vector<int>& matIs, \
         col[0] = vcpn[ idx2( cl, 0, 2 ) ] - 1 + totalShift;
         col[1] = vcpn[ idx2( cl, 1, 2 ) ] - 1 + totalShift;
         // Insert values into assembly vector matVals
-        for (int i = 0; i < 2; i++)
-        {
+        for (int i = 0; i < 2; i++) {
           matIs.push_back(rcl);
           matJs.push_back(col[i]);
           matVals.push_back(val[i]);
@@ -238,8 +231,7 @@ pressureGradDrive ( const FluidMesh& Mesh, std::vector<int>& matIs, \
 {
   int velShift, done, dtwo;
 
-  switch ( Shift )
-  {
+  switch ( Shift ) {
     case 0 :
     {
       velShift = 0;
@@ -285,8 +277,7 @@ continuityEq ( const FluidMesh& Mesh, std::vector<int>& matIs, \
   int totalShift, col[2];
   double val[2];
 
-  switch ( Mesh.DIM )
-  {
+  switch ( Mesh.DIM ) {
     case 3 :
     {
       totalShift = Mesh.DOF[1] + Mesh.DOF[2] + Mesh.DOF[3];
@@ -301,8 +292,7 @@ continuityEq ( const FluidMesh& Mesh, std::vector<int>& matIs, \
         col[0] = pcvn[ idx2( cl, 0, 2 ) ] - 1 + velShift;
         col[1] = pcvn[ idx2( cl, 1, 2 ) ] - 1 + velShift;
         // Insert values into assembly vector
-        for (int i = 0; i < 2; i++)
-        {
+        for (int i = 0; i < 2; i++) {
           matVals.push_back(val[i]);
           matIs.push_back((totalShift + cl));
           matJs.push_back(col[i]);
@@ -318,8 +308,7 @@ continuityEq ( const FluidMesh& Mesh, std::vector<int>& matIs, \
         val[1] = -val[0];
         col[0] = pcvn[ idx2( cl, 0, 2 ) ] -1 + velShift;
         col[1] = pcvn[ idx2( cl, 1, 2 ) ] -1 + velShift;
-        for (int i = 0; i < 2; i++)
-        {
+        for (int i = 0; i < 2; i++) {
           matVals.push_back(val[i]);
           matIs.push_back((totalShift + cl));
           matJs.push_back(col[i]);
@@ -340,8 +329,7 @@ continuityDrive ( const FluidMesh& Mesh, std::vector<int>& matIs, \
 {
   int velShift, done, dtwo;
 
-  switch ( Shift )
-  {
+  switch ( Shift ) {
     case 0 :
     {
       velShift = 0;
@@ -425,8 +413,7 @@ VelocityArray ( const FluidMesh& Mesh, double visc, std::vector<int>& matIs, \
 {
   int velShift;
 
-  switch ( component )
-  {
+  switch ( component ) {
     case 0 :
     {
       velShift = 0;
@@ -463,12 +450,10 @@ PoreNetworkArray( const PoreNetwork& pn, std::vector<int>& matIs, \
   double *val = new double[ 2*pn.DIM + 1 ];
   int *colId = new int[ 2*pn.DIM + 1 ];
   int pore;
-  switch (pn.DIM)
-  {
+  switch (pn.DIM) {
     case 2 :
     {
-      for (int ip = 0; ip < pn.InteriorPores.size(); ip++)
-      {
+      for (int ip = 0; ip < pn.InteriorPores.size(); ip++) {
         pore = pn.InteriorPores[ ip ];
         for (int dir = 0; dir < (pn.DIM * 2); dir++) {
           colId[dir] = pn.Throats[ idx2( pore, dir, (2*pn.DIM) ) ]-1;
@@ -489,8 +474,7 @@ PoreNetworkArray( const PoreNetwork& pn, std::vector<int>& matIs, \
     }
     default :
     {
-      for (int ip = 0; ip < pn.InteriorPores.size(); ip++)
-      {
+      for (int ip = 0; ip < pn.InteriorPores.size(); ip++) {
         pore = pn.InteriorPores[ ip ];
         for (int dir = 0; dir < (pn.DIM * 2); dir++) {
           colId[dir] = pn.Throats[ idx2( pore, dir, (2*pn.DIM) ) ]-1;
@@ -515,4 +499,3 @@ PoreNetworkArray( const PoreNetwork& pn, std::vector<int>& matIs, \
   delete[] val;
   delete[] colId;
 }
-

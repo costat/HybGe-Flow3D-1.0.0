@@ -18,7 +18,6 @@ void
 PoreNetworkSolveDirect( const PoreNetwork& pn, const std::vector<double>& Ks, \
                         std::vector<double>& Solution, int direction )
 {
-
   // delcarations
   std::vector<int> matIs, matJs;
   std::vector<double> matVals, force;
@@ -44,14 +43,14 @@ PoreNetworkSolveDirect( const PoreNetwork& pn, const std::vector<double>& Ks, \
   sol.Allocate("solution", pn.nPores);
   sol.Zeros();
 
-  // assemble paralution arrays from COO data
+    // assemble paralution arrays from COO data
   mat.Assemble( &matIs[0], &matJs[0], &matVals[0], matIs.size(), \
                 "operator", pn.nPores, pn.nPores );
 
-  for (int cl = 0; cl < pn.nPores; cl++)
-  {
+  for (int cl = 0; cl < pn.nPores; cl++) {
     forceP[cl] = force[cl];
   }
+  std::cout << "\nCheck\n";
 
   // GMRES object
   GMRES<LocalMatrix<double>, LocalVector<double>, double> ls;

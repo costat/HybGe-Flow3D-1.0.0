@@ -78,8 +78,7 @@ StokesSolveDirect( const FluidMesh& Mesh, double visc, int direction, \
   ls.Solve(forceP, &sol);
 
   // pass solution from paralution object to std vector input
-  for (int cl = 0; cl < Mesh.dofTotal; cl++)
-  {
+  for (int cl = 0; cl < Mesh.dofTotal; cl++) {
     Solution[cl] = sol[cl];
   }
 
@@ -89,7 +88,6 @@ StokesSolveDirect( const FluidMesh& Mesh, double visc, int direction, \
   p.Clear();
   forceP.Clear();
   sol.Clear();
-
 }
 // initializes the pressure solution to a linear. for use in decoupled iterative schemes, e.g. the urzawa schemes
 void
@@ -102,8 +100,7 @@ initPressure( const FluidMesh& Mesh, std::vector<double>& Solution, int directio
   {
     case 0 :
     {
-      for (int cl = 0; cl < Mesh.DOF[0]; cl++)
-      {
+      for (int cl = 0; cl < Mesh.DOF[0]; cl++) {
         cl2 = cl + shift;
         Solution[ cl2 ] = 1 - (Mesh.xLim[0] - Mesh.PCellCenters[ idx2( cl, 0, Mesh.DIM ) ]) / (Mesh.xLim[1] - Mesh.xLim[0]);
       }
@@ -111,8 +108,7 @@ initPressure( const FluidMesh& Mesh, std::vector<double>& Solution, int directio
     }
     case 1 :
     {
-      for (int cl = 0; cl < Mesh.DOF[0]; cl++)
-      {
+      for (int cl = 0; cl < Mesh.DOF[0]; cl++) {
         cl2 = cl + shift;
         Solution[ cl2 ] = 1 - (Mesh.yLim[0] - Mesh.PCellCenters[ idx2( cl, 1, Mesh.DIM ) ]) / (Mesh.yLim[1] - Mesh.yLim[0]);
       }
@@ -120,8 +116,7 @@ initPressure( const FluidMesh& Mesh, std::vector<double>& Solution, int directio
     }
     case 2 :
     {
-      for (int cl = 0; cl < Mesh.DOF[0]; cl++)
-      {
+      for (int cl = 0; cl < Mesh.DOF[0]; cl++) {
         cl2 = cl + shift;
         Solution[ cl2 ] = 1 - (Mesh.zLim[0] - Mesh.PCellCenters[ idx2( cl, 2, Mesh.DIM ) ]) / (Mesh.zLim[1] - Mesh.zLim[0]);
       }
@@ -203,8 +198,7 @@ updatePressureRich( const FluidMesh& Mesh, std::vector<double>& Solution, \
     case 2 :
     {
       velShift = Mesh.DOF[1] + Mesh.DOF[2];
-      for (int cl = 0; cl < Mesh.DOF[0]; cl++)
-      {
+      for (int cl = 0; cl < Mesh.DOF[0]; cl++) {
         pressureHold[cl] = Solution[ (velShift + cl) ] - relax * ( \
                            ( solU[ Mesh.PressureCellUNeighbor[ idx2( cl, 1, 2 ) ]-1 ] - solU[ Mesh.PressureCellUNeighbor[ idx2( cl, 0, 2 ) ]-1 ] ) \
                            / Mesh.PCellWidths[ idx2( cl, 0, Mesh.DIM ) ] + \
@@ -216,8 +210,7 @@ updatePressureRich( const FluidMesh& Mesh, std::vector<double>& Solution, \
     default :
     {
       velShift = Mesh.DOF[1] + Mesh.DOF[2] + Mesh.DOF[3];
-      for (int cl = 0; cl < Mesh.DOF[0]; cl++)
-      {
+      for (int cl = 0; cl < Mesh.DOF[0]; cl++) {
         pressureHold[cl] = Solution[ (velShift + cl) ] - relax * ( \
                            ( solU[ Mesh.PressureCellUNeighbor[ idx2( cl, 1, 2 ) ]-1 ] - solU[ Mesh.PressureCellUNeighbor[ idx2( cl, 0, 2 ) ]-1 ] ) \
                            / Mesh.PCellWidths[ idx2( cl, 0, Mesh.DIM ) ] + \
@@ -310,8 +303,7 @@ StokesSolveRich( const FluidMesh& Mesh, double visc, int direction, \
   solV.Allocate("solution V", Mesh.DOF[2]);
   solV.Zeros();
 
-  if (Mesh.DIM == 3)
-  {
+  if (Mesh.DIM == 3) {
     forceWP.Allocate("force vector W", Mesh.DOF[3]);
     forceWP.Zeros();
     solW.Allocate("solution W", Mesh.DOF[3]);
@@ -342,8 +334,7 @@ StokesSolveRich( const FluidMesh& Mesh, double visc, int direction, \
   lsV.SetBasisSize(100);
 
   GMRES<LocalMatrix<double>, LocalVector<double>, double> lsW;
-  if (Mesh.DIM == 3)
-  {
+  if (Mesh.DIM == 3) {
     lsW.Init(tolAbs, tolRel, 1e8, maxIt);
     lsW.SetOperator(matW);
     lsW.Verbose(1);
@@ -360,8 +351,7 @@ StokesSolveRich( const FluidMesh& Mesh, double visc, int direction, \
   lsV.SetPreconditioner(pV);
 
   ILU<LocalMatrix<double>, LocalVector<double>, double> pW;
-  if (Mesh.DIM == 3)
-  {
+  if (Mesh.DIM == 3) {
     pW.Set(prec);
     lsW.SetPreconditioner(pW);
   }
@@ -418,14 +408,11 @@ StokesSolveRich( const FluidMesh& Mesh, double visc, int direction, \
   for (int cl = 0; cl < Mesh.DOF[1]; cl++) {
     Solution[cl] = solU[cl];
   }
-  for (int cl = 0; cl < Mesh.DOF[2]; cl++)
-  {
+  for (int cl = 0; cl < Mesh.DOF[2]; cl++) {
     Solution[cl+Mesh.DOF[1]] = solV[cl];
   }
-  if (Mesh.DIM == 3)
-  {
-    for (int cl = 0; cl < Mesh.DOF[3]; cl++)
-    {
+  if (Mesh.DIM == 3) {
+    for (int cl = 0; cl < Mesh.DOF[3]; cl++) {
       Solution[cl+Mesh.DOF[1]+Mesh.DOF[2]] = solW[cl];
     }
   }
@@ -450,4 +437,3 @@ StokesSolveRich( const FluidMesh& Mesh, double visc, int direction, \
   solW.Clear();
 
 }
-

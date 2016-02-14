@@ -1441,10 +1441,12 @@ PoreNetworkBoundary( const PoreNetwork& pn, std::vector<int>& matIs, \
         LR = 0;
         UD = 1;
       }
-      int pore, ppore1, ppore2, entries;
+      int pore, ppore1, ppore2, entries, dirTemp;
       for (int pi = 0; pi < pn.BoundaryPores.size(); pi++) {
         pore = pn.BoundaryPores[ pi ];
         if (!pn.Throats[ idx2( pore, dirIn, (pn.DIM*2) ) ] || !pn.Throats[ idx2( pore, dirOut, (pn.DIM*2) ) ]) {
+          if (!pn.Throats[ idx2( pore, dirIn, (pn.DIM*2) ) ]) dirTemp = dirOut;
+          else dirTemp = dirIn;
           if (!pn.Throats[ idx2( pore, dirRight, (pn.DIM*2) ) ]) {
             if (!pn.Throats[ idx2( pore, dirDown, (pn.DIM*2) ) ]) {
               // !in, !right, !down
@@ -1452,7 +1454,7 @@ PoreNetworkBoundary( const PoreNetwork& pn, std::vector<int>& matIs, \
               ppore2 = FindPeriodicPair( pn, pore, direction, dirUp );
               colId[0] = pn.Throats[ idx2( pore, dirLeft, (pn.DIM*2) ) ]-1;
               colId[1] = pn.Throats[ idx2( pore, dirUp, (pn.DIM*2) ) ]-1;
-              colId[2] = pn.Throats[ idx2( pore, dirOut, (pn.DIM*2) ) ]-1;
+              colId[2] = pn.Throats[ idx2( pore, dirTemp, (pn.DIM*2) ) ]-1;
               colId[3] = ppore1;
               colId[4] = ppore2;
               colId[5] = pore;
@@ -1474,7 +1476,7 @@ PoreNetworkBoundary( const PoreNetwork& pn, std::vector<int>& matIs, \
               ppore2 = FindPeriodicPair( pn, pore, direction, dirDown );
               colId[0] = pn.Throats[ idx2( pore, dirLeft, (pn.DIM*2) ) ]-1;
               colId[1] = pn.Throats[ idx2( pore, dirDown, (pn.DIM*2) ) ]-1;
-              colId[2] = pn.Throats[ idx2( pore, dirOut, (pn.DIM*2) ) ]-1;
+              colId[2] = pn.Throats[ idx2( pore, dirTemp, (pn.DIM*2) ) ]-1;
               colId[3] = ppore1;
               colId[4] = ppore2;
               colId[5] = pore;
@@ -1496,7 +1498,7 @@ PoreNetworkBoundary( const PoreNetwork& pn, std::vector<int>& matIs, \
               colId[0] = pn.Throats[ idx2( pore, dirLeft, (pn.DIM*2) ) ]-1;
               colId[1] = pn.Throats[ idx2( pore, dirDown, (pn.DIM*2) ) ]-1;
               colId[2] = pn.Throats[ idx2( pore, dirUp, (pn.DIM*2) ) ]-1;
-              colId[3] = pn.Throats[ idx2( pore, dirOut, (pn.DIM*2) ) ]-1;
+              colId[3] = pn.Throats[ idx2( pore, dirTemp, (pn.DIM*2) ) ]-1;
               colId[4] = ppore1;
               colId[5] = pore;
               val[0] = -0.5 * ( Ks[ idx2( colId[0], LR, pn.DIM ) ] + Ks[ idx2( pore, LR, pn.DIM ) ] );
@@ -1519,7 +1521,7 @@ PoreNetworkBoundary( const PoreNetwork& pn, std::vector<int>& matIs, \
               ppore2 = FindPeriodicPair( pn, pore, direction, dirUp );
               colId[0] = pn.Throats[ idx2( pore, dirRight, (pn.DIM*2) ) ]-1;
               colId[1] = pn.Throats[ idx2( pore, dirUp, (pn.DIM*2) ) ]-1;
-              colId[2] = pn.Throats[ idx2( pore, dirOut, (pn.DIM*2) ) ]-1;
+              colId[2] = pn.Throats[ idx2( pore, dirTemp, (pn.DIM*2) ) ]-1;
               colId[3] = ppore1;
               colId[4] = ppore2;
               colId[5] = pore;
@@ -1541,7 +1543,7 @@ PoreNetworkBoundary( const PoreNetwork& pn, std::vector<int>& matIs, \
               ppore2 = FindPeriodicPair( pn, pore, direction, dirDown );
               colId[0] = pn.Throats[ idx2( pore, dirRight, (pn.DIM*2) ) ]-1;
               colId[1] = pn.Throats[ idx2( pore, dirDown, (pn.DIM*2) ) ]-1;
-              colId[2] = pn.Throats[ idx2( pore, dirOut, (pn.DIM*2) ) ]-1;
+              colId[2] = pn.Throats[ idx2( pore, dirTemp, (pn.DIM*2) ) ]-1;
               colId[3] = ppore1;
               colId[4] = ppore2;
               colId[5] = pore;
@@ -1551,7 +1553,7 @@ PoreNetworkBoundary( const PoreNetwork& pn, std::vector<int>& matIs, \
               val[3] = -0.5 * ( Ks[ idx2( colId[3], LR, pn.DIM ) ] + Ks[ idx2( pore, LR, pn.DIM ) ] );
               val[4] = -0.5 * ( Ks[ idx2( colId[4], UD, pn.DIM ) ] + Ks[ idx2( pore, UD, pn.DIM ) ] );
               val[5] = -(val[0] + val[1] + val[2] + val[3] + val[4]) + \
-                       0.5 * Ks[ idx2( pore, direction, pn.DIM ) ]
+                       0.5 * Ks[ idx2( pore, direction, pn.DIM ) ];
               if (!pn.Throats[ idx2( pore, dirIn, (pn.DIM*2) ) ]) {
                 force[pore] = force[pore] + 0.5 * Ks[ idx2( pore, direction, pn.DIM ) ];
               }
@@ -1563,7 +1565,7 @@ PoreNetworkBoundary( const PoreNetwork& pn, std::vector<int>& matIs, \
               colId[0] = pn.Throats[ idx2( pore, dirRight, (pn.DIM*2) ) ]-1;
               colId[1] = pn.Throats[ idx2( pore, dirDown, (pn.DIM*2) ) ]-1;
               colId[2] = pn.Throats[ idx2( pore, dirUp, (pn.DIM*2) ) ]-1;
-              colId[3] = pn.Throats[ idx2( pore, dirOut, (pn.DIM*2) ) ]-1;
+              colId[3] = pn.Throats[ idx2( pore, dirTemp, (pn.DIM*2) ) ]-1;
               colId[4] = ppore1;
               colId[5] = pore;
               val[0] = -0.5 * ( Ks[ idx2( colId[0], LR, pn.DIM ) ] + Ks[ idx2( pore, LR, pn.DIM ) ] );
@@ -1585,7 +1587,7 @@ PoreNetworkBoundary( const PoreNetwork& pn, std::vector<int>& matIs, \
             colId[0] = pn.Throats[ idx2( pore, dirRight, (pn.DIM*2) ) ]-1;
             colId[1] = pn.Throats[ idx2( pore, dirLeft, (pn.DIM*2) ) ]-1;
             colId[2] = pn.Throats[ idx2( pore, dirUp, (pn.DIM*2) ) ]-1;
-            colId[3] = pn.Throats[ idx2( pore, dirOut, (pn.DIM*2) ) ]-1;
+            colId[3] = pn.Throats[ idx2( pore, dirTemp, (pn.DIM*2) ) ]-1;
             colId[4] = ppore1;
             colId[5] = pore;
             val[0] = -0.5 * ( Ks[ idx2( colId[0], LR, pn.DIM ) ] + Ks[ idx2( pore, LR, pn.DIM ) ] );
@@ -1606,7 +1608,7 @@ PoreNetworkBoundary( const PoreNetwork& pn, std::vector<int>& matIs, \
             colId[0] = pn.Throats[ idx2( pore, dirRight, (pn.DIM*2) ) ]-1;
             colId[1] = pn.Throats[ idx2( pore, dirLeft, (pn.DIM*2) ) ]-1;
             colId[2] = pn.Throats[ idx2( pore, dirDown, (pn.DIM*2) ) ]-1;
-            colId[3] = pn.Throats[ idx2( pore, dirOut, (pn.DIM*2) ) ]-1;
+            colId[3] = pn.Throats[ idx2( pore, dirTemp, (pn.DIM*2) ) ]-1;
             colId[4] = ppore1;
             colId[5] = pore;
             val[0] = -0.5 * ( Ks[ idx2( colId[0], LR, pn.DIM ) ] + Ks[ idx2( pore, LR, pn.DIM ) ] );
@@ -1626,7 +1628,7 @@ PoreNetworkBoundary( const PoreNetwork& pn, std::vector<int>& matIs, \
             colId[0] = pn.Throats[ idx2( pore, dirRight, (pn.DIM*2) ) ]-1;
             colId[1] = pn.Throats[ idx2( pore, dirLeft, (pn.DIM*2) ) ]-1;
             colId[2] = pn.Throats[ idx2( pore, dirDown, (pn.DIM*2) ) ]-1;
-            colId[3] = pn.Throats[ idx2( pore, dirOut, (pn.DIM*2) ) ]-1;
+            colId[3] = pn.Throats[ idx2( pore, dirTemp, (pn.DIM*2) ) ]-1;
             colId[4] = pn.Throats[ idx2( pore, dirUp, (pn.DIM*2) ) ]-1;
             colId[5] = pore;
             val[0] = -0.5 * ( Ks[ idx2( colId[0], LR, pn.DIM ) ] + Ks[ idx2( pore, LR, pn.DIM ) ] );
@@ -1788,7 +1790,7 @@ PoreNetworkBoundary( const PoreNetwork& pn, std::vector<int>& matIs, \
           colId[1] = pn.Throats[ idx2( pore, dirLeft, (pn.DIM*2) ) ]-1;
           colId[2] = pn.Throats[ idx2( pore, dirIn, (pn.DIM*2) ) ]-1;
           colId[3] = pn.Throats[ idx2( pore, dirOut, (pn.DIM*2) ) ]-1;
-          colId[4] = pn.Throats[ idx2( pore, dirUp, (pn.DIM*2) ) ]-1;
+          colId[4] = pn.Throats[ idx2( pore, dirDown, (pn.DIM*2) ) ]-1;
           colId[5] = ppore1;
           colId[6] = pore;
           val[0] = -0.5 * ( Ks[ idx2( colId[0], LR, pn.DIM ) ] + Ks[ idx2( pore, LR, pn.DIM ) ] );

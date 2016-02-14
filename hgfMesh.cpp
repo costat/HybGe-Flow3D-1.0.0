@@ -147,8 +147,7 @@ void innerFaceConnectivity( \
   ytol = 1.2 * dy;
   ztol = 1.2 * dz;
 
-  switch ( DIM )
-  {
+  switch ( DIM ) {
     case 2 :
     {
       double cccl0, cccl1;
@@ -171,13 +170,11 @@ void innerFaceConnectivity( \
                - cccl1;
           if (fabs(xr) < epsx) {
             if (fabs(yr) < ytol) {
-              if (yr < 0)
-              {
+              if (yr < 0) {
                 int0 = incr;
                 numNeighbors++;
               }
-              else if (yr > 0)
-              {
+              else if (yr > 0) {
                 int2 = incr;
                 numNeighbors++;
               }
@@ -235,13 +232,11 @@ void innerFaceConnectivity( \
           if (fabs(xr) < epsx) {
             if (fabs(yr) < epsy) {
               if (fabs(zr) < ztol) {
-                if (zr < 0)
-                {
+                if (zr < 0) {
                   int0 = incr;
                   numNeighbors++;
                 }
-                else if (zr > 0)
-                {
+                else if (zr > 0) {
                   int2 = incr;
                   numNeighbors++;
                 }
@@ -249,13 +244,11 @@ void innerFaceConnectivity( \
             }
             if (fabs(zr) < epsz) {
               if (fabs(yr) < ytol) {
-                if (yr < 0)
-                {
+                if (yr < 0) {
                   int5 = incr;
                   numNeighbors++;
                 }
-                else if (yr > 0)
-                {
+                else if (yr > 0) {
                   int4 = incr;
                   numNeighbors++;
                 }
@@ -265,13 +258,11 @@ void innerFaceConnectivity( \
           else if (fabs(yr) < epsy) {
             if (fabs(zr) < epsz) {
               if (fabs(xr) < xtol) {
-                if (xr < 0)
-                {
+                if (xr < 0) {
                   int3 = incr;
                   numNeighbors++;
                 }
-                else if (xr > 0)
-                {
+                else if (xr > 0) {
                   int1 = incr;
                   numNeighbors++;
                 }
@@ -307,8 +298,7 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
   zLim[0] = 0;
   zLim[1] = height;
 
-  switch ( nz )
-  {
+  switch ( nz ) {
     case 0 : // 2D problem
     {
       // Constants determined by dimension alone
@@ -326,12 +316,9 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
       // Max pressure nodes
       std::vector<double> nodeHold;
       nodeHold.resize(2);
-      for (int yi = 0; yi < ny; yi++)
-      {
-        for (int xi = 0; xi < nx; xi++)
-        {
-          if (gridin[ idx2(xi, yi, ldi1) ] != 1)
-          {
+      for (int yi = 0; yi < ny; yi++) {
+        for (int xi = 0; xi < nx; xi++) {
+          if (gridin[ idx2(xi, yi, ldi1) ] != 1) {
             numPCells++;
             if (gridin[ idx2(xi, yi, ldi1) ] == 0) numVoid++;
           }
@@ -352,13 +339,10 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
       ImmersedBoundary.reserve(numPCells);
       Nodes.reserve((maxPNodes * 2));
 
-      for (int yi = 0; yi < ny; yi++)
-      {
-        for (int xi = 0; xi < nx; xi++)
-        {
+      for (int yi = 0; yi < ny; yi++) {
+        for (int xi = 0; xi < nx; xi++) {
           FullGrid.push_back(gridin[ idx2(xi, yi, ldi1) ]);
-          if (gridin[ idx2( xi, yi, ldi1 ) ] != 1)
-          {
+          if (gridin[ idx2( xi, yi, ldi1 ) ] != 1) {
             countCell++;
             ImmersedBoundary.push_back(gridin[ idx2(xi, yi, ldi1) ]);
             cellVert[0] = (xi + 1) * dx - dx;
@@ -370,28 +354,23 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
             cellVert[6] = cellVert[0];
             cellVert[7] = cellVert[5];
 
-            for (int pcount = 0; pcount < 4; pcount++)
-            {
+            for (int pcount = 0; pcount < 4; pcount++) {
               nodeHold[0] = cellVert[ idx2( pcount, 0, 2 ) ];
               nodeHold[1] = cellVert[ idx2( pcount, 1, 2 ) ];
-              if ( !countCell ) // countCell = 0 -> first cell so no possible
+              if ( !countCell ) { // countCell = 0 -> first cell so no possible
                                 // node duplicates
-              {
                 checkVert = -1;
               }
-              else
-              {
+              else {
                 checkVert = isNear2d( nodeHold, Nodes, dx, dy, dz, nNodes );
               }
-              if (checkVert == -1) // node is not a duplicate
-              {
+              if (checkVert == -1) { // node is not a duplicate
                 nNodes++;
                 Nodes.push_back(nodeHold[0]);
                 Nodes.push_back(nodeHold[1]);
                 mv[ idx2( countCell, pcount, 4 ) ] = nNodes-1;
               }
-              else // node is a duplicate
-              {
+              else { // node is a duplicate
                 mv[ idx2( countCell, pcount, 4 ) ] = checkVert;
               }
             }
@@ -402,8 +381,7 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
 
       // Next we compute cell centers for pressures
       PCellCenters.resize((numPCells * 2));
-      for (int cl = 0; cl < numPCells; cl++)
-      {
+      for (int cl = 0; cl < numPCells; cl++) {
         PCellCenters[ idx2( cl, 0, 2 ) ] = 0.5 \
           * (Nodes[ idx2( mv[ idx2( cl, 0, 4 ) ], 0, NodesLDI ) ] \
              + Nodes[ idx2( mv[ idx2( cl, 1, 4) ], 0, NodesLDI ) ]);
@@ -441,28 +419,23 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
           UCellCenters.reserve((maxUCells * 2));
           PressureCellUNeighbor.resize((numPCells * 2));
           UCellPressureNeighbor.resize((maxUCells * 2));
-          for (int cl = 0; cl < numPCells; cl++)
-          {
+          for (int cl = 0; cl < numPCells; cl++) {
             cellVert[0] = PCellCenters[ idx2( cl, 0, 2 ) ] - uStep;
             cellVert[1] = PCellCenters[ idx2( cl, 1, 2 ) ];
             cellVert[2] = PCellCenters[ idx2( cl, 0, 2 ) ] + uStep;
             cellVert[3] = PCellCenters[ idx2( cl, 1, 2 ) ];
-            for (int pcount = 0; pcount < 2; pcount++)
-            {
+            for (int pcount = 0; pcount < 2; pcount++) {
               // U Component
               nodeHoldU[0] = cellVert[ idx2( pcount, 0, 2 ) ];
               nodeHoldU[1] = cellVert[ idx2( pcount, 1, 2 ) ];
-              if ( !countUCells ) // First U node
-              {
+              if ( !countUCells ) {// First U node
                 checkVertU = -1;
               }
-              else
-              {
+              else {
                 checkVertU = isNear2d( nodeHoldU, UCellCenters, \
                                      dx, dy, dz, countUCells );
               }
-              if (checkVertU == -1) // cell center location is not a duplicate
-              {
+              if (checkVertU == -1) { // cell center location is not a duplicate
                 countUCells++;
                 UCellCenters.push_back(nodeHoldU[0]);
                 UCellCenters.push_back(nodeHoldU[1]);
@@ -479,8 +452,7 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
                                PressureCellVelocityNeighborLDI ) ] = countUCells;
                 }
               }
-              if (checkVertU != -1)
-              {
+              if (checkVertU != -1) {
                 if (pcount == 0) {
                   UCellPressureNeighbor[ idx2( checkVertU, 1, \
                                VelocityCellPressureNeighborLDI) ] = cl+1;
@@ -539,29 +511,24 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
           VCellCenters.reserve((maxVCells * 2));
           PressureCellVNeighbor.resize((numPCells * 2));
           VCellPressureNeighbor.resize((maxVCells * 2));
-          for (int xl = 0; xl < numPCells; xl++)
-          {
+          for (int xl = 0; xl < numPCells; xl++) {
             yl = PresListByY[ xl ];
             cellVert[4] = PCellCenters[ idx2( yl, 0, 2 ) ];
             cellVert[5] = PCellCenters[ idx2( yl, 1, 2 ) ] - vStep;
             cellVert[6] = PCellCenters[ idx2( yl, 0, 2 ) ];
             cellVert[7] = PCellCenters[ idx2( yl, 1, 2 ) ] + vStep;
-            for (int pcount = 0; pcount < 2; pcount++)
-            {
+            for (int pcount = 0; pcount < 2; pcount++) {
               // V Component
               nodeHoldV[0] = cellVert[ idx2( (pcount + 2), 0, 2 ) ];
               nodeHoldV[1] = cellVert[ idx2( (pcount + 2), 1, 2 ) ];
-              if ( !countVCells ) // First V node
-              {
+              if ( !countVCells ) { // First V node
                 checkVertV = -1;
               }
-              else
-              {
+              else {
                 checkVertV = isNear2d( nodeHoldV, VCellCenters, \
                                     dx, dy, dz, countVCells );
               }
-              if (checkVertV == -1)
-              {
+              if (checkVertV == -1) {
                 countVCells++;
                 VCellCenters.push_back(nodeHoldV[0]);
                 VCellCenters.push_back(nodeHoldV[1]);
@@ -578,8 +545,7 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
                                PressureCellVelocityNeighborLDI ) ] = countVCells;
                 }
               }
-              if (checkVertV != -1)
-              {
+              if (checkVertV != -1) {
                 if (pcount == 0) {
                   VCellPressureNeighbor[ idx2( checkVertV, 1, \
                                VelocityCellPressureNeighborLDI) ] = yl+1;
@@ -643,14 +609,10 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
       // Max pressure nodes
       std::vector<double> nodeHold;
       nodeHold.resize(3);
-      for (int yi = 0; yi < ny; yi++)
-      {
-        for (int xi = 0; xi < nx; xi++)
-        {
-          for (int zi = 0; zi < nz; zi++)
-          {
-            if (gridin[ idx3(xi, yi, zi, ldi1, ldi2) ] != 1)
-            {
+      for (int yi = 0; yi < ny; yi++) {
+        for (int xi = 0; xi < nx; xi++) {
+          for (int zi = 0; zi < nz; zi++) {
+            if (gridin[ idx3(xi, yi, zi, ldi1, ldi2) ] != 1) {
               numPCells++;
               if (gridin[ idx2(xi, yi, ldi1) ] == 0) numVoid++;
             }
@@ -672,15 +634,11 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
       FullGrid.reserve((nx * ny * nz));
       ImmersedBoundary.reserve(numPCells);
       Nodes.reserve((maxPNodes * 3));
-      for (int zi = 0; zi < nz; zi++)
-      {
-        for (int yi = 0; yi < ny; yi++)
-        {
-          for (int xi = 0; xi < nx; xi++)
-          {
+      for (int zi = 0; zi < nz; zi++) {
+        for (int yi = 0; yi < ny; yi++) {
+          for (int xi = 0; xi < nx; xi++) {
             FullGrid.push_back(gridin[ idx3(xi, yi, zi, ldi1, ldi2) ]);
-            if (gridin[ idx3( xi, yi, zi, ldi1, ldi2 ) ] != 1)
-            {
+            if (gridin[ idx3( xi, yi, zi, ldi1, ldi2 ) ] != 1) {
               countCell++;
               ImmersedBoundary.push_back(gridin[ idx3(xi, yi, zi, ldi1, ldi2) ]);
 
@@ -716,30 +674,25 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
               cellVert[22] = cellVert[1];
               cellVert[23] = cellVert[14];
 
-              for (int pcount = 0; pcount < 8; pcount++)
-              {
+              for (int pcount = 0; pcount < 8; pcount++) {
                 nodeHold[0] = cellVert[ idx2( pcount, 0, 3 ) ];
                 nodeHold[1] = cellVert[ idx2( pcount, 1, 3 ) ];
                 nodeHold[2] = cellVert[ idx2( pcount, 2, 3 ) ];
-                if ( !countCell ) // countCell = 0 -> first cell so no possible
+                if ( !countCell ) { // countCell = 0 -> first cell so no possible
                                   // node duplicates
-                {
                   checkVert = -1;
                 }
-                else
-                {
+                else {
                   checkVert = isNear3d( nodeHold, Nodes, dx, dy, dz, nNodes );
                 }
-                if (checkVert == -1) // node is not a duplicate
-                {
+                if (checkVert == -1) { // node is not a duplicate
                   nNodes++;
                   Nodes.push_back(nodeHold[0]);
                   Nodes.push_back(nodeHold[1]);
                   Nodes.push_back(nodeHold[2]);
                   mv[ idx2( countCell, pcount, 8 ) ] = nNodes-1;
                 }
-                else // node is a duplicate
-                {
+                else { // node is a duplicate
                   mv[ idx2( countCell, pcount, 8 ) ] = checkVert;
                 }
               }
@@ -751,8 +704,7 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
 
       // Next we compute cell centers for pressures
       PCellCenters.resize((numPCells * 3));
-      for (int cl = 0; cl < numPCells; cl++)
-      {
+      for (int cl = 0; cl < numPCells; cl++) {
         PCellCenters[ idx2( cl, 0, 3 ) ] = 0.5 \
           * (Nodes[ idx2( mv[ idx2( cl, 0, 8 ) ], 0, NodesLDI ) ] \
              + Nodes[ idx2( mv[ idx2( cl, 1, 8 ) ], 0, NodesLDI ) ]);
@@ -794,8 +746,7 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
           UCellCenters.reserve((maxUCells * 3));
           PressureCellUNeighbor.resize((numPCells * 2));
           UCellPressureNeighbor.resize((maxUCells * 2));
-          for (int cl = 0; cl < numPCells; cl++)
-          {
+          for (int cl = 0; cl < numPCells; cl++) {
             // Each 3 value block is a 'row' of the 2d celLVert array
             cellVert[0] = PCellCenters[ idx2( cl, 0, 3 ) ] - uStep;
             cellVert[1] = PCellCenters[ idx2( cl, 1, 3 ) ];
@@ -805,23 +756,19 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
             cellVert[4] = PCellCenters[ idx2( cl, 1, 3 ) ];
             cellVert[5] = PCellCenters[ idx2( cl, 2, 3 ) ];
 
-            for (int pcount = 0; pcount < 2; pcount++)
-            {
+            for (int pcount = 0; pcount < 2; pcount++) {
               // U Component
               nodeHoldU[0] = cellVert[ idx2( pcount, 0, 3 ) ];
               nodeHoldU[1] = cellVert[ idx2( pcount, 1, 3 ) ];
               nodeHoldU[2] = cellVert[ idx2( pcount, 2, 3 ) ];
-              if ( !countUCells ) // First U node
-              {
+              if ( !countUCells ) { // First U node
                 checkVertU = -1;
               }
-              else
-              {
+              else {
                 checkVertU = isNear3d( nodeHoldU, UCellCenters, \
                                     dx, dy, dz, countUCells );
               }
-              if (checkVertU == -1) // cell center location is not a duplicate
-              {
+              if (checkVertU == -1) { // cell center location is not a duplicate
                 countUCells++;
                 UCellCenters.push_back(nodeHoldU[0]);
                 UCellCenters.push_back(nodeHoldU[1]);
@@ -839,8 +786,7 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
                                PressureCellVelocityNeighborLDI ) ] = countUCells;
                 }
               }
-              if (checkVertU != -1)
-              {
+              if (checkVertU != -1) {
                 if (pcount == 0) {
                   UCellPressureNeighbor[ idx2( checkVertU, 1, \
                                VelocityCellPressureNeighborLDI) ] = cl+1;
@@ -900,8 +846,7 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
           VCellCenters.reserve((maxVCells * 3));
           PressureCellVNeighbor.resize((numPCells * 2));
           VCellPressureNeighbor.resize((maxVCells * 2));
-          for (int cl = 0; cl < numPCells; cl++)
-          {
+          for (int cl = 0; cl < numPCells; cl++) {
             yl = PresListByY[ cl ];
             // Each 3 value block is a 'row' of the 2d celLVert array
             cellVert[6] = PCellCenters[ idx2( yl, 0, 3 ) ];
@@ -912,23 +857,19 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
             cellVert[10] = PCellCenters[ idx2( yl, 1, 3 ) ] + vStep;
             cellVert[11] = PCellCenters[ idx2( yl, 2, 3 ) ];
 
-            for (int pcount = 0; pcount < 2; pcount++)
-            {
+            for (int pcount = 0; pcount < 2; pcount++) {
               // V Component
               nodeHoldV[0] = cellVert[ idx2( (pcount + 2), 0, 3 ) ];
               nodeHoldV[1] = cellVert[ idx2( (pcount + 2), 1, 3 ) ];
               nodeHoldV[2] = cellVert[ idx2( (pcount + 2), 2, 3 ) ];
-              if ( !countVCells ) // First V node
-              {
+              if ( !countVCells ) { // First V node
                 checkVertV = -1;
               }
-              else
-              {
+              else {
                 checkVertV = isNear3d( nodeHoldV, VCellCenters, \
                                     dx, dy, dz, countVCells );
               }
-              if (checkVertV == -1)
-              {
+              if (checkVertV == -1) {
                 countVCells++;
                 VCellCenters.push_back(nodeHoldV[0]);
                 VCellCenters.push_back(nodeHoldV[1]);
@@ -946,8 +887,7 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
                                PressureCellVelocityNeighborLDI ) ] = countVCells;
                 }
               }
-              if (checkVertV != -1)
-              {
+              if (checkVertV != -1) {
                 if (pcount == 0) {
                   VCellPressureNeighbor[ idx2( checkVertV, 1, \
                                VelocityCellPressureNeighborLDI) ] = yl+1;
@@ -1006,8 +946,7 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
           WCellCenters.reserve((maxWCells * 3));
           PressureCellWNeighbor.resize((numPCells * 2));
           WCellPressureNeighbor.resize((maxWCells * 2));
-          for (int cl = 0; cl < numPCells; cl++)
-          {
+          for (int cl = 0; cl < numPCells; cl++) {
             zl = PresListByZ[ cl ];
             // Each 3 value block is a 'row' of the 2d celLVert array
             cellVert[12] = PCellCenters[ idx2( zl, 0, 3 ) ];
@@ -1018,24 +957,20 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
             cellVert[16] = PCellCenters[ idx2( zl, 1, 3 ) ];
             cellVert[17] = PCellCenters[ idx2( zl, 2, 3 ) ] + wStep;
 
-            for (int pcount = 0; pcount < 2; pcount++)
-            {
+            for (int pcount = 0; pcount < 2; pcount++) {
               int checkVertW;
               // W Component
               nodeHoldW[0] = cellVert[ idx2( (pcount + 4), 0, 3 ) ];
               nodeHoldW[1] = cellVert[ idx2( (pcount + 4), 1, 3 ) ];
               nodeHoldW[2] = cellVert[ idx2( (pcount + 4), 2, 3 ) ];
-              if ( !countWCells ) // First W node
-              {
+              if ( !countWCells ) { // First W node
                 checkVertW = -1;
               }
-              else
-              {
+              else {
                 checkVertW = isNear3d( nodeHoldW, WCellCenters, \
                                     dx, dy, dz, countWCells );
               }
-              if (checkVertW == -1)
-              {
+              if (checkVertW == -1) {
                 countWCells++;
                 WCellCenters.push_back(nodeHoldW[0]);
                 WCellCenters.push_back(nodeHoldW[1]);
@@ -1053,8 +988,7 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
                                PressureCellVelocityNeighborLDI ) ] = countWCells;
                 }
               }
-              if (checkVertW != -1)
-              {
+              if (checkVertW != -1) {
                 if (pcount == 0) {
                   WCellPressureNeighbor[ idx2( checkVertW, 1, \
                                VelocityCellPressureNeighborLDI) ] = zl+1;
@@ -1126,10 +1060,8 @@ int FluidMesh::isNear2d( std::vector<double>& Vector1, std::vector<double>& Vect
     cl--;
     xr = fabs( Vector1[0] - Vector2[ idx2( cl, 0, 2 ) ]);
     yr = fabs( Vector1[1] - Vector2[ idx2( cl, 1, 2 ) ]);
-    if (xr < epsx)
-    {
-      if (yr < epsy)
-      {
+    if (xr < epsx) {
+      if (yr < epsy) {
         prox = cl;
       }
     }
@@ -1156,12 +1088,9 @@ int FluidMesh::isNear3d( std::vector<double>& Vector1, std::vector<double>& Vect
     xr = fabs( Vector1[0] - Vector2[ idx2( cl, 0, 3 ) ]);
     yr = fabs( Vector1[1] - Vector2[ idx2( cl, 1, 3 ) ]);
     zr = fabs( Vector1[2] - Vector2[ idx2( cl, 2, 3 ) ]);
-    if (xr < epsx)
-    {
-      if (yr < epsy)
-      {
-        if (zr < epsz)
-        {
+    if (xr < epsx) {
+      if (yr < epsy) {
+        if (zr < epsz) {
           prox = cl;
         }
       }
@@ -1172,8 +1101,7 @@ int FluidMesh::isNear3d( std::vector<double>& Vector1, std::vector<double>& Vect
 // Compute total DOF
 void FluidMesh::TotalDOF( void )
 {
-  switch ( DIM )
-  {
+  switch ( DIM ) {
     case 2 :
       dofTotal =  DOF[0] + DOF[1] + DOF[2];
       break;
@@ -1186,8 +1114,7 @@ void FluidMesh::TotalDOF( void )
 int FluidMesh::VelocityDOF( void )
 {
   int outVal = 0;
-  switch ( DIM )
-  {
+  switch ( DIM ) {
     case 2 :
       outVal = DOF[1] + DOF[2];
       break;
@@ -1200,8 +1127,7 @@ int FluidMesh::VelocityDOF( void )
 // Compute maximum possible nonzero entries in linear system
 void FluidMesh::MaxNonZero( void )
 {
-  switch ( DIM )
-  {
+  switch ( DIM ) {
     case 2 :
       maxNNZ = 4 * DOF[0] + 8 * DOF[1] + 8 * DOF[2];
       break;
@@ -1213,21 +1139,18 @@ void FluidMesh::MaxNonZero( void )
 // create sorted pressure index for y grid
 void FluidMesh::sortPV( void )
 {
-  switch ( DIM )
-  {
+  switch ( DIM ) {
     case 2 :
     {
       std::vector< sortStruc2 > pYtrans2( (PCellCenters.size()/2) );
       PresListByY.reserve( PCellCenters.size()/2 );
-      for (unsigned long cl = 0; cl < (PCellCenters.size()/2); cl++)
-      {
+      for (unsigned long cl = 0; cl < (PCellCenters.size()/2); cl++) {
         pYtrans2[cl].xx = PCellCenters[ idx2( cl, 0, 2 ) ];
         pYtrans2[cl].yy = PCellCenters[ idx2( cl, 1, 2 ) ];
         pYtrans2[cl].ind = cl;
       }
       std::sort(pYtrans2.begin(), pYtrans2.end(), byXbyY());
-      for (unsigned long cl = 0; cl < (PCellCenters.size()/2); cl++)
-      {
+      for (unsigned long cl = 0; cl < (PCellCenters.size()/2); cl++) {
         PresListByY.push_back( pYtrans2[cl].ind );
       }
       break;
@@ -1238,8 +1161,7 @@ void FluidMesh::sortPV( void )
       std::vector< sortStruc3 > pZtrans3( (PCellCenters.size()/3) );
       PresListByY.reserve( PCellCenters.size()/3 );
       PresListByZ.reserve( PCellCenters.size()/3 );
-      for (unsigned long cl = 0; cl < (PCellCenters.size()/3); cl++)
-      {
+      for (unsigned long cl = 0; cl < (PCellCenters.size()/3); cl++) {
         pYtrans3[cl].xx = PCellCenters[ idx2( cl, 0, 3 ) ];
         pYtrans3[cl].yy = PCellCenters[ idx2( cl, 1, 3 ) ];
         pYtrans3[cl].zz = PCellCenters[ idx2( cl, 2, 3 ) ];
@@ -1251,8 +1173,7 @@ void FluidMesh::sortPV( void )
       }
       std::sort(pYtrans3.begin(), pYtrans3.end(), byZbyXbyY());
       std::sort(pZtrans3.begin(), pZtrans3.end(), byYbyXbyZ());
-      for (unsigned long cl = 0; cl < (PCellCenters.size()/3); cl++)
-      {
+      for (unsigned long cl = 0; cl < (PCellCenters.size()/3); cl++) {
         PresListByY.push_back( pYtrans3[cl].ind );
         PresListByZ.push_back( pZtrans3[cl].ind );
       }
@@ -1263,16 +1184,14 @@ void FluidMesh::sortPV( void )
 // create the pore-network from porescale meshes
 void PoreNetwork::UniformPN( double length, double width, double height, int nx, int ny, int nz )
 {
-  if (nz)
-  {
+  if (nz) {
     DIM = 3;
     nPores = nx * ny * nz;
     dx = length/nx;
     dy = width/ny;
     dz = height/nz;
   }
-  else
-  {
+  else {
     DIM = 2;
     nPores = nx * ny;
     dx = length/nx;
@@ -1285,46 +1204,36 @@ void PoreNetwork::UniformPN( double length, double width, double height, int nx,
   Throats.resize( nPores * DIM * 2 );
   // set pore locations
   if (DIM == 2) {
-    for (int porey = 0; porey < ny; porey++)
-    {
-      for (int porex = 0; porex < nx; porex++)
-      {
+    for (int porey = 0; porey < ny; porey++) {
+      for (int porex = 0; porex < nx; porex++) {
         PoresXYZ[ idx2( idx2( porey, porex, ny ), 0, 2 ) ] = 0.5 * dx + dx * ( porex );
         PoresXYZ[ idx2( idx2( porey, porex, ny ), 1, 2 ) ] = 0.5 * dy + dy * ( porey );
       }
     }
   }
   else {
-    for (int porez = 0; porez < nz; porez++)
-    {
-      for (int porey = 0; porey < ny; porey++)
-      {
-        for (int porex = 0; porex < nx; porex++)
-        {
-          PoresXYZ[ idx2( idx3( porex, porey, porez, ny, nz ), 0, 3 ) ] = 0.5 * dx + dx * ( porex );
-          PoresXYZ[ idx2( idx3( porex, porey, porez, ny, nz ), 1, 3 ) ] = 0.5 * dy + dy * ( porey );
-          PoresXYZ[ idx2( idx3( porex, porey, porez, ny, nz ), 2, 3 ) ] = 0.5 * dz + dz * ( porez );
+    for (int porez = 0; porez < nz; porez++) {
+      for (int porey = 0; porey < ny; porey++) {
+        for (int porex = 0; porex < nx; porex++) {
+          PoresXYZ[ idx2( idx3( porez, porey, porex, ny, nz ), 0, 3 ) ] = 0.5 * dx + dx * ( porex );
+          PoresXYZ[ idx2( idx3( porez, porey, porex, ny, nz ), 1, 3 ) ] = 0.5 * dy + dy * ( porey );
+          PoresXYZ[ idx2( idx3( porez, porey, porex, ny, nz ), 2, 3 ) ] = 0.5 * dz + dz * ( porez );
         }
       }
     }
   }
   int nConnections;
   innerFaceConnectivity( Throats, PoresXYZ, dx, dy, dz, nPores, DIM );
-  for (int pore = 0; pore < nPores; pore++)
-  {
+  for (int pore = 0; pore < nPores; pore++) {
     nConnections = 0;
-    for (int side = 0; side < (2*DIM); side++)
-    {
+    for (int side = 0; side < (2*DIM); side++) {
       if (Throats[ idx2( pore, side, 2*DIM ) ]) nConnections++;
     }
-    if (nConnections == 2*DIM)
-    {
+    if (nConnections == 2*DIM) {
       InteriorPores.push_back( pore );
     }
-    else
-    {
+    else {
       BoundaryPores.push_back( pore );
     }
   }
 }
-

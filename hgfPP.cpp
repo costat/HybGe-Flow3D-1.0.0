@@ -1003,7 +1003,6 @@ void
 computeKPoreNetwork( const PoreNetwork& pn, const std::vector<double>& Solution, \
                      const std::vector<double>& Ks, double& K, int direction, int print )
 {
-  std::cout << "\n" << pn.psLength << "\t" << pn.psWidth << "\t" << pn.psHeight << "\t" << pn.dx << "\t" << pn.dy << "\t" << pn.dz << "\n";
   int dirIn;
   double A, L;
   if (direction == 0) {
@@ -1038,18 +1037,15 @@ computeKPoreNetwork( const PoreNetwork& pn, const std::vector<double>& Solution,
   int pore;
   std::vector<unsigned long> lPores;
   lPores.reserve( pn.BoundaryPores.size() );
-  for (int ii = 0; ii < pn.BoundaryPores.size(); ii++)
-  {
+  for (int ii = 0; ii < pn.BoundaryPores.size(); ii++) {
     pore = pn.BoundaryPores[ ii ];
     if (!pn.Throats[ idx2( pore, dirIn, (pn.DIM*2) ) ]) lPores.push_back( pore );
   }
   double KHOLD = 0;
   double TK;
-  for (int ii = 0; ii < lPores.size(); ii++)
-  {
+  for (int ii = 0; ii < lPores.size(); ii++) {
     pore = lPores[ ii ];
-    for (int dir = 0; dir < (pn.DIM*2); dir++)
-    {
+    for (int dir = 0; dir < (pn.DIM*2); dir++) {
       if ( dir == 1 || dir == 3 ) {
         TK = 0.5 * Ks[ idx2( pore, 0, 2 ) ];
       }
@@ -1064,8 +1060,6 @@ computeKPoreNetwork( const PoreNetwork& pn, const std::vector<double>& Solution,
       else {
         TK = 0.5 * Ks[ idx2( pore, 1, (pn.DIM) ) ];
       }
-      std::cout << "\npore = " << pore << "\t TK = " << TK;
-      std::cout << "\t new term = " << TK * ( 1 - Solution[ pore ] )  << "\n";
       KHOLD = KHOLD + TK * ( 1 - Solution[ pore ] );
     }
   }
@@ -1125,4 +1119,3 @@ writePoreNetworkSolutionTP ( const PoreNetwork& pn, const std::vector<double>& s
     flowrun << "\t" << ThroatConns[ idx2( ii, 1, 2 ) ]+1 << "\n";
   }
 }
-
