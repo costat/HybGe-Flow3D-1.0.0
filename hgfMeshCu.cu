@@ -317,13 +317,13 @@ void innerFaceConnectivity( \
   if (DIM == 2)
   {
     cudaOccupancyMaxPotentialBlockSize( &minGridSize, &blockSize, ifcKernel2D, 0, nCells );
-    gridSize = (SubMesh[meshNum].DOF + blockSize - 1) / blockSize;
+    gridSize = (nCells + blockSize - 1) / blockSize;
     ifcKernel2D<<< gridSize, blockSize >>>( d_CFC, d_CCC, epsx, epsy, xtol, ytol, nCells );
   }
   else if (DIM == 3)
   {
     cudaOccupancyMaxPotentialBlockSize( &minGridSize, &blockSize, ifcKernel3D, 0, nCells );
-    gridSize = (SubMesh[meshNum].DOF + blockSize - 1) / blockSize;
+    gridSize = (nCells + blockSize - 1) / blockSize;
     ifcKernel3D<<< gridSize, blockSize >>>( d_CFC, d_CCC, epsx, epsy, epsz, xtol, ytol, ztol, nCells );
   }
 
@@ -334,8 +334,8 @@ void innerFaceConnectivity( \
 
   // free device memory
   cudaFree( d_CFC );
-  cudaFree( d_CCC )
-    
+  cudaFree( d_CCC );
+
 }
 // Function to construct the mesh from voxel array input
 void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
