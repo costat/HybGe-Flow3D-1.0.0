@@ -182,3 +182,45 @@ immersedBoundarySingleComponent ( const FluidMesh& Mesh, std::vector<int>& matIs
     }
   }
 }
+void
+BuildImmersedBoundary( FluidMesh& Mesh, double vf, int nObs )
+{
+  int radSize = max((int)(round(sqrt(vf * Mesh.ImmersedBoundary.size()))), 1);
+  std::vector< unsigned long > cellNums;
+  cellNums.resize( radSize * radSize );
+  double blockNorm = 1;
+  int seedCell;
+  while (blockNorm) {
+    seedCell = rand() % (int)Mesh.ImmersedBoundary.size();
+    for (int ii = 0; ii < radSize; ii++) {
+      if (ii == 0) {
+        cellNums[ idx2( ii, 0, radSize) ] = seedCell;
+      }
+      else {
+        if (Mesh.FaceConnectivity[ idx2( cellNums[ idx2( (ii-1), 0, radSize ) ], 1, 4 ) ]) {
+
+        }
+        else {
+          // break out to while level, new seed
+        }
+      }
+      for (int jj = 1; jj < radSize; jj++) {
+        if (Mesh.FaceConnectivity[ idx2( cellNums[ idx2( ii, (jj-1), radSize ) ], 2, 4 ) ]) {
+
+        }
+        else {
+           // break out to while loop level, new seed
+        }
+      }
+    }
+    // define blockNorm by summing current IB entries. if empty, set cells to IB;
+    for (int ii = 0; ii < cellNums.size(); ii++) {
+      blockNorm = blockNorm + Mesh.ImmersedBoundary[ cellNums[ ii ] ];
+    }
+    if (!blockNorm) {
+      for (int ii = 0; ii < cellNum.size(); ii++) {
+        Mesh.ImmersedBoundary[ cellNums[ ii ] ] = 1;
+      }
+    }
+  }
+}

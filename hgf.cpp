@@ -40,6 +40,7 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
   if (direction < 3) type = 0;
   else if (direction == 3) type = 1;
   else if (direction == 4) type = 2;
+  else if (direction == 5) type = 3;
   else
   {
     std::cout << "\nProblem type not properly defined. Solving x-flow problem.\n\n";
@@ -284,6 +285,76 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
       // Total timers
       total_duration = ( omp_get_wtime() - start );
       std::cout << "Total time: " << total_duration << "seconds\n";
+    }
+    case 3 :
+    { // compute empirical distributions on subdomains, sample for constructed pore-network problem
+      int NVF = 5;
+      int nSims = 1000;
+      double mesh_duration, stokes_duration, pn_duration, total_duration;
+      double start, stokes_start, pn_start;
+      double volfracs[5];
+
+      volfracs[0] = 0.05;
+      volfracs[1] = 0.10;
+      volfracs[2] = 0.15;
+      volfracs[3] = 0.2;
+      volfracs[4] = 0.25;
+
+      start = omp_get_wtime();
+      // determine array slices for subdomains
+      std::vector< std::vector< unsigned long > > slices;
+      std::vector< double > lengths, widths, heights;
+      std::vector< int > nxs, nys, nzs;
+      MeshSubdivide( gridin, ldi1, ldi2, nx, ny, nz, \
+                     length, width, height, MX, MY, MZ, \
+                     slices, lengths, widths, heights, \
+                     nxs, nys, nzs );
+
+      // build meshes
+      std::vector< FluidMesh > Meshes;
+      Meshes.resize( slices.size() );
+      for (unsigned long sd = 0; sd < slices.size(); sd++) {
+        Meshes[sd].BuildUniformMesh( slices[sd].data(), nys[sd], nzs[sd], nxs[sd], nys[sd], nzs[sd], \
+                                     lengths[sd], widths[sd], heights[sd] );
+      }
+
+      mesh_duration = ( omp_get_wtime() - start );
+      stokes_start = omp_get_wtime();
+
+      // solve porescale problems
+      std::vector< std::vector< double > > Solutions;
+      Solutions.resize( Meshes[0].DIM*slices.size() );
+
+      // loop for subdomains
+      for (int sd = 0; sd < Meshes.size(); sd++) {
+        // loop for volume franction
+        for (int vf = 0; vf < NVF; nv++) {
+          // loop for samples
+          for (int spl = 0; spl < nSims; spl++) {
+
+            // console info
+            std::cout << "\n\n";
+            std::cout << "---------------------------------------------------------------------\n";
+            std::cout << "Solving sample " << spl << " for volume fraction ";
+            std::cout << volfracs[ vf ] << " on subdomain " << sd << "\n.";
+            std::cout << "---------------------------------------------------------------------\n";
+
+            // build and set immersed boundary
+            BuildImmersedBoundary( Meshes[sd], volfracs[0], (vf+1) );
+
+            // solve problem
+
+            // store solution
+
+            // compute K
+
+            // save K in appropriate vector
+
+          }
+        }
+      }
+
+      break; // break type 3
     }
   }
   if (simNum == numSims) stop_paralution();
