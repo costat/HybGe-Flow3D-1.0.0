@@ -10,6 +10,7 @@
 
 #include "hgf.hpp"
 #include "hgfMesh.hpp"
+#include "hgfIB.hpp"
 #include "hgfStokes.hpp"
 #include "hgfPoreNetwork.hpp"
 #include "hgfPP.hpp"
@@ -328,7 +329,7 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
       // loop for subdomains
       for (int sd = 0; sd < Meshes.size(); sd++) {
         // loop for volume franction
-        for (int vf = 0; vf < NVF; nv++) {
+        for (int vf = 0; vf < NVF; vf++) {
           // loop for samples
           for (int spl = 0; spl < nSims; spl++) {
 
