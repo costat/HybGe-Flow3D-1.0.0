@@ -188,9 +188,11 @@ void
 BuildImmersedBoundary( FluidMesh& Mesh, double vf, int nObs )
 {
   int radSize = std::max((int)(round( pow( (vf * Mesh.ImmersedBoundary.size()), (double)(1.0/Mesh.DIM) ) )), 1);
+  // set IB to zeros before randomly filling blocks
+  std::fill( Mesh.ImmersedBoundary.begin(), Mesh.ImmersedBoundary.end(), 0 );
   std::vector< unsigned long > cellNums;
   cellNums.resize( pow(radSize, Mesh.DIM) );
-  double blockNorm = 1;
+  double blockNorm;
   int nObsPlaced = 0;
   int seedCell;
   // generate a random location and test if a block of appropriate size 'fits' from that anchor
@@ -206,7 +208,7 @@ BuildImmersedBoundary( FluidMesh& Mesh, double vf, int nObs )
       }
       else {
         if (Mesh.PFaceConnectivity[ idx2( cellNums[ idx2( (ii-1), 0, radSize ) ], 1, 4 ) ]) {
-          cellNums[ idx2( ii, 0, radSize) ] = Mesh.PFaceConnectivity[ cellNums[ idx2( (ii-1), 0, radSize ) ], 1, 4 ]-1;
+          cellNums[ idx2( ii, 0, radSize) ] = Mesh.PFaceConnectivity[ idx2( cellNums[ idx2( (ii-1), 0, radSize ) ], 1, 4 ) ]-1;
         }
         else {
           goto newseed2;
@@ -227,15 +229,16 @@ BuildImmersedBoundary( FluidMesh& Mesh, double vf, int nObs )
   newseed3 :
   {
     seedCell = rand() % (int)Mesh.ImmersedBoundary.size();
+
     // first we set the anchor entries (ii, jj, 0)
     for (int ii = 0; ii < radSize; ii++) {
-      if ( ii = 0 ) {
+      if ( ii == 0 ) {
         cellNums[ idx3( ii, 0, 0, radSize, radSize ) ] = seedCell;
       }
       else {
         if (Mesh.PFaceConnectivity[ idx2( cellNums[ idx3( (ii-1), 0, 0, radSize, radSize ) ], 1, 6 ) ]) {
           cellNums[ idx3( ii, 0, 0, radSize, radSize ) ] = \
-            Mesh.PFaceConnectivity[ idx2( cellNums[ idx3( ii, 0, 0, radSize, radSize ) ], 1, 6 ) ]-1;
+            Mesh.PFaceConnectivity[ idx2( cellNums[ idx3( (ii-1), 0, 0, radSize, radSize ) ], 1, 6 ) ]-1;
         }
         else {
           goto newseed3;
@@ -269,6 +272,7 @@ BuildImmersedBoundary( FluidMesh& Mesh, double vf, int nObs )
   }
   blockcheck :
   {
+    blockNorm = 0;
     // define blockNorm by summing current IB entries. if empty, set cells to IB;
     for (int ii = 0; ii < cellNums.size(); ii++) {
       blockNorm = blockNorm + Mesh.ImmersedBoundary[ cellNums[ ii ] ];
