@@ -289,17 +289,11 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
     }
     case 3 :
     { // compute empirical distributions on subdomains, sample for constructed pore-network problem
-      int NVF = 5;
-      int nSims = 1000;
+      int NVF = 2;
+      int nSims = 2;
       double mesh_duration, stokes_duration, pn_duration, total_duration;
       double start, stokes_start, pn_start;
-      double volfracs[5];
-
-      volfracs[0] = 0.05;
-      volfracs[1] = 0.10;
-      volfracs[2] = 0.15;
-      volfracs[3] = 0.2;
-      volfracs[4] = 0.25;
+      double objectVolumeFrac = 0.05;
 
       start = omp_get_wtime();
       // determine array slices for subdomains
@@ -328,6 +322,9 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
 
       // loop for subdomains
       for (int sd = 0; sd < Meshes.size(); sd++) {
+        Solutions[ idx2( sd, 0, Meshes[sd].DIM ) ].resize( Meshes[sd].dofTotal );
+        Solutions[ idx2( sd, 1, Meshes[sd].DIM ) ].resize( Meshes[sd].dofTotal );
+        if (Meshes[sd].DIM == 3) Solutions[ idx2( sd, 2, Meshes[sd].DIM ) ].resize( Meshes[sd].dofTotal );
         // loop for volume franction
         for (int vf = 0; vf < NVF; vf++) {
           // loop for samples
@@ -337,14 +334,20 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
             std::cout << "\n\n";
             std::cout << "---------------------------------------------------------------------\n";
             std::cout << "Solving sample " << spl << " for volume fraction ";
-            std::cout << volfracs[ vf ] << " on subdomain " << sd << "\n.";
+            std::cout << (vf+1)*objectVolumeFrac << " on subdomain " << sd << "\n.";
             std::cout << "---------------------------------------------------------------------\n";
 
             // build and set immersed boundary
-            BuildImmersedBoundary( Meshes[sd], volfracs[0], (vf+1) );
-
-            // solve problem
-
+            BuildImmersedBoundary( Meshes[sd], objectVolumeFrac, (vf+1) );
+            // solve problems
+            StokesSolveDirect( Meshes[sd], visc, 0, Solutions[ idx2( sd, 0, Meshes[sd].DIM ) ], \
+                               tolAbs, tolRel, maxIt, nThreads, prec );
+            StokesSolveDirect( Meshes[sd], visc, 1, Solutions[ idx2( sd, 1, Meshes[sd].DIM ) ], \
+                               tolAbs, tolRel, maxIt, nThreads, prec );
+            if (Meshes[sd].DIM == 3) {
+              StokesSolveDirect( Meshes[sd], visc, 2, Solutions[ idx2( sd, 2, Meshes[sd].DIM ) ], \
+                                 tolAbs, tolRel, maxIt, nThreads, prec );
+            }
             // store solution
 
             // compute K
