@@ -10,6 +10,7 @@
 /* Define a 2d -> 1d array index,
    uses row major indexing */
 #define idx2(i, j, ldi) ((i * ldi) + j)
+#define idx3(i, j, k, ldi1, ldi2) (k + (ldi2 * (j + ldi1 * i)))
 
 /* immersedBoundary adds a penalty to the diagonal entry in rows associated
    to immersed boundary voxels. */
@@ -186,15 +187,17 @@ immersedBoundarySingleComponent ( const FluidMesh& Mesh, std::vector<int>& matIs
 void
 BuildImmersedBoundary( FluidMesh& Mesh, double vf, int nObs )
 {
-  int radSize = std::max((int)(round(sqrt(vf * Mesh.ImmersedBoundary.size()))), 1);
+  int radSize = std::max((int)(round( pow( (vf * Mesh.ImmersedBoundary.size()), (double)(1.0/Mesh.DIM) ) )), 1);
   std::vector< unsigned long > cellNums;
-  cellNums.resize( radSize * radSize );
+  cellNums.resize( pow(radSize, Mesh.DIM) );
   double blockNorm = 1;
   int nObsPlaced = 0;
   int seedCell;
   // generate a random location and test if a block of appropriate size 'fits' from that anchor
-  goto newseed;
-  newseed :
+  if (Mesh.DIM == 2) goto newseed2;
+  else goto newseed3;
+  // 2d seed generation
+  newseed2 :
   {
     seedCell = rand() % (int)Mesh.ImmersedBoundary.size();
     for (int ii = 0; ii < radSize; ii++) {
@@ -206,7 +209,7 @@ BuildImmersedBoundary( FluidMesh& Mesh, double vf, int nObs )
           cellNums[ idx2( ii, 0, radSize) ] = Mesh.PFaceConnectivity[ cellNums[ idx2( (ii-1), 0, radSize ) ], 1, 4 ]-1;
         }
         else {
-          goto newseed;
+          goto newseed2;
         }
       }
       for (int jj = 1; jj < radSize; jj++) {
@@ -214,22 +217,76 @@ BuildImmersedBoundary( FluidMesh& Mesh, double vf, int nObs )
           cellNums[ idx2( ii, jj, radSize ) ] = Mesh.PFaceConnectivity[ idx2( cellNums[ idx2( ii, (jj-1), radSize ) ], 2, 4 ) ]-1;
         }
         else {
-          goto newseed;
+          goto newseed2;
         }
       }
     }
+    goto blockcheck;
   }
-  // define blockNorm by summing current IB entries. if empty, set cells to IB;
-  for (int ii = 0; ii < cellNums.size(); ii++) {
-    blockNorm = blockNorm + Mesh.ImmersedBoundary[ cellNums[ ii ] ];
-  }
-  // if blockNorm is 0 then the location is void space. we then set the IB. otherwise return to newseed and start over
-  if (!blockNorm) {
-    for (int ii = 0; ii < cellNums.size(); ii++) {
-      Mesh.ImmersedBoundary[ cellNums[ ii ] ] = 1;
+  // 3d seed generation
+  newseed3 :
+  {
+    seedCell = rand() % (int)Mesh.ImmersedBoundary.size();
+    // first we set the anchor entries (ii, jj, 0)
+    for (int ii = 0; ii < radSize; ii++) {
+      if ( ii = 0 ) {
+        cellNums[ idx3( ii, 0, 0, radSize, radSize ) ] = seedCell;
+      }
+      else {
+        if (Mesh.PFaceConnectivity[ idx2( cellNums[ idx3( (ii-1), 0, 0, radSize, radSize ) ], 1, 6 ) ]) {
+          cellNums[ idx3( ii, 0, 0, radSize, radSize ) ] = \
+            Mesh.PFaceConnectivity[ idx2( cellNums[ idx3( ii, 0, 0, radSize, radSize ) ], 1, 6 ) ]-1;
+        }
+        else {
+          goto newseed3;
+        }
+      }
+      for (int jj = 1; jj < radSize; jj++) {
+        if (Mesh.PFaceConnectivity[ idx2( cellNums[ idx3( ii, (jj-1), 0, radSize, radSize ) ], 4, 6 ) ]) {
+          cellNums[ idx3(ii, jj, 0, radSize, radSize ) ] = \
+            Mesh.PFaceConnectivity[ idx2( cellNums[ idx3( ii, (jj-1), 0, radSize, radSize ) ], 4, 6 ) ]-1;
+        }
+        else {
+          goto newseed3;
+        }
+      }
     }
-    nObsPlaced++;
-    if (nObsPlaced < nObs) goto newseed;
+    // now we set the entries (*,*,kk)
+    for (int ii = 0; ii < radSize; ii++) {
+      for (int jj = 0; jj < radSize; jj++) {
+        for (int kk = 1; kk < radSize; kk++) {
+          if (Mesh.PFaceConnectivity[ idx2( cellNums[ idx3( ii, jj, (kk-1), radSize, radSize ) ], 2, 6 ) ]) {
+            cellNums[ idx3( ii, jj, kk, radSize, radSize ) ] = \
+              Mesh.PFaceConnectivity[ idx2( cellNums[ idx3( ii, jj, (kk-1), radSize, radSize ) ], 2, 6 ) ]-1;
+          }
+          else {
+            goto newseed3;
+          }
+        }
+      }
+    }
+    goto blockcheck;
   }
-  else goto newseed;
+  blockcheck :
+  {
+    // define blockNorm by summing current IB entries. if empty, set cells to IB;
+    for (int ii = 0; ii < cellNums.size(); ii++) {
+      blockNorm = blockNorm + Mesh.ImmersedBoundary[ cellNums[ ii ] ];
+    }
+    // if blockNorm is 0 then the location is void space. we then set the IB. otherwise return to newseed and start over
+    if (!blockNorm) {
+      for (int ii = 0; ii < cellNums.size(); ii++) {
+        Mesh.ImmersedBoundary[ cellNums[ ii ] ] = 1;
+      }
+      nObsPlaced++;
+      if (nObsPlaced < nObs) {
+        if (Mesh.DIM == 2) goto newseed2;
+        else goto newseed3;
+      }
+    }
+    else {
+      if (Mesh.DIM == 2) goto newseed2;
+      else goto newseed3;
+    }
+  }
 }
