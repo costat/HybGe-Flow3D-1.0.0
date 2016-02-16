@@ -192,6 +192,7 @@ BuildImmersedBoundary( FluidMesh& Mesh, double vf, int nObs )
   double blockNorm = 1;
   int nObsPlaced = 0;
   int seedCell;
+  // generate a random location and test if a block of appropriate size 'fits' from that anchor
   goto newseed;
   newseed :
   {
@@ -202,7 +203,7 @@ BuildImmersedBoundary( FluidMesh& Mesh, double vf, int nObs )
       }
       else {
         if (Mesh.PFaceConnectivity[ idx2( cellNums[ idx2( (ii-1), 0, radSize ) ], 1, 4 ) ]) {
-
+          cellNums[ idx2( ii, 0, radSize) ] = Mesh.PFaceConnectivity[ cellNums[ idx2( (ii-1), 0, radSize ) ], 1, 4 ]-1;
         }
         else {
           goto newseed;
@@ -210,7 +211,7 @@ BuildImmersedBoundary( FluidMesh& Mesh, double vf, int nObs )
       }
       for (int jj = 1; jj < radSize; jj++) {
         if (Mesh.PFaceConnectivity[ idx2( cellNums[ idx2( ii, (jj-1), radSize ) ], 2, 4 ) ]) {
-
+          cellNums[ idx2( ii, jj, radSize ) ] = Mesh.PFaceConnectivity[ idx2( cellNums[ idx2( ii, (jj-1), radSize ) ], 2, 4 ) ]-1;
         }
         else {
           goto newseed;
@@ -222,6 +223,7 @@ BuildImmersedBoundary( FluidMesh& Mesh, double vf, int nObs )
   for (int ii = 0; ii < cellNums.size(); ii++) {
     blockNorm = blockNorm + Mesh.ImmersedBoundary[ cellNums[ ii ] ];
   }
+  // if blockNorm is 0 then the location is void space. we then set the IB. otherwise return to newseed and start over
   if (!blockNorm) {
     for (int ii = 0; ii < cellNums.size(); ii++) {
       Mesh.ImmersedBoundary[ cellNums[ ii ] ] = 1;
