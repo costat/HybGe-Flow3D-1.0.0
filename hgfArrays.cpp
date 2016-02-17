@@ -499,3 +499,21 @@ PoreNetworkArray( const PoreNetwork& pn, std::vector<int>& matIs, \
   delete[] val;
   delete[] colId;
 }
+
+void sortCOO( std::vector<int>& matIs, std::vector<int>& matJs, std::vector<double>& matVals )
+{
+  std::vector<arrayCOO> dat(matIs.size());
+  for (int ii = 0; ii < matIs.size(); ii++)
+  {
+    dat[ii].I = matIs[ii];
+    dat[ii].J = matJs[ii];
+    dat[ii].Val = matVals[ii];
+  }
+  std::sort(dat.begin(), dat.end(), byIbyJ());
+  for (int ii = 0; ii < sdArrays[kk].matIs.size(); ii++)
+  {
+    matIs[ii] = dat[ii].I;
+    matJs[ii] = dat[ii].J;
+    matVals[ii] = dat[ii].Val;
+  }
+}

@@ -53,3 +53,9 @@ PoreNetworkArray ( const PoreNetwork& pn, std::vector<int>& matIs, \
                    std::vector<int>& matJs, std::vector<double>& matVals, \
                    const std::vector<double>& Ks );
 
+void
+sortCOO ( std::vector<int>& matIs, std::vector<int>& matJs, std::vector<double>& matVals );
+
+void
+buildCSR ( const std::vector<int>& matIs, const std::vector<int>& matJs, \
+           const std::vector<double>& matVals, std::vector<int>& rowPTR );

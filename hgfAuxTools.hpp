@@ -1,3 +1,18 @@
+struct arrayCOO
+{
+  int I;
+  int J;
+  double Val;
+};
+
+struct byIbyJ
+{
+  bool operator()(arrayCOO const &one, arrayCOO const &two)
+  {
+    return ( one.I < two.I || (one.I == two.I && one.J < two.J ) );
+  }
+};
+
 struct sortStruc2
 {
   double xx;
@@ -38,4 +53,3 @@ struct byYbyXbyZ
            || (one.yy == two.yy && one.xx == two.xx && one.zz < two.zz) );
   }
 };
-
