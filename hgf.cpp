@@ -5,6 +5,8 @@
 #include <omp.h>
 #include <math.h>
 #include <iterator>
+#include <string>
+#include <sstream>
 
 #include <paralution.hpp>
 
@@ -20,6 +22,18 @@
 #define idx2(i, j, ldi) ((i * ldi) + j)
 
 using namespace paralution;
+
+/* current g++ has a bug claiming to_string() is not a memeber of std.
+   when this is fixed this "patch" can be deleted. called as patch::to_string()*/
+namespace patch
+{
+  template < typename T > std::string to_string( const T& n )
+  {
+    std::ostringstream stm;
+    stm << n;
+    return stm.str();
+  }
+}
 
 /* hgfStokesDrive solves the Stokes equations on a cartesian grid
    with an immersed boundary. The model is solved in 2d or 3d, either
@@ -289,6 +303,9 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
     }
     case 3 :
     { // compute empirical distributions on subdomains, sample for constructed pore-network problem
+      std::string outNameX;
+      std::string outNameY;
+      std::string outNameZ;
       int NVF = 2;
       int nSims = 2;
       double mesh_duration, stokes_duration, pn_duration, total_duration;
@@ -348,8 +365,17 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
               StokesSolveDirect( Meshes[sd], visc, 2, Solutions[ idx2( sd, 2, Meshes[sd].DIM ) ], \
                                  tolAbs, tolRel, maxIt, nThreads, prec );
             }
-            // store solution
-
+            // store solutions
+            outNameX = "./output/domain" + patch::to_string(sd) + "_" + patch::to_string((vf+1)) + "obs_sample" + patch::to_string(spl) + "_X.dat";
+            outNameY = "./outputdomain" + patch::to_string(sd) + "_" + patch::to_string((vf+1)) + "obs_sample" + patch::to_string(spl) + "_Y.dat";
+            if (Meshes[sd].DIM == 3) {
+              outNameZ = "./outputdomain" + patch::to_string(sd) + "_" + patch::to_string((vf+1)) + "obs_sample" + patch::to_string(spl) + "_Z.dat";
+            }
+            writeSolutionTP ( Meshes[sd], Solutions[ idx2( sd, 0, Meshes[sd].DIM ) ], outNameX );
+            writeSolutionTP ( Meshes[sd], Solutions[ idx2( sd, 1, Meshes[sd].DIM ) ], outNameY );
+            if (Meshes[sd].DIM == 3) {
+              writeSolutionTP ( Meshes[sd], Solutions[ idx2( sd, 2, Meshes[sd].DIM ) ], outNameZ );
+            }
             // compute K
 
             // save K in appropriate vector
