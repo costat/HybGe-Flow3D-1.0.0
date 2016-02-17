@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <vector>
+#include <algorithm>
 
 #include "hgfMesh.hpp"
 #include "hgfArrays.hpp"
@@ -500,7 +501,8 @@ PoreNetworkArray( const PoreNetwork& pn, std::vector<int>& matIs, \
   delete[] colId;
 }
 
-void sortCOO( std::vector<int>& matIs, std::vector<int>& matJs, std::vector<double>& matVals )
+void
+sortCOO( std::vector<int>& matIs, std::vector<int>& matJs, std::vector<double>& matVals )
 {
   std::vector<arrayCOO> dat(matIs.size());
   for (int ii = 0; ii < matIs.size(); ii++)
@@ -510,10 +512,27 @@ void sortCOO( std::vector<int>& matIs, std::vector<int>& matJs, std::vector<doub
     dat[ii].Val = matVals[ii];
   }
   std::sort(dat.begin(), dat.end(), byIbyJ());
-  for (int ii = 0; ii < sdArrays[kk].matIs.size(); ii++)
+  for (int ii = 0; ii < matIs.size(); ii++)
   {
     matIs[ii] = dat[ii].I;
     matJs[ii] = dat[ii].J;
     matVals[ii] = dat[ii].Val;
   }
+}
+
+void
+buildCSR( const std::vector<int>& matIs, const std::vector<int>& matJs, \
+          const std::vector<double>& matVals, std::vector<int>& rowPTR )
+{
+  int rowVal = matIs[0];
+  rowPTR.push_back(0);
+  for (int row = 1; row < matIs.size(); row++)
+  {
+    if (matIs[row] > rowVal)
+    {
+      rowVal = matIs[row];
+      rowPTR.push_back(row);
+    }
+  }
+  rowPTR.push_back(matIs.size());
 }

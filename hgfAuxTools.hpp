@@ -1,3 +1,7 @@
+// hgfAuxTools.hpp
+#ifndef HGFAUXTOOLS_H
+#define HGFAUXTOOLS_H
+
 struct arrayCOO
 {
   int I;
@@ -53,3 +57,5 @@ struct byYbyXbyZ
            || (one.yy == two.yy && one.xx == two.xx && one.zz < two.zz) );
   }
 };
+
+#endif

@@ -1,4 +1,5 @@
 #include <vector>
+#include "hgfAuxTools.hpp"
 
 void
 diffusionArrays ( const FluidMesh& Mesh, std::vector<int>& matIs, \
