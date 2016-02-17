@@ -280,7 +280,7 @@ BuildImmersedBoundary( FluidMesh& Mesh, double vf, int nObs )
     // if blockNorm is 0 then the location is void space. we then set the IB. otherwise return to newseed and start over
     if (!blockNorm) {
       for (int ii = 0; ii < cellNums.size(); ii++) {
-        Mesh.ImmersedBoundary[ cellNums[ ii ] ] = 1;
+        Mesh.ImmersedBoundary[ cellNums[ ii ] ] = 2;
       }
       nObsPlaced++;
       if (nObsPlaced < nObs) {
