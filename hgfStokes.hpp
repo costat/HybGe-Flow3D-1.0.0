@@ -1,3 +1,7 @@
+// hgfStokes.hpp
+#ifndef HGFSTOKES_H
+#define HGFSTOKES_H
+
 #include <vector>
 
 #include <paralution.hpp>
@@ -21,3 +25,5 @@ void
 updatePressureRich( const FluidMesh& Mesh, std::vector<double>& Solution, \
                     const paralution::LocalVector<double>& solU, const paralution::LocalVector<double>& solV, \
                     const paralution::LocalVector<double>& solW, double& residual, double relax );
+
+#endif

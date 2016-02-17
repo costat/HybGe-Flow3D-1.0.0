@@ -1,6 +1,6 @@
 // hgfMesh.hpp
-#ifndef FluidMesh_H
-#define FluidMesh_H
+#ifndef HGFMESH_H
+#define HGFMESH_H
 
 #include <vector>
 

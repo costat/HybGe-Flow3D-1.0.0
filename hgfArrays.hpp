@@ -1,3 +1,7 @@
+// hgfArrays.hpp
+#ifndef HGFARRAYS_H
+#define HGFARRAYS_H
+
 #include <vector>
 #include "hgfAuxTools.hpp"
 
@@ -60,3 +64,5 @@ sortCOO ( std::vector<int>& matIs, std::vector<int>& matJs, std::vector<double>&
 void
 buildCSR ( const std::vector<int>& matIs, const std::vector<int>& matJs, \
            const std::vector<double>& matVals, std::vector<int>& rowPTR );
+
+#endif

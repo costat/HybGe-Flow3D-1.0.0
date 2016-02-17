@@ -1,3 +1,7 @@
+// hgfIB.hpp
+#ifndef HGFIB_H
+#define HGFIB_H
+
 #include <vector>
 
 void
@@ -10,3 +14,5 @@ immersedBoundarySingleComponent ( const FluidMesh& Mesh, std::vector<int>& matIs
                                   int component );
 
 void BuildImmersedBoundary( FluidMesh& Mesh, double vf, int nObs );
+
+#endif

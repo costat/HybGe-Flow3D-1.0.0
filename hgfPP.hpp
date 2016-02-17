@@ -1,3 +1,7 @@
+// hgfPP.hpp
+#ifndef HGFPP_H
+#define HGFPP_H
+
 #include <vector>
 #include <string>
 
@@ -41,3 +45,4 @@ void
 writePoreNetworkSolutionTP ( const PoreNetwork& pn, const std::vector<double>& sol, \
                              std::string& outName );
 
+#endif
