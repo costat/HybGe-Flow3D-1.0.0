@@ -5,6 +5,7 @@
 #include <math.h>
 #include <omp.h>
 #include <algorithm>
+#include <cuda_runtime.h>
 
 #include "hgfMeshCu.hpp"
 #include "hgf.hpp"
@@ -23,7 +24,7 @@ __global__ void ifcKernel2D ( unsigned long *d_CFC, const double *d_CCC, \
                               double epsx, double epsy, \
                               double xtol, double ytol, int nCells )
 {
-  int cl = blockId.x * blockDIM.x + threadId.x;
+  int cl = blockIdx.x * blockDim.x + threadIdx.x;
   int incr;
   double xr, yr;
   int numNeighbors = 0;

@@ -3,6 +3,7 @@
 #define HGFMESH_H
 
 #include <vector>
+#include <cuda_runtime.h>
 
 __global__ void ifcKernel2D ( unsigned long *d_CFC, const double *d_CCC, \
                               double epsx, double epsy, double xtol, double ytol, int nCells );
