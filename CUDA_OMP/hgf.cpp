@@ -300,6 +300,7 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
       // Total timers
       total_duration = ( omp_get_wtime() - start );
       std::cout << "Total time: " << total_duration << "seconds\n";
+      break;
     }
     case 3 :
     { // compute empirical distributions on subdomains, sample for constructed pore-network problem

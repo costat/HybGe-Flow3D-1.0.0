@@ -63,7 +63,7 @@ StokesSolveDirect( const FluidMesh& Mesh, double visc, int direction, \
   GMRES<LocalMatrix<double>, LocalVector<double>, double> ls;
   ls.Init(tolAbs, tolRel, 1e8, maxIt);
   ls.SetOperator(mat);
-  ls.Verbose(1);
+  ls.Verbose(2);
   ls.SetBasisSize(100);
 
   // preconditioning
