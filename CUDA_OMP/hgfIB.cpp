@@ -4,7 +4,7 @@
 
 #include <paralution.hpp>
 
-#include "hgfMesh.hpp"
+#include "hgfMeshCu.hpp"
 #include "hgfIB.hpp"
 
 /* Define a 2d -> 1d array index,

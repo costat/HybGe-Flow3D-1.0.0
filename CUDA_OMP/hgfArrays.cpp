@@ -3,7 +3,7 @@
 #include <vector>
 #include <algorithm>
 
-#include "hgfMesh.hpp"
+#include "hgfMeshCu.hpp"
 #include "hgfArrays.hpp"
 
 /* Define a 2d -> 1d array index,

@@ -4,7 +4,7 @@
 
 #include <paralution.hpp>
 
-#include "hgfMesh.hpp"
+#include "hgfMeshCu.hpp"
 #include "hgfArrays.hpp"
 #include "hgfBC.hpp"
 #include "hgfIB.hpp"

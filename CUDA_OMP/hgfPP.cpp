@@ -4,7 +4,7 @@
 #include <string>
 #include <paralution.hpp>
 
-#include "hgfMesh.hpp"
+#include "hgfMeshCu.hpp"
 #include "hgfPP.hpp"
 
 #define idx2(i, j, ldi) ((i * ldi) + j)

@@ -6,7 +6,7 @@
 #include <omp.h>
 #include <algorithm>
 
-#include "hgfMesh.hpp"
+#include "hgfMeshCu.hpp"
 #include "hgf.hpp"
 #include "hgfArrays.hpp"
 #include "hgfBC.hpp"

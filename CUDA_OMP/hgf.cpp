@@ -11,7 +11,7 @@
 #include <paralution.hpp>
 
 #include "hgf.hpp"
-#include "hgfMesh.hpp"
+#include "hgfMeshCu.hpp"
 #include "hgfIB.hpp"
 #include "hgfStokes.hpp"
 #include "hgfPoreNetwork.hpp"

@@ -6,7 +6,7 @@
 
 #include <paralution.hpp>
 
-#include "hgfMesh.hpp"
+#include "hgfMeshCu.hpp"
 
 void
 StokesSolveDirect( const FluidMesh& Mesh, double visc, int direction, \

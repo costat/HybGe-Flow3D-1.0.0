@@ -5,7 +5,7 @@
 #include <vector>
 #include <paralution.hpp>
 
-#include "hgfMesh.hpp"
+#include "hgfMeshCu.hpp"
 
 void
 PoreNetworkSolveDirect( const PoreNetwork& pn, const std::vector<double>& Ks, \

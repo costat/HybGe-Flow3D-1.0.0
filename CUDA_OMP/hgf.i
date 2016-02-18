@@ -3,7 +3,7 @@
 %{
   #define SWIG_FILE_WITH_INIT
   #include "hgf.hpp"
-  #include "hgfMesh.hpp"
+  #include "hgfMeshCu.hpp"
   #include "hgfStokes.hpp"
   #include "hgfPoreNetwork.hpp"
   #include "hgfArrays.hpp"
@@ -21,7 +21,7 @@
 %apply (unsigned long *IN_ARRAY1, int DIM1) {(unsigned long *gridin, int size1)}
 
 %include "hgf.hpp"
-%include "hgfMesh.hpp"
+%include "hgfMeshCu.hpp"
 %include "hgfStokes.hpp"
 %include "hgfPoreNetwork.hpp"
 %include "hgfArrays.hpp"

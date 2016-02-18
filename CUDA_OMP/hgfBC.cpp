@@ -4,7 +4,7 @@
 #include <string.h>
 #include <math.h>
 
-#include "hgfMesh.hpp"
+#include "hgfMeshCu.hpp"
 #include "hgfBC.hpp"
 
 /* Define a 2d -> 1d array index,
