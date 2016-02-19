@@ -118,11 +118,7 @@ FlowComponent3d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
                                     - 0.5 * componentCellWidths[ idx2( cl, direction, Mesh.CellWidthsLDI ) ]) \
                                     < componentMin) // inflow, nonzero force
       {
-        force[cl2] = maxin \
-          * (componentCellCenters[ idx2( cl, LR, Mesh.CellCentersLDI ) ] - minLR) \
-          * (componentCellCenters[ idx2( cl, LR, Mesh.CellCentersLDI ) ] - maxLR) \
-          * (componentCellCenters[ idx2( cl, UD, Mesh.CellCentersLDI ) ] - minUD) \
-          * (componentCellCenters[ idx2( cl, UD, Mesh.CellCentersLDI ) ] - maxUD);
+        force[cl2] = maxin;
       }
       colId[0] = cl2;
       val[0] = 1;
@@ -971,9 +967,7 @@ FlowComponent2d ( const FluidMesh& Mesh, std::vector<int>& matIs, \
                                     - 0.6 * componentCellWidths[ idx2( cl, direction, Mesh.CellCentersLDI ) ]) \
                                     < componentMin) // inflow, nonzero force
       {
-        force[cl2] = -maxin \
-          * (componentCellCenters[ idx2( cl, LR, Mesh.CellCentersLDI ) ] - minLR) \
-          * (componentCellCenters[ idx2( cl, LR, Mesh.CellCentersLDI ) ] - maxLR);
+        force[cl2] = maxin;
       }
       colId[0] = cl2;
       val[0] = 1;
