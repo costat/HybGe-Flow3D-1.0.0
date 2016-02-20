@@ -7,16 +7,16 @@ SET(HGF_BUILD_EXECUTABLE ON CACHE BOOL "Build HGF Driver Executable.")
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 
-SET(LIBRARY_SRCS hgf.cpp
-                 hgfMesh.cpp
-                 hgfStokes.cpp
-                 hgfPoreNetwork.cpp
-                 hgfArrays.cpp
-                 hgfBC.cpp
-                 hgfIB.cpp
-                 hgfPP.cpp)
+SET(LIBRARY_SRCS ../src/hgf.cpp
+                 ../src/hgfMesh.cpp
+                 ../src/hgfStokes.cpp
+                 ../src/hgfPoreNetwork.cpp
+                 ../src/hgfArrays.cpp
+                 ../src/hgfBC.cpp
+                 ../src/hgfIB.cpp
+                 ../src/hgfPP.cpp)
 
-SET(EXECUTABLE_SRCS driver.cpp)
+SET(EXECUTABLE_SRCS ../src/driver.cpp)
 
 SET(CMAKE_MODULE_PATH ${CMAKE_HOME_DIRECTORY}/cmake)
 
