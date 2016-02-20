@@ -45,9 +45,11 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
           double length, double width, double height, int direction, \
           double visc, int nThreads, int prec, int numSims, int simNum, \
           double tolAbs, double tolRel, int maxIt, \
-          int MX, int MY, int MZ, int solver, double relax )
+          int MX, int MY, int MZ, int solver, double relax, int output )
 {
-
+  std::string outExt;
+  if ( output == 0 ) outExt = ".dat";
+  else outExt = ".vtk";
   int type;
 
   if (simNum == 1) init_paralution();
@@ -68,7 +70,7 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
     case 0 : // Solve a single flow direction, upscale constant conductivity
     {
       std::string outName;
-      outName = "./output/flowrun.dat";
+      outName = "./output/flowrun" + outExt;
       double mesh_duration, stokes_duration, total_duration;
       double start, stokes_start;
 
@@ -107,9 +109,9 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
       std::string outNameX;
       std::string outNameY;
       std::string outNameZ;
-      outNameX = "./output/flowrunX.dat";
-      outNameY = "./output/flowrunY.dat";
-      outNameZ = "./output/flowrunZ.dat";
+      outNameX = "./output/flowrunX" + outExt;
+      outNameY = "./output/flowrunY" + outExt;
+      outNameZ = "./output/flowrunZ" + outExt;
       double mesh_duration, stokes_duration, total_duration;
       double start, stokes_start;
 
@@ -367,10 +369,10 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
                                  tolAbs, tolRel, maxIt, nThreads, prec );
             }
             // store solutions
-            outNameX = "./output/domain" + patch::to_string(sd) + "_" + patch::to_string((vf+1)) + "obs_sample" + patch::to_string(spl) + "_X.dat";
-            outNameY = "./output/domain" + patch::to_string(sd) + "_" + patch::to_string((vf+1)) + "obs_sample" + patch::to_string(spl) + "_Y.dat";
+            outNameX = "./output/domain" + patch::to_string(sd) + "_" + patch::to_string((vf+1)) + "obs_sample" + patch::to_string(spl) + "_X" + outExt;
+            outNameY = "./output/domain" + patch::to_string(sd) + "_" + patch::to_string((vf+1)) + "obs_sample" + patch::to_string(spl) + "_Y" + outExt;
             if (Meshes[sd].DIM == 3) {
-              outNameZ = "./output/domain" + patch::to_string(sd) + "_" + patch::to_string((vf+1)) + "obs_sample" + patch::to_string(spl) + "_Z.dat";
+              outNameZ = "./output/domain" + patch::to_string(sd) + "_" + patch::to_string((vf+1)) + "obs_sample" + patch::to_string(spl) + "_Z" + outExt;
             }
             writeSolutionTP ( Meshes[sd], Solutions[ idx2( sd, 0, Meshes[sd].DIM ) ], outNameX );
             writeSolutionTP ( Meshes[sd], Solutions[ idx2( sd, 1, Meshes[sd].DIM ) ], outNameY );

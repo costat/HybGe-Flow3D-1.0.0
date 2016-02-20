@@ -22,6 +22,8 @@ main( int argc, const char* argv[] )
   int MY = 4;
   int MZ = 4;
 
+  int output = 1;
+
   ldi1 = ny;
   ldi2 = nz;
 
@@ -56,7 +58,7 @@ main( int argc, const char* argv[] )
 
   hgfDrive( gridin, size1, ldi1, ldi2, nx, ny, nz, \
                  length, width, height, direction, visc, \
-                 nThreads, prec, numSims, simNum, 1e-12, 1e-12, 5000, MX, MY, MZ, solver, relax );
+                 nThreads, prec, numSims, simNum, 1e-12, 1e-12, 5000, MX, MY, MZ, solver, relax, output );
 
   delete[] gridin;
 

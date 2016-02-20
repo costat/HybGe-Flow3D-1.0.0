@@ -64,7 +64,7 @@ StokesSolveDirect( const FluidMesh& Mesh, double visc, int direction, \
   ls.Init(tolAbs, tolRel, 1e8, maxIt);
   ls.SetOperator(mat);
   ls.Verbose(2);
-  ls.SetBasisSize(100);
+  ls.SetBasisSize(1000);
 
   // preconditioning
   ILU<LocalMatrix<double>, LocalVector<double>, double> p;
