@@ -1,6 +1,7 @@
 #include <vector>
 #include <omp.h>
 #include <math.h>
+#include <iostream>
 
 // hgf includes
 #include "hgfMeshCu.cuh"
@@ -252,7 +253,6 @@ StokesSolveRich( const FluidMesh& Mesh, double visc, int direction, \
     // magma solves
 
     // update the pressure vector and compute residual
-    updatePressureRich( Mesh, Solution, solU, solV, solW, residual, relax );
 
     std::cout << "\nRichardson Iteration " << richIt << " \t Residual: " << residual << "\n";
 

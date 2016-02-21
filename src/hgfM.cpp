@@ -13,7 +13,7 @@
 #include "hgfIB.hpp"
 #include "hgfStokesM.hpp"
 #include "hgfPoreNetworkM.hpp"
-#include "hgfPP.hpp"
+#include "hgfPPM.hpp"
 
 /* Define a 2d -> 1d array index,
    uses row major indexing */
