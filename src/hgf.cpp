@@ -93,7 +93,8 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
       stokes_duration = ( omp_get_wtime() - stokes_start );
 
       // Write solution to file
-      writeSolutionTP ( Mesh, sol, outName );
+      if (output) writeSolutionPV ( Mesh, sol, outName );
+      else writeSolutionTP( Mesh, sol, outName );
       double K;
       computeKConstantDrive ( Mesh, sol, K, direction, 1 );
 
@@ -154,9 +155,16 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
       stokes_duration = ( omp_get_wtime() - stokes_start );
 
       // Write solution to file
-      writeSolutionTP ( Mesh, solX, outNameX );
-      writeSolutionTP ( Mesh, solY, outNameY );
-      writeSolutionTP ( Mesh, solZ, outNameZ );
+      if (output) {
+        writeSolutionPV ( Mesh, solX, outNameX );
+        writeSolutionPV ( Mesh, solY, outNameY );
+        writeSolutionPV ( Mesh, solZ, outNameZ );
+      }
+      else {
+        writeSolutionTP ( Mesh, solX, outNameX );
+        writeSolutionTP ( Mesh, solY, outNameY );
+        writeSolutionTP ( Mesh, solZ, outNameZ );
+      }
       computeKTensorL ( Mesh, solX, solY, solZ );
 
       std::cout << "Mesh constructed in " << mesh_duration << "seconds\n";
@@ -374,10 +382,19 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
             if (Meshes[sd].DIM == 3) {
               outNameZ = "./output/domain" + patch::to_string(sd) + "_" + patch::to_string((vf+1)) + "obs_sample" + patch::to_string(spl) + "_Z" + outExt;
             }
-            writeSolutionTP ( Meshes[sd], Solutions[ idx2( sd, 0, Meshes[sd].DIM ) ], outNameX );
-            writeSolutionTP ( Meshes[sd], Solutions[ idx2( sd, 1, Meshes[sd].DIM ) ], outNameY );
-            if (Meshes[sd].DIM == 3) {
-              writeSolutionTP ( Meshes[sd], Solutions[ idx2( sd, 2, Meshes[sd].DIM ) ], outNameZ );
+            if (output) {
+              writeSolutionPV ( Meshes[sd], Solutions[ idx2( sd, 0, Meshes[sd].DIM ) ], outNameX );
+              writeSolutionPV ( Meshes[sd], Solutions[ idx2( sd, 1, Meshes[sd].DIM ) ], outNameY );
+              if (Meshes[sd].DIM == 3) {
+                writeSolutionPV ( Meshes[sd], Solutions[ idx2( sd, 2, Meshes[sd].DIM ) ], outNameZ );
+              }
+            }
+            else {
+              writeSolutionTP ( Meshes[sd], Solutions[ idx2( sd, 0, Meshes[sd].DIM ) ], outNameX );
+              writeSolutionTP ( Meshes[sd], Solutions[ idx2( sd, 1, Meshes[sd].DIM ) ], outNameY );
+              if (Meshes[sd].DIM == 3) {
+                writeSolutionTP ( Meshes[sd], Solutions[ idx2( sd, 2, Meshes[sd].DIM ) ], outNameZ );
+              }
             }
             // compute K
 
