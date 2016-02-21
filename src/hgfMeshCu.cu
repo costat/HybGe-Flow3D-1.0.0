@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <cuda_runtime.h>
 
-#include "hgfMeshCu.hpp"
+#include "hgfMeshCu.cuh"
 #include "hgf.hpp"
 #include "hgfArrays.hpp"
 #include "hgfBC.hpp"

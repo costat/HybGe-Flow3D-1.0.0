@@ -1,5 +1,6 @@
 #include <vector>
 #include <iostream>
+#include <fstream>
 #include <cstdlib>
 #include <cstring>
 #include <math.h>
@@ -1047,8 +1048,8 @@ void
 Save( std::string& outName )
 {
 /*
-  ofstream outFile;
-  outFile.open( outName.c_str(), ios::binary | ios::out );
+  std::ofstream outFile;
+  outFile.open( outName.c_str() );
 
   outFile.close();
 */
@@ -1056,8 +1057,9 @@ Save( std::string& outName )
 void
 Load( std::string& inName )
 {
-/*  ifstream inFile;
-  inFile.open( inName.c_str(), ios::binary | ios::in );
+/*
+  std::ifstream inFile;
+  inFile.open( inName.c_str() );
 
   inFile.close();
 */

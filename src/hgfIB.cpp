@@ -1,8 +1,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <algorithm>
-
-#include <paralution.hpp>
+#include <math.h>
 
 // hgf includes
 #ifndef CUDA_BUILD
