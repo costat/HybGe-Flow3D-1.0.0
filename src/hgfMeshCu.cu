@@ -1162,7 +1162,7 @@ void FluidMesh::TotalDOF( void )
       dofTotal =  DOF[0] + DOF[1] + DOF[2];
       break;
     case 3 :
-      dofTotal = DOF[1] + DOF[1] + DOF[2] + DOF[3];
+      dofTotal = DOF[0] + DOF[1] + DOF[2] + DOF[3];
       break;
   }
 }

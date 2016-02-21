@@ -2,6 +2,9 @@
 #include <omp.h>
 #include <math.h>
 #include <iostream>
+#include <magma.h>
+#include <magmasparse.h>
+#include <stdio.h>
 
 // hgf includes
 #include "hgfMeshCu.cuh"
@@ -21,7 +24,7 @@ StokesSolveDirect( const FluidMesh& Mesh, double visc, int direction, \
 {
 
   // delcarations
-  std::vector<int> matIs, matJs;
+  std::vector<int> matIs, matJs, rowPTR;;
   std::vector<double> matVals, force;
   matIs.reserve(Mesh.maxNNZ);
   matJs.reserve(Mesh.maxNNZ);
@@ -37,7 +40,39 @@ StokesSolveDirect( const FluidMesh& Mesh, double visc, int direction, \
   // immersed boundary
   immersedBoundary( Mesh, matIs, matJs, matVals );
 
-  // magma solve
+  // build the rowPTR vector for CSR rep of the array. first we sort the COO vecs
+  sortCOO( matIs, matJs, matVals );
+  buildCSR( matIs, matJs, matVals, rowPTR );
+
+  // magma declarations
+  magma_int_t info = 0;
+  magma_init();
+  magma_dopts opts;
+  magma_queue_t queue = NULL;
+  magma_queue_create( &queue );
+
+  magma_d_matrix A={Magma_CSR}, d_A={Magma_CSR};
+  magma_d_vector b, d_b, d_x;
+
+  // Set A and b from CSR vectors
+  magma_dcsrset( Mesh.dofTotal, Mesh.dofTotal, &rowPTR[0], &matJs[0], &matVals[0], &A, queue );
+  magma_dvset( Mesh.dofTotal, 1, &force[0], &b, queue );
+
+  // Initialize solution to 0
+  magma_dvinit( &d_x, Magma_DEV, A.num_cols, 1, 0, queue );
+  printf( "\n%% matrix info: %d-by-%d with %d nonzeros\n\n",
+            (int) A.num_rows,(int) A.num_cols,(int) A.nnz );
+
+  // solve the system
+
+  // bring the solution back to host
+
+  // magma frees
+  magma_dmfree( &d_A, queue );
+  magma_dmfree( &d_b, queue );
+  magma_dmfree( &d_x, queue );
+  magma_queue_destroy( queue );
+  magma_finalize();
 
 }
 // initializes the pressure solution to a linear. for use in decoupled iterative schemes, e.g. the urzawa schemes
