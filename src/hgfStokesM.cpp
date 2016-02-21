@@ -58,14 +58,21 @@ StokesSolveDirect( const FluidMesh& Mesh, double visc, int direction, \
   magma_dcsrset( Mesh.dofTotal, Mesh.dofTotal, &rowPTR[0], &matJs[0], &matVals[0], &A, queue );
   magma_dvset( Mesh.dofTotal, 1, &force[0], &b, queue );
 
-  // Initialize solution to 0
-  magma_dvinit( &d_x, Magma_DEV, A.num_cols, 1, 0, queue );
   printf( "\n%% matrix info: %d-by-%d with %d nonzeros\n\n",
             (int) A.num_rows,(int) A.num_cols,(int) A.nnz );
 
+  // device arrays
+  magma_dmtransfer( A, &d_A, Magma_CPU, Magma_DEV, queue );
+  magma_dmtransfer( b, &d_b, Magma_CPU, Magma_DEV, queue );
+  magma_dvinit( &d_x, Magma_DEV, A.num_cols, 1, 0, queue );
+
   // solve the system
 
-  // bring the solution back to host
+  int mout,nout;
+  double * valout;
+  // bring the solution back to host, fill std::vector solution
+  magma_dvget( d_x, &mout, &nout, &valout, queue );
+  std::copy( valout, valout + mout, Solution.begin() );
 
   // magma frees
   magma_dmfree( &d_A, queue );
