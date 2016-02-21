@@ -3,7 +3,17 @@
 #include <math.h>
 #include <paralution.hpp>
 
+// hgf includes
+#ifndef CUDA_BUILD
+# define CUDA_BUILD 0
+#endif
+
+#if CUDA_BUILD
+#include "hgfMeshCu.cuh"
+#else
 #include "hgfMesh.hpp"
+#endif
+
 #include "hgfArrays.hpp"
 #include "hgfBC.hpp"
 #include "hgfPoreNetwork.hpp"

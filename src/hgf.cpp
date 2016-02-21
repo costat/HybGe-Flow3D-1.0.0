@@ -7,11 +7,20 @@
 #include <iterator>
 #include <string>
 #include <sstream>
-
 #include <paralution.hpp>
 
-#include "hgf.hpp"
+// hgf includes
+#ifndef CUDA_BUILD
+# define CUDA_BUILD 0
+#endif
+
+#if CUDA_BUILD
+#include "hgfMeshCu.cuh"
+#else
 #include "hgfMesh.hpp"
+#endif
+
+#include "hgf.hpp"
 #include "hgfIB.hpp"
 #include "hgfStokes.hpp"
 #include "hgfPoreNetwork.hpp"

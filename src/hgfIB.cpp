@@ -4,7 +4,17 @@
 
 #include <paralution.hpp>
 
+// hgf includes
+#ifndef CUDA_BUILD
+# define CUDA_BUILD 0
+#endif
+
+#if CUDA_BUILD
+#include "hgfMeshCu.cuh"
+#else
 #include "hgfMesh.hpp"
+#endif
+
 #include "hgfIB.hpp"
 
 /* Define a 2d -> 1d array index,

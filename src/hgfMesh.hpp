@@ -46,6 +46,8 @@ class FluidMesh
     void BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
                     int nx, int ny, int nz, \
                     double length, double width, double height );
+    void Save( std::string& outName );
+    void Load( std::string& inName );
   private:
     int isNear2d( std::vector<double>& Vector1, std::vector<double>& Vector2, \
                   double dx, double dy, double dz, int nNodes );
