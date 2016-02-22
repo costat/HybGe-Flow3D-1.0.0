@@ -4,6 +4,7 @@
 #include <iostream>
 #include <magma.h>
 #include <magmasparse.h>
+#include <magma_lapack.h>
 #include <stdio.h>
 
 // hgf includes
@@ -67,20 +68,23 @@ StokesSolveDirect( const FluidMesh& Mesh, double visc, int direction, \
   magma_dvinit( &d_x, Magma_DEV, A.num_cols, 1, 0, queue );
 
   // solve the system
+  magma_dsolverinfo_init( &opts.solver_par, &opts.precond_par, queue );
+  magma_dcumilusetup( d_A, &opts.precond_par, queue );
+  magma_dfgmres( d_A, d_b, &d_x, &opts.solver_par, &opts.precond_par, queue );
+  magma_dsolverinfo( &opts.solver_par, &opts.precond_par, queue );
 
-  int mout,nout;
-  double * valout;
+  magma_int_t mout,nout;
+  double * valout = Solution.data();
   // bring the solution back to host, fill std::vector solution
   magma_dvget( d_x, &mout, &nout, &valout, queue );
-  std::copy( valout, valout + mout, Solution.begin() );
 
   // magma frees
+  magma_dsolverinfo_free( &opts.solver_par, &opts.precond_par, queue );
   magma_dmfree( &d_A, queue );
   magma_dmfree( &d_b, queue );
   magma_dmfree( &d_x, queue );
   magma_queue_destroy( queue );
   magma_finalize();
-
 }
 // initializes the pressure solution to a linear. for use in decoupled iterative schemes, e.g. the urzawa schemes
 void
