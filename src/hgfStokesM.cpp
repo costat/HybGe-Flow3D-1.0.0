@@ -69,8 +69,8 @@ StokesSolveDirect( const FluidMesh& Mesh, double visc, int direction, \
 
   // solve the system
   magma_dsolverinfo_init( &opts.solver_par, &opts.precond_par, queue );
-  magma_dcumilusetup( d_A, &opts.precond_par, queue );
-  magma_dfgmres( d_A, d_b, &d_x, &opts.solver_par, &opts.precond_par, queue );
+  opts.solver_par.solver = Magma_GMRES;
+  magma_d_solver( d_A, d_b, &d_x, &opts, queue );
   magma_dsolverinfo( &opts.solver_par, &opts.precond_par, queue );
 
   magma_int_t mout,nout;
