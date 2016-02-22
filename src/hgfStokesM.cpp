@@ -62,27 +62,40 @@ StokesSolveDirect( const FluidMesh& Mesh, double visc, int direction, \
   printf( "\n%% matrix info: %d-by-%d with %d nonzeros\n\n",
             (int) A.num_rows,(int) A.num_cols,(int) A.nnz );
 
-  // device arrays
-  magma_dmtransfer( A, &d_A, Magma_CPU, Magma_DEV, queue );
-  magma_dmtransfer( b, &d_b, Magma_CPU, Magma_DEV, queue );
-  magma_dvinit( &d_x, Magma_DEV, A.num_cols, 1, 0, queue );
-
-  // solve the system
+  // magma setup
   magma_dsolverinfo_init( &opts.solver_par, &opts.precond_par, queue );
   opts.solver_par.solver = Magma_GMRES;
+  opts.solver_par.maxiter = 10000;
+  opts.solver_par.rtol = 1e-8;
+  opts.solver_par.atol = 1e-8;
+  opts.solver_par.restart = 30;
+  opts.precond_par.solver = Magma_NONE;
+  opts.blocksize = 32;
+  opts.alignment = 1;
+  A.blocksize = opts.blocksize;
+  A.alignment = opts.alignment;
+  magma_d_precondsetup( A, b, &opts.solver_par, &opts.precond_par, queue );
+  magma_dmtransfer( A, &d_A, Magma_CPU, Magma_DEV, queue );
+  magma_dmtransfer( b, &d_b, Magma_CPU, Magma_DEV, queue );
+  magma_dvinit( &d_x, Magma_DEV, Solution.size(), 1, Solution[0], queue );
+
+  // solve the system
   magma_d_solver( d_A, d_b, &d_x, &opts, queue );
   magma_dsolverinfo( &opts.solver_par, &opts.precond_par, queue );
 
   magma_int_t mout,nout;
-  double * valout = Solution.data();
+  double * valout;
   // bring the solution back to host, fill std::vector solution
   magma_dvget( d_x, &mout, &nout, &valout, queue );
+  for (int ii = 0; ii < Solution.size(); ii++) {
+    Solution[ii] = valout[ii];
+  }
 
   // magma frees
   magma_dsolverinfo_free( &opts.solver_par, &opts.precond_par, queue );
-  magma_dmfree( &d_A, queue );
-  magma_dmfree( &d_b, queue );
-  magma_dmfree( &d_x, queue );
+  magma_d_mfree( &d_A, queue );
+  magma_d_vfree( &d_b, queue );
+  magma_d_vfree( &d_x, queue );
   magma_queue_destroy( queue );
   magma_finalize();
 }
