@@ -1,8 +1,16 @@
+#include <vector>
 #include <boost/filesystem.hpp>
+#include "hgfAuxTools.hpp"
 
-using namespace boost::filesystem;
+namespace bfs = boost::filesystem;
 
 bool
-find_file( const path& ProblemPath, \
+find_file( const bfs::path& ProblemPath, \
            const std::string& fileName, \
-           path& MeshPath );
+           bfs::path& MeshPath );
+
+void
+geoFromFile( ProbParam& Par, const bfs::path& Geo );
+
+void
+problemParameters( ProbParam& Par, const bfs::path& ProblemPath);

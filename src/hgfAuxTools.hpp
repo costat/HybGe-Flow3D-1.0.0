@@ -2,6 +2,8 @@
 #ifndef HGFAUXTOOLS_H
 #define HGFAUXTOOLS_H
 
+#include <vector>
+
 struct arrayCOO
 {
   int I;
@@ -56,6 +58,14 @@ struct byYbyXbyZ
     return ( one.yy < two.yy || (one.yy == two.yy && one.xx < two.xx) \
            || (one.yy == two.yy && one.xx == two.xx && one.zz < two.zz) );
   }
+};
+
+struct ProbParam
+{
+  int nx, ny, nz, nThreads, prec, direction, solver, output;
+  double length, width, height, visc, relax;
+  bool isMesh;
+  std::vector<unsigned long> gridin;
 };
 
 #endif
