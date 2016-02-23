@@ -5,7 +5,7 @@
 #include <string>
 
 // hgf includes
-#include "hgfMeshCu.cuh"
+#include "hgfMeshCu.hpp"
 #include "hgfPP.hpp"
 
 #define idx2(i, j, ldi) ((i * ldi) + j)

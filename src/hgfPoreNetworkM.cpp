@@ -3,7 +3,7 @@
 #include <math.h>
 
 // hgf includes
-#include "hgfMeshCu.cuh"
+#include "hgfMeshCu.hpp"
 #include "hgfArrays.hpp"
 #include "hgfBC.hpp"
 #include "hgfPoreNetworkM.hpp"

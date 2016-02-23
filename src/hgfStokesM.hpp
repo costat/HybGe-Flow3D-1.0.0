@@ -5,7 +5,7 @@
 #include <vector>
 
 // hgf includes
-#include "hgfMeshCu.cuh"
+#include "hgfMeshCu.hpp"
 
 void
 StokesSolveDirect( const FluidMesh& Mesh, double visc, int direction, \

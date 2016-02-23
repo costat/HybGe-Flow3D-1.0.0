@@ -8,7 +8,7 @@
 #include <cuda_runtime.h>
 #include <fstream>
 
-#include "hgfMeshCu.cuh"
+#include "hgfMeshCu.hpp"
 #include "hgf.hpp"
 #include "hgfArrays.hpp"
 #include "hgfBC.hpp"

@@ -5,7 +5,7 @@
 #include <vector>
 
 // hgf includes
-#include "hgfMeshCu.cuh"
+#include "hgfMeshCu.hpp"
 
 void
 PoreNetworkSolveDirect( const PoreNetwork& pn, const std::vector<double>& Ks, \

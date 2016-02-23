@@ -10,7 +10,7 @@
 #endif
 
 #if CUDA_BUILD
-#include "hgfMeshCu.cuh"
+#include "hgfMeshCu.hpp"
 #else
 #include "hgfMesh.hpp"
 #endif

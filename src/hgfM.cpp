@@ -9,7 +9,7 @@
 #include <sstream>
 
 #include "hgfM.hpp"
-#include "hgfMeshCu.cuh"
+#include "hgfMeshCu.hpp"
 #include "hgfIB.hpp"
 #include "hgfStokesM.hpp"
 #include "hgfPoreNetworkM.hpp"

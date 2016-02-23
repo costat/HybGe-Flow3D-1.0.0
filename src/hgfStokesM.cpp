@@ -8,7 +8,7 @@
 #include <stdio.h>
 
 // hgf includes
-#include "hgfMeshCu.cuh"
+#include "hgfMeshCu.hpp"
 #include "hgfArrays.hpp"
 #include "hgfBC.hpp"
 #include "hgfIB.hpp"
