@@ -340,22 +340,20 @@ void innerFaceConnectivity( \
 
 }
 // Function to construct the mesh from voxel array input
-void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
-                                  int nx, int ny, int nz, \
-                                  double length, double width, double height )
+void FluidMesh::BuildUniformMesh( const ProbParam& Par )
 {
   int checkVert;
   int maxPNodes;
   int numPCells = 0;
   int numVoid = 0;
   xLim[0] = 0;
-  xLim[1] = length;
+  xLim[1] = Par.length;
   yLim[0] = 0;
-  yLim[1] = width;
+  yLim[1] = Par.width;
   zLim[0] = 0;
-  zLim[1] = height;
+  zLim[1] = Par.height;
 
-  switch ( nz ) {
+  switch ( Par.nz ) {
     case 0 : // 2D problem
     {
       // Constants determined by dimension alone
@@ -366,42 +364,42 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
       FaceConnectivityLDI = 4;
       PressureCellVelocityNeighborLDI = 2;
       VelocityCellPressureNeighborLDI = 2;
-      NX = nx;
-      NY = ny;
-      NZ = nz;
+      NX = Par.nx;
+      NY = Par.ny;
+      NZ = Par.nz;
 
       // Max pressure nodes
       std::vector<double> nodeHold;
       nodeHold.resize(2);
-      for (int yi = 0; yi < ny; yi++) {
-        for (int xi = 0; xi < nx; xi++) {
-          if (gridin[ idx2(xi, yi, ldi1) ] != 1) {
+      for (int yi = 0; yi < Par.ny; yi++) {
+        for (int xi = 0; xi < Par.nx; xi++) {
+          if (Par.gridin[ idx2(yi, xi, Par.nx) ] != 1) {
             numPCells++;
-            if (gridin[ idx2(xi, yi, ldi1) ] == 0) numVoid++;
+            if (Par.gridin[ idx2(yi, xi, Par.nx) ] == 0) numVoid++;
           }
         }
       }
       maxPNodes = numPCells * 4;
       int nNodes = 0;
-      double dx = length / nx;
-      double dy = width / ny;
+      double dx = Par.length / Par.nx;
+      double dy = Par.width / Par.ny;
       double dz = 0;
       int countCell = -1;
       mv.resize( (numPCells * 4) );
       double cellVert [ 8 ];
-      porosity = numVoid/(double)(nx * ny);
+      porosity = numVoid/(double)(Par.nx * Par.ny);
 
       // First we buil FullGrid, ImmersedBoundary, and Nodes.
-      FullGrid.reserve((nx * ny));
+      FullGrid.reserve((Par.nx * Par.ny));
       ImmersedBoundary.reserve(numPCells);
       Nodes.reserve((maxPNodes * 2));
 
-      for (int yi = 0; yi < ny; yi++) {
-        for (int xi = 0; xi < nx; xi++) {
-          FullGrid.push_back(gridin[ idx2(xi, yi, ldi1) ]);
-          if (gridin[ idx2( xi, yi, ldi1 ) ] != 1) {
+      for (int yi = 0; yi < Par.ny; yi++) {
+        for (int xi = 0; xi < Par.nx; xi++) {
+          FullGrid.push_back(Par.gridin[ idx2(yi, xi, Par.nx) ]);
+          if (Par.gridin[ idx2( yi, xi, Par.nx ) ] != 1) {
             countCell++;
-            ImmersedBoundary.push_back(gridin[ idx2(xi, yi, ldi1) ]);
+            ImmersedBoundary.push_back(Par.gridin[ idx2(yi, xi, Par.nx) ]);
             cellVert[0] = (xi + 1) * dx - dx;
             cellVert[1] = (yi + 1) * dy - dy;
             cellVert[2] = (xi + 1) * dx;
@@ -472,7 +470,7 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
           nodeHoldU.resize(2);
           int countUCells = 0;
           double uStep = 0.5*dx;
-          int maxUCells = nx * ny + ny;
+          int maxUCells = Par.nx * Par.ny + Par.ny;
           UCellCenters.reserve((maxUCells * 2));
           PressureCellUNeighbor.resize((numPCells * 2));
           UCellPressureNeighbor.resize((maxUCells * 2));
@@ -563,7 +561,7 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
           nodeHoldV.resize(2);
           int countVCells = 0;
           double vStep = 0.5*dy;
-          int maxVCells = nx * ny + nx;
+          int maxVCells = Par.nx * Par.ny + Par.nx;
           int yl;
           VCellCenters.reserve((maxVCells * 2));
           PressureCellVNeighbor.resize((numPCells * 2));
@@ -666,12 +664,12 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
       // Max pressure nodes
       std::vector<double> nodeHold;
       nodeHold.resize(3);
-      for (int yi = 0; yi < ny; yi++) {
-        for (int xi = 0; xi < nx; xi++) {
-          for (int zi = 0; zi < nz; zi++) {
-            if (gridin[ idx3(xi, yi, zi, ldi1, ldi2) ] != 1) {
+      for (int zi = 0; zi < Par.nz; zi++) {
+        for (int yi = 0; yi < Par.ny; yi++) {
+          for (int xi = 0; xi < Par.nx; xi++) {
+            if (Par.gridin[ idx3(zi, yi, xi, Par.ny, Par.nx) ] != 1) {
               numPCells++;
-              if (gridin[ idx2(xi, yi, ldi1) ] == 0) numVoid++;
+              if (Par.gridin[ idx3(zi, yi, xi, Par.ny, Par.nx ) ] == 0) numVoid++;
             }
           }
         }
@@ -679,25 +677,25 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
       maxPNodes = numPCells * 8;
 
       int nNodes = 0;
-      double dx = length / nx;
-      double dy = width / ny;
-      double dz = height / nz;
+      double dx = Par.length / Par.nx;
+      double dy = Par.width / Par.ny;
+      double dz = Par.height / Par.nz;
       int countCell = -1;
       mv.resize( (numPCells * 8) );
       double cellVert [ 24 ];
-      porosity = numVoid /(double)(nx * ny * nz);
+      porosity = numVoid /(double)(Par.nx * Par.ny * Par.nz);
 
       // First we buil FullGrid, ImmersedBoundary, and Nodes.
-      FullGrid.reserve((nx * ny * nz));
+      FullGrid.reserve((Par.nx * Par.ny * Par.nz));
       ImmersedBoundary.reserve(numPCells);
       Nodes.reserve((maxPNodes * 3));
-      for (int zi = 0; zi < nz; zi++) {
-        for (int yi = 0; yi < ny; yi++) {
-          for (int xi = 0; xi < nx; xi++) {
-            FullGrid.push_back(gridin[ idx3(xi, yi, zi, ldi1, ldi2) ]);
-            if (gridin[ idx3( xi, yi, zi, ldi1, ldi2 ) ] != 1) {
+      for (int zi = 0; zi < Par.nz; zi++) {
+        for (int yi = 0; yi < Par.ny; yi++) {
+          for (int xi = 0; xi < Par.nx; xi++) {
+            FullGrid.push_back(Par.gridin[ idx3(zi, yi, xi, Par.ny, Par.nx) ]);
+            if (Par.gridin[ idx3( zi, yi, xi, Par.ny, Par.nx ) ] != 1) {
               countCell++;
-              ImmersedBoundary.push_back(gridin[ idx3(xi, yi, zi, ldi1, ldi2) ]);
+              ImmersedBoundary.push_back(Par.gridin[ idx3(zi, yi, xi, Par.ny, Par.nx) ]);
 
               cellVert[0] = (xi + 1) * dx - dx;
               cellVert[1] = (yi + 1) * dy - dy;
@@ -799,7 +797,7 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
           nodeHoldU.resize(3);
           int countUCells = 0;
           double uStep = 0.5*dx;
-          int maxUCells = nx * ny * nz + ny * nz;
+          int maxUCells = Par.nx * Par.ny * Par.nz + Par.ny * Par.nz;
           UCellCenters.reserve((maxUCells * 3));
           PressureCellUNeighbor.resize((numPCells * 2));
           UCellPressureNeighbor.resize((maxUCells * 2));
@@ -898,7 +896,7 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
           nodeHoldV.resize(3);
           int countVCells = 0;
           double vStep = 0.5*dy;
-          int maxVCells = nx * ny * nz + nx * nz;
+          int maxVCells = Par.nx * Par.ny * Par.nz + Par.nx * Par.nz;
           int yl;
           VCellCenters.reserve((maxVCells * 3));
           PressureCellVNeighbor.resize((numPCells * 2));
@@ -998,7 +996,7 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
           nodeHoldW.resize(3);
           int countWCells = 0;
           double wStep = 0.5*dz;
-          int maxWCells = nx * ny * nz + nx * ny;
+          int maxWCells = Par.nx * Par.ny * Par.nz + Par.nx * Par.ny;
           int zl;
           WCellCenters.reserve((maxWCells * 3));
           PressureCellWNeighbor.resize((numPCells * 2));

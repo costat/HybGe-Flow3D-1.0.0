@@ -19,9 +19,7 @@
 
 // solves the stokes system directly as a single linear system
 void
-StokesSolveDirect( const FluidMesh& Mesh, double visc, int direction, \
-                   std::vector<double>& Solution, double tolAbs, double tolRel, \
-                   int maxIt, int nThreads, int prec )
+StokesSolveDirect( const FluidMesh& Mesh, std::vector<double>& Solution, const ProbParam& Par )
 {
 
   // delcarations
@@ -33,10 +31,10 @@ StokesSolveDirect( const FluidMesh& Mesh, double visc, int direction, \
   force.resize(Mesh.dofTotal);
 
   // interior cells
-  StokesArray( Mesh, visc, matIs, matJs, matVals );
+  StokesArray( Mesh, Par.visc, matIs, matJs, matVals );
 
   // boundary conditions
-  AxisFlowDrive( Mesh, matIs, matJs, matVals, force, visc, direction );
+  AxisFlowDrive( Mesh, matIs, matJs, matVals, force, Par.visc, Par.direction );
 
   // immersed boundary
   immersedBoundary( Mesh, matIs, matJs, matVals );

@@ -72,14 +72,7 @@ hgfDrive( const bfs::path& ProblemPath, const bfs::path& MeshPath, ProbParam& Pa
 
       // Build mesh object
       FluidMesh Mesh;
-      /*if (!Par.isMesh) {
-        Mesh.BuildUniformMesh( Par.gridin.data(), Par.ny, Par.nz, Par.nx, Par.ny, Par.nz, Par.length, Par.width, Par.height );
-        SaveFluidMesh( Mesh, MeshPath.string() );
-      }
-      else {
-        LoadFluidMesh( Mesh, MeshPath.string() );
-      } */
-      Mesh.BuildUniformMesh( Par.gridin.data(), Par.ny, Par.nz, Par.nx, Par.ny, Par.nz, Par.length, Par.width, Par.height );
+      Mesh.BuildUniformMesh( Par );
 
       // Mesh Timer
       mesh_duration = ( omp_get_wtime() - start );
@@ -88,7 +81,7 @@ hgfDrive( const bfs::path& ProblemPath, const bfs::path& MeshPath, ProbParam& Pa
       // call Stokes' solver
       std::vector< double > sol;
       sol.resize( Mesh.dofTotal );
-      StokesSolveDirect( Mesh, Par.visc, Par.direction, sol, Par.tolAbs, Par.tolRel, Par.maxIt, Par.nThreads, Par.prec );
+      StokesSolveDirect( Mesh, sol, Par );
 
       // Linear solve timer
       stokes_duration = ( omp_get_wtime() - stokes_start );
@@ -103,7 +96,7 @@ hgfDrive( const bfs::path& ProblemPath, const bfs::path& MeshPath, ProbParam& Pa
       std::cout << "Stokes problems solved in " << stokes_duration << "seconds\n";
       // Total timers
       total_duration = ( omp_get_wtime() - start );
-      std::cout << "Total time: " << total_duration << "seconds\n";
+      std::cout << "Total time: " << total_duration << "seconds\n\n";
       break;
     }
 /*
