@@ -50,7 +50,6 @@ geoFromFile( ProbParam& Par, const bfs::path& Geo )
   {
     std::getline(ifs, line);
   }
-  std::cout << line << "\n";
   std::istringstream ix(line);
   ix >> str >> Par.nx;
   // grab ny
@@ -58,7 +57,6 @@ geoFromFile( ProbParam& Par, const bfs::path& Geo )
   {
     std::getline(ifs, line);
   }
-  std::cout << line << "\n";
   std::istringstream iy(line);
   iy >> str >> Par.ny;
   // grab nz
@@ -66,7 +64,6 @@ geoFromFile( ProbParam& Par, const bfs::path& Geo )
   {
     std::getline(ifs, line);
   }
-  std::cout << line << "\n";
   std::istringstream iz(line);
   iz >> str >> Par.nz;
 
@@ -110,5 +107,8 @@ geoFromFile( ProbParam& Par, const bfs::path& Geo )
 void
 problemParameters( ProbParam& Par, const bfs::path& ProblemPath )
 {
+  std::string line;
+  std::string str;
+  bfs::ifstream ifs( ProblemPath / "Paramters.dat" );
 
 }

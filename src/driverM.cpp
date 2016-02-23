@@ -16,19 +16,38 @@ main( int argc, const char* argv[] )
   ProbParam Par;
   // path to problem directory from input
   bfs::path ProblemPath( argv[1] );
-  // if it exists, path to Mesh.dat within ProblemPath. if it does not exist: ProblemPath/Mesh.dat.
-  bfs::path MeshPath;
 
   // check if mesh already exists in the problem directory
   std::string meshSaved = "Mesh.dat";
-  bool isMesh = find_file( ProblemPath, meshSaved, MeshPath );
+  bfs::path MeshPath;
+  Par.isMesh = find_file( ProblemPath, meshSaved, MeshPath );
   // if the mesh wasn't built, we set the path for the mesh to ProblemPath/Mesh.dat
-  if (!isMesh) MeshPath = ProblemPath / "Mesh.dat";
+  if (!Par.isMesh) {
+    std::cout << "\nMesh file not found. Mesh will be constructed from Geometry file.\n";
+    MeshPath = ProblemPath / "Mesh.dat";
+  }
+  else std::cout << "\nMesh file found. For full domain simulations mesh will be loaded from file.\n";
 
-  // whether or not the full mesh was built, we load the data from the geometry file
-  bfs::path Geo( ProblemPath / "Geometry.dat" );
+  // find geometry file, exit if not present
+  std::string geom = "Geometry.dat";
+  bfs::path Geo;
+  bool isGeo = find_file( ProblemPath, geom, Geo);
+  if (!isGeo) {
+    std::cout << "\nGeometry file not present in problem folder. Exiting\n";
+    exit(0);
+  }
+  // grab geometry data
   geoFromFile( Par, Geo );
-  // load problem parameters
+
+  // find parameter file, exit if not present
+  std::string param = "Parameters.dat";
+  bfs::path Parameters;
+  bool isParam = find_file( ProblemPath, param, Parameters );
+  if (!isParam) {
+    std::cout << "\nParameter file not present in problem folder. Exiting\n";
+    exit(0);
+  }
+  // grab parameter data
   problemParameters( Par, ProblemPath );
 
   // send problem to hgf
