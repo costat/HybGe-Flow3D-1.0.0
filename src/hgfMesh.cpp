@@ -1044,26 +1044,6 @@ void FluidMesh::BuildUniformMesh( unsigned long *gridin, int ldi1, int ldi2, \
   TotalDOF();
   MaxNonZero();
 }
-void
-Save( std::string& outName )
-{
-/*
-  std::ofstream outFile;
-  outFile.open( outName.c_str() );
-
-  outFile.close();
-*/
-}
-void
-Load( std::string& inName )
-{
-/*
-  std::ifstream inFile;
-  inFile.open( inName.c_str() );
-
-  inFile.close();
-*/
-}
 // Function to find duplicate node in 2d
 int FluidMesh::isNear2d( std::vector<double>& Vector1, std::vector<double>& Vector2, \
                          double dx, double dy, double dz, int nNodes )
@@ -1257,4 +1237,10 @@ void PoreNetwork::UniformPN( double length, double width, double height, int nx,
       BoundaryPores.push_back( pore );
     }
   }
+}
+void SaveMesh( const FluidMesh& Mesh, const std::string& outName )
+{
+/*  std::ofstream ofs(outName.c_str());
+  boost::archive::text_oarchive oa(ofs);
+  oa << Mesh;*/
 }

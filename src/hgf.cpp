@@ -88,6 +88,9 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
       // Build mesh object
       FluidMesh Mesh;
       Mesh.BuildUniformMesh( gridin, ldi1, ldi2, nx, ny, nz, length, width, height );
+      // Save the mesh
+      std::string outGeo = "./output/mesh";
+
       // Mesh Timer
       mesh_duration = ( omp_get_wtime() - start );
       stokes_start = omp_get_wtime();
