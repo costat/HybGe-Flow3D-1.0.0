@@ -37,6 +37,9 @@ IF(CUDA_FOUND)
   INCLUDE_DIRECTORIES(${CUDA_INCLUDE_DIRS})
 ENDIF()
 
+FIND_PACKAGE(Boost REQUIRED)
+INCLUDE_DIRECTORIES(${BOOST_INCLUDE_DIRS})
+
 ADD_LIBRARY(hgflib STATIC ${LIBRARY_SRCS})
 
 IF(HGF_BUILD_PYTHON_HOOKS)
@@ -61,6 +64,7 @@ IF(HGF_BUILD_PYTHON_HOOKS)
                               ${CUDA_CUBLAS_LIBRARIES}
                               ${CUDA_cusparse_LIBRARY}
                               ${PYTHON_LIBRARIES}
+                              ${BOOST_LIBRARIES}
                               hgflib)
     ELSE()
       SWIG_LINK_LIBRARIES(hgf ${PARALUTION_LIBRARY}
@@ -68,16 +72,19 @@ IF(HGF_BUILD_PYTHON_HOOKS)
                               ${CUDA_CUBLAS_LIBRARIES}
                               ${CUDA_cusparse_LIBRARY}
                               ${PYTHON_LIBRARIES}
+                              ${BOOST_LIBRARIES}
                               hgflib)
     ENDIF()
   ELSEIF(OPENCL_FOUND)
     SWIG_LINK_LIBRARIES(hgf ${PARALUTION_LIBRARY}
                             ${OpenCL_LIBRARIES}
                             ${PYTHON_LIBRARIES}
+                            ${BOOST_LIBRARIES}
                             hgflib)
   ELSE()
     SWIG_LINK_LIBRARIES(hgf ${PARALUTION_LIBRARY}
                             ${PYTHON_LIBRARIES}
+                            ${BOOST_LIBRARIES}
                             hgflib)
   ENDIF()
 ENDIF()
@@ -91,20 +98,25 @@ IF(HGF_BUILD_EXECUTABLE)
                                 ${CUDA_CUBLAS_LIBRARIES}
                                 ${CUDA_cusparse_LIBRARY}
                                 hgflib
-                                ${PARALUTION_LIBRARY})
+                                ${PARALUTION_LIBRARY}
+                                ${BOOST_LIBRARIES})
+
     ELSE()
       TARGET_LINK_LIBRARIES(hgf ${CUDA_LIBRARIES}
                                 ${CUDA_CUBLAS_LIBRARIES}
                                 ${CUDA_cusparse_LIBRARY}
                                 hgflib
-                                ${PARALUTION_LIBRARY})
+                                ${PARALUTION_LIBRARY}
+                                ${BOOST_LIBRARIES})
     ENDIF()
   ELSEIF(OPENCL_FOUND)
     TARGET_LINK_LIBRARIES(hgf ${OpenCL_LIBRARIES}
                               hgflib
-                              ${PARALUTION_LIBRARY})
+                              ${PARALUTION_LIBRARY}
+                              ${BOOST_LIBRARIES})
   ELSE()
     TARGET_LINK_LIBRARIES(hgf hgflib
-                          ${PARALUTION_LIBRARY})
+                          ${PARALUTION_LIBRARY}
+                          ${BOOST_LIBRARIES})
   ENDIF()
 ENDIF()
