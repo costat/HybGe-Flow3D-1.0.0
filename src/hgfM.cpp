@@ -7,6 +7,7 @@
 #include <iterator>
 #include <string>
 #include <sstream>
+#include <boost/filesystem.hpp>
 
 #include "hgfM.hpp"
 #include "hgfMeshCu.hpp"
@@ -14,6 +15,8 @@
 #include "hgfStokesM.hpp"
 #include "hgfPoreNetworkM.hpp"
 #include "hgfPPM.hpp"
+
+namespace bfs = boost::filesystem;
 
 /* Define a 2d -> 1d array index,
    uses row major indexing */
@@ -36,35 +39,32 @@ namespace patch
    once for upscaling a constant conductivity, or 2/3 times for
    upscaling a conductivity tensor. */
 void
-hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
-          int nx, int ny, int nz, \
-          double length, double width, double height, int direction, \
-          double visc, int nThreads, int prec, \
-          double tolAbs, double tolRel, int maxIt, \
-          int MX, int MY, int MZ, int solver, double relax, int output )
+hgfDrive( const bfs::path& ProblemPath, const bfs::path& MeshPath, ProbParam& Par )
 {
-  std::string outExt;
-  if ( output == 0 ) outExt = ".dat";
-  else outExt = ".vtk";
   int type;
-
-  if (direction < 3) type = 0;
-  else if (direction == 3) type = 1;
-  else if (direction == 4) type = 2;
-  else if (direction == 5) type = 3;
-  else
-  {
+  if (Par.direction < 3) type = 0;
+  else if (Par.direction == 3) type = 1;
+  else if (Par.direction == 4) type = 2;
+  else if (Par.direction == 5) type = 3;
+  else {
     std::cout << "\nProblem type not properly defined. Solving x-flow problem.\n\n";
     type = 0;
-    direction = 0;
+    Par.direction = 0;
   }
+
+  bfs::path outputfolder( ProblemPath / "Output/" );
+  if (!bfs::exists(outputfolder)) bfs::create_directory(outputfolder);
+
+  std::string outExt;
+  if ( Par.output == 0 ) outExt = ".dat";
+  else outExt = ".vtk";
 
   switch ( type )
   {
     case 0 : // Solve a single flow direction, upscale constant conductivity
     {
       std::string outName;
-      outName = "./output/flowrun" + outExt;
+      outName = outputfolder.string() + "Solution" + outExt;
       double mesh_duration, stokes_duration, total_duration;
       double start, stokes_start;
 
@@ -72,7 +72,15 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
 
       // Build mesh object
       FluidMesh Mesh;
-      Mesh.BuildUniformMesh( gridin, ldi1, ldi2, nx, ny, nz, length, width, height );
+      /*if (!Par.isMesh) {
+        Mesh.BuildUniformMesh( Par.gridin.data(), Par.ny, Par.nz, Par.nx, Par.ny, Par.nz, Par.length, Par.width, Par.height );
+        SaveFluidMesh( Mesh, MeshPath.string() );
+      }
+      else {
+        LoadFluidMesh( Mesh, MeshPath.string() );
+      } */
+      Mesh.BuildUniformMesh( Par.gridin.data(), Par.ny, Par.nz, Par.nx, Par.ny, Par.nz, Par.length, Par.width, Par.height );
+
       // Mesh Timer
       mesh_duration = ( omp_get_wtime() - start );
       stokes_start = omp_get_wtime();
@@ -80,17 +88,16 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
       // call Stokes' solver
       std::vector< double > sol;
       sol.resize( Mesh.dofTotal );
-      if (solver == 0) StokesSolveDirect( Mesh, visc, direction, sol, tolAbs, tolRel, maxIt, nThreads, prec );
-      else StokesSolveRich( Mesh, visc, direction, sol, tolAbs, tolRel, maxIt, nThreads, prec, relax );
+      StokesSolveDirect( Mesh, Par.visc, Par.direction, sol, Par.tolAbs, Par.tolRel, Par.maxIt, Par.nThreads, Par.prec );
 
       // Linear solve timer
       stokes_duration = ( omp_get_wtime() - stokes_start );
 
       // Write solution to file
-      if (output) writeSolutionPV ( Mesh, sol, outName );
+      if (Par.output) writeSolutionPV ( Mesh, sol, outName );
       else writeSolutionTP( Mesh, sol, outName );
       double K;
-      computeKConstantDrive ( Mesh, sol, K, direction, 1 );
+      computeKConstantDrive ( Mesh, sol, K, Par.direction, 1 );
 
       std::cout << "Mesh constructed in " << mesh_duration << "seconds\n";
       std::cout << "Stokes problems solved in " << stokes_duration << "seconds\n";
@@ -99,6 +106,7 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
       std::cout << "Total time: " << total_duration << "seconds\n";
       break;
     }
+/*
     case 1 : // Solve all 2/3 flow directions for upscaled tensor
     {
       std::string outNameX;
@@ -400,5 +408,6 @@ hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
 
       break; // break type 3
     }
+    */
   }
 }

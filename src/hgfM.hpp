@@ -1,7 +1,7 @@
+#include <boost/filesystem.hpp>
+#include "hgfAuxTools.hpp"
+
+namespace bfs = boost::filesystem;
+
 void
-hgfDrive( unsigned long *gridin, int size1, int ldi1, int ldi2, \
-          int nx, int ny, int nz, \
-          double length, double width, double height, \
-          int direction, double visc, int nThreads, int prec, \
-          double tolAbs, double tolRel, int maxIt, \
-          int MX, int MY, int MZ, int solver, double relax, int output );
+hgfDrive( const bfs::path& ProblemPath, const bfs::path& MeshPath, ProbParam& Par );

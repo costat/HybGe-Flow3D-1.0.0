@@ -53,5 +53,5 @@ main( int argc, const char* argv[] )
   printParams( Par );
 
   // send problem to hgf
-  //hgfDrive( Par, ProblemPath, Geo );
+  hgfDrive( ProblemPath, MeshPath, Par );
 }
