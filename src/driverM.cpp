@@ -50,6 +50,7 @@ main( int argc, const char* argv[] )
   }
   // grab parameter data
   problemParameters( Par, Parameters );
+  printParams( Par );
 
   // send problem to hgf
   //hgfDrive( Par, ProblemPath, Geo );

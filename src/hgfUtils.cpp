@@ -185,4 +185,49 @@ problemParameters( ProbParam& Par, const bfs::path& ParameterPath )
   }
   std::istringstream irelax(line);
   irelax >> str >> Par.relax;
+  // grab tolAbs
+  if (ifs.good())
+  {
+    std::getline(ifs, line);
+  }
+  std::istringstream ita(line);
+  ita >> str >> Par.tolAbs;
+  // grab tolRel
+  if (ifs.good())
+  {
+    std::getline(ifs, line);
+  }
+  std::istringstream itr(line);
+  itr >> str >> Par.tolRel;
+  // grab maxIt
+  if (ifs.good())
+  {
+    std::getline(ifs, line);
+  }
+  std::istringstream imaxit(line);
+  imaxit >> str >> Par.maxIt;
+  // grab nCuts
+  if (ifs.good())
+  {
+    std::getline(ifs, line);
+  }
+  std::istringstream inc(line);
+  inc >> str >> Par.nCuts;
+}
+void printParams( ProbParam& Par )
+{
+  std::cout << "\n" << "Length= " << Par.length << "\n";
+  std::cout << "Width= " << Par.width << "\n";
+  std::cout << "Height= " << Par.height << "\n";
+  std::cout << "Viscosity= " << Par.visc << "\n";
+  std::cout << "Direction= " << Par.direction << "\n";
+  std::cout << "Output= " << Par.output << "\n";
+  std::cout << "OMP Threads= " << Par.nThreads << "\n";
+  std::cout << "ILU P-Level= " << Par.prec << "\n";
+  std::cout << "Solver Switch= " << Par.solver << "\n";
+  std::cout << "Relaxation= " << Par.relax << "\n";
+  std::cout << "Absolute Tolernace= " << Par.tolAbs << "\n";
+  std::cout << "Relative Tolerance= " << Par.tolRel << "\n";
+  std::cout << "Maximum Iterations= " << Par.maxIt << "\n";
+  std::cout << "Cuts for Subdomains= " << Par.nCuts << "\n\n";
 }

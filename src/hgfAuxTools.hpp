@@ -62,8 +62,8 @@ struct byYbyXbyZ
 
 struct ProbParam
 {
-  int nx, ny, nz, nThreads, prec, direction, solver, output;
-  double length, width, height, visc, relax;
+  int nx, ny, nz, nThreads, prec, direction, solver, output, nCuts, maxIt;
+  double length, width, height, visc, relax, tolAbs, tolRel;
   bool isMesh;
   std::vector<unsigned long> gridin;
 };

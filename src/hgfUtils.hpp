@@ -14,3 +14,5 @@ geoFromFile( ProbParam& Par, const bfs::path& Geo );
 
 void
 problemParameters( ProbParam& Par, const bfs::path& ProblemPath);
+
+void printParams( ProbParam& Par );
