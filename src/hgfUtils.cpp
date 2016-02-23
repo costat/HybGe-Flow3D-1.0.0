@@ -67,6 +67,11 @@ geoFromFile( ProbParam& Par, const bfs::path& Geo )
   std::istringstream iz(line);
   iz >> str >> Par.nz;
 
+  if (!Par.nx || !Par.ny) {
+    std::cout << "\nSomething went wrong readying mesh. Make sure formatting is correct.\n";
+    exit(0);
+  }
+
   std::string hold;
   // read remaining lines of geometry into Par.gridin
   if ( Par.nz ) {
@@ -105,10 +110,79 @@ geoFromFile( ProbParam& Par, const bfs::path& Geo )
 }
 
 void
-problemParameters( ProbParam& Par, const bfs::path& ProblemPath )
+problemParameters( ProbParam& Par, const bfs::path& ParameterPath )
 {
   std::string line;
   std::string str;
-  bfs::ifstream ifs( ProblemPath / "Paramters.dat" );
-
+  bfs::ifstream ifs( ParameterPath );
+  // grab length
+  if (ifs.good())
+  {
+    std::getline(ifs, line);
+  }
+  std::istringstream ilength(line);
+  ilength >> str >> Par.length;
+  // grab width
+  if (ifs.good())
+  {
+    std::getline(ifs, line);
+  }
+  std::istringstream iwidth(line);
+  iwidth >> str >> Par.width;
+  // grab height
+  if (ifs.good())
+  {
+    std::getline(ifs, line);
+  }
+  std::istringstream iheight(line);
+  iheight >> str >> Par.height;
+  // grab viscocity
+  if (ifs.good())
+  {
+    std::getline(ifs, line);
+  }
+  std::istringstream ivisc(line);
+  ivisc >> str >> Par.visc;
+  // grab direction
+  if (ifs.good())
+  {
+    std::getline(ifs, line);
+  }
+  std::istringstream idirec(line);
+  idirec >> str >> Par.direction;
+  // grab output switch
+  if (ifs.good())
+  {
+    std::getline(ifs, line);
+  }
+  std::istringstream iout(line);
+  iout >> str >> Par.output;
+  // grab nThreads
+  if (ifs.good())
+  {
+    std::getline(ifs, line);
+  }
+  std::istringstream inth(line);
+  inth >> str >> Par.nThreads;
+  // grab prec
+  if (ifs.good())
+  {
+    std::getline(ifs, line);
+  }
+  std::istringstream iprec(line);
+  iprec >> str >> Par.prec;
+  // grab solver
+  if (ifs.good())
+  {
+    std::getline(ifs, line);
+  }
+  std::istringstream isolver(line);
+  isolver >> str >> Par.solver;
+  // grab relax
+  if (ifs.good())
+  {
+    std::getline(ifs, line);
+  }
+  std::istringstream irelax(line);
+  irelax >> str >> Par.relax;
 }

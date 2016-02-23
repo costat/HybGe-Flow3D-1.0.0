@@ -16,6 +16,7 @@ main( int argc, const char* argv[] )
   ProbParam Par;
   // path to problem directory from input
   bfs::path ProblemPath( argv[1] );
+  std::cout << "\nSolving problem in directory: \t " << ProblemPath << "\n";
 
   // check if mesh already exists in the problem directory
   std::string meshSaved = "Mesh.dat";
@@ -48,7 +49,7 @@ main( int argc, const char* argv[] )
     exit(0);
   }
   // grab parameter data
-  problemParameters( Par, ProblemPath );
+  problemParameters( Par, Parameters );
 
   // send problem to hgf
   //hgfDrive( Par, ProblemPath, Geo );
