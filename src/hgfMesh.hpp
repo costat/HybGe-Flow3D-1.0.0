@@ -3,10 +3,6 @@
 #define HGFMESH_H
 
 #include <vector>
-#include <fstream>
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/serialization/vector.hpp>
 
 void MeshSubdivide( unsigned long *gridin, int ldi1, int ldi2, \
                     int nx, int ny, int nz, \
@@ -26,40 +22,6 @@ void innerFaceConnectivity( std::vector<unsigned long>& ComponentFaceConnectivit
 class FluidMesh
 {
   public:
-    template<class Archive>
-    void serialize( Archive & ar, const unsigned int version )
-    {
-      ar & mv;
-      ar & Nodes;
-      ar & PCellCenters;
-      ar & UCellCenters;
-      ar & VCellCenters;
-      ar & WCellCenters;
-      ar & PCellWidths;
-      ar & UCellWidths;
-      ar & VCellWidths;
-      ar & WCellWidths;
-      ar & PresListByY;
-      ar & PresListByZ;
-      ar & PFaceConnectivity;
-      ar & UFaceConnectivity;
-      ar & VFaceConnectivity;
-      ar & WFaceConnectivity;
-      ar & PressureCellUNeighbor;
-      ar & PressureCellVNeighbor;
-      ar & PressureCellWNeighbor;
-      ar & UCellPressureNeighbor;
-      ar & VCellPressureNeighbor;
-      ar & WCellPressureNeighbor;
-      ar & UInteriorCells;
-      ar & VInteriorCells;
-      ar & WInteriorCells;
-      ar & UBoundaryCells;
-      ar & VBoundaryCells;
-      ar & WBoundaryCells;
-      ar & ImmersedBoundary;
-      ar & FullGrid;
-    }
     std::vector<unsigned long> mv;
     std::vector<double> Nodes, PCellCenters, UCellCenters, VCellCenters;
     std::vector<double> WCellCenters;
@@ -105,7 +67,5 @@ class PoreNetwork
     // public functions
     void UniformPN( double length, double width, double height, int nx, int ny, int nz );
 };
-
-void SaveMesh( const FluidMesh& Mesh, const std::string& outName );
 
 #endif

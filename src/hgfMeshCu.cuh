@@ -4,6 +4,9 @@
 
 #include <vector>
 #include <cuda_runtime.h>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/serialization/vector.hpp>
 
 __global__ void ifcKernel2D ( unsigned long *d_CFC, const double *d_CCC, \
                               double epsx, double epsy, double xtol, double ytol, int nCells );
@@ -30,6 +33,56 @@ class FluidMesh
 {
   public:
     // Public data
+    template<class Archive>
+    void serialize( Archive & ar, const unsigned int version )
+    {
+      ar & mv;
+      ar & Nodes;
+      ar & PCellCenters;
+      ar & UCellCenters;
+      ar & VCellCenters;
+      ar & WCellCenters;
+      ar & PCellWidths;
+      ar & UCellWidths;
+      ar & VCellWidths;
+      ar & WCellWidths;
+      ar & PresListByY;
+      ar & PresListByZ;
+      ar & PFaceConnectivity;
+      ar & UFaceConnectivity;
+      ar & VFaceConnectivity;
+      ar & WFaceConnectivity;
+      ar & PressureCellUNeighbor;
+      ar & PressureCellVNeighbor;
+      ar & PressureCellWNeighbor;
+      ar & UCellPressureNeighbor;
+      ar & VCellPressureNeighbor;
+      ar & WCellPressureNeighbor;
+      ar & UInteriorCells;
+      ar & VInteriorCells;
+      ar & WInteriorCells;
+      ar & UBoundaryCells;
+      ar & VBoundaryCells;
+      ar & WBoundaryCells;
+      ar & ImmersedBoundary;
+      ar & FullGrid;
+      ar & NodesLDI;
+      ar & CellCentersLDI;
+      ar & CellWidthsLDI;
+      ar & FaceConnectivityLDI;
+      ar & PressureCellVelocityNeighborLDI;
+      ar & VelocityCellPressureNeighborLDI;
+      ar & DIM;
+      ar & NX;
+      ar & NY;
+      ar & NZ;
+      ar & dofTotal;
+      ar & maxNNZ;
+      ar & xLim;
+      ar & yLim;
+      ar & zLim;
+      ar & porosity;
+    }
     std::vector<unsigned long> mv;
     std::vector<double> Nodes, PCellCenters, UCellCenters, VCellCenters;
     std::vector<double> WCellCenters;
@@ -75,5 +128,8 @@ class PoreNetwork
     // public functions
     void UniformPN( double length, double width, double height, int nx, int ny, int nz );
 };
+
+void SaveFluidMesh( const FluidMesh& Mesh, const std::string& outName );
+void LoadFluidMesh( FluidMesh& Mesh, const std::string& inName );
 
 #endif

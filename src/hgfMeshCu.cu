@@ -6,6 +6,7 @@
 #include <omp.h>
 #include <algorithm>
 #include <cuda_runtime.h>
+#include <fstream>
 
 #include "hgfMeshCu.cuh"
 #include "hgf.hpp"
@@ -1291,5 +1292,22 @@ void PoreNetwork::UniformPN( double length, double width, double height, int nx,
     else {
       BoundaryPores.push_back( pore );
     }
+  }
+}
+void SaveFluidMesh( const FluidMesh& Mesh, const std::string& outName )
+{
+  {
+    std::ofstream ofs(outName.c_str());
+    boost::archive::text_oarchive oa(ofs);
+    oa << Mesh;
+  }
+}
+void LoadFluidMesh( FluidMesh& Mesh, const std::string& inName )
+{
+  // load vectors
+  {
+    std::ifstream ifs(inName.c_str());
+    boost::archive::text_iarchive ia(ifs);
+    ia >> Mesh;
   }
 }

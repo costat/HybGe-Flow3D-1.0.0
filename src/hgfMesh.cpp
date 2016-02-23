@@ -1238,9 +1238,3 @@ void PoreNetwork::UniformPN( double length, double width, double height, int nx,
     }
   }
 }
-void SaveMesh( const FluidMesh& Mesh, const std::string& outName )
-{
-/*  std::ofstream ofs(outName.c_str());
-  boost::archive::text_oarchive oa(ofs);
-  oa << Mesh;*/
-}
