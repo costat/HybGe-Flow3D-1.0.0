@@ -4,6 +4,8 @@ PROJECT(hgf)
 
 SET(HGF_BUILD_EXECUTABLE ON CACHE BOOL "Build HGF Driver Executable.")
 
+SET(CMAKE_MODULE_PATH ${CMAKE_HOME_DIRECTORY}/cmake)
+
 ### FIND PACKAGES ###
 ## OpenMP ##
 FIND_PACKAGE(OpenMP REQUIRED)
@@ -16,18 +18,20 @@ INCLUDE_DIRECTORIES(${CUDA_INCLUDE_DIRS})
 INCLUDE(FindCUDA)
 
 ## Boost ##
-FIND_PACKAGE(Boost REQUIRED)
+FIND_PACKAGE(Boost COMPONENTS system filesystem serialization REQUIRED)
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
+LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
 
 ## MAGMA ##
-
-## BLAS/LAPACK ##
+#FIND_PACKAGE(MAGMA REQUIRED)
+#INCLUDE_DIRECTORIES(${MAGMA_INCLUDE_DIRS})
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 
-LIST(APPEND CMAKE_CXX_FLAGS "-std=c++11 -O3")
+LIST(APPEND CUDA_NVCC_FLAGS "-std=c++11 -O3 -Xcompiler -DCUDA_BUILD=1")
 
 SET(LIBRARY_SRCS ../src/hgfM.cpp
+                 ../src/hgfMeshCu.cu
                  ../src/hgfStokesM.cpp
                  ../src/hgfPoreNetworkM.cpp
                  ../src/hgfArrays.cpp
@@ -35,20 +39,16 @@ SET(LIBRARY_SRCS ../src/hgfM.cpp
                  ../src/hgfIB.cpp
                  ../src/hgfPPM.cpp)
 
-SET(LIBRARYCU_SRCS ../src/hgfMeshCu.cu)
-
-SET(EXECUTABLE_SRCS ../src/driver.cpp)
+SET(EXECUTABLE_SRCS ../src/driverM.cpp)
 
 SET(CMAKE_MODULE_PATH ${CMAKE_HOME_DIRECTORY}/cmake)
 
-CUDA_ADD_LIBRARY(hgflibcu STATIC ${LIBRARYCU_SRCS})
-
-ADD_LIBRARY(hgflib STATIC ${LIBRARY_SRCS})
+CUDA_ADD_LIBRARY(hgflib STATIC ${LIBRARY_SRCS})
 
 CUDA_ADD_EXECUTABLE(hgf ${EXECUTABLE_SRCS})
-TARGET_LINK_LIBRARIES(hgf ${CUDA_LIBRARIES}
-                          ${CUDA_CUBLAS_LIBRARIES}
-                          ${CUDA_cusparse_LIBRARY}
-                          ${Boost_LIBRARIES}
-                          hgflibcu
-                          hgflib)
+TARGET_LINK_LIBRARIES( hgf ${CUDA_LIBRARIES}
+                           ${CUDA_CUBLAS_LIBRARIES}
+                           ${CUDA_cusparse_LIBRARY}
+                           ${Boost_LIBRARIES}
+                           #${MAGMA_LIBRARIES}
+                           hgflib)
