@@ -698,7 +698,7 @@ writeSolutionTP ( const FluidMesh& Mesh, const std::vector<double>& sol, \
       for (int row = 0; row < nEls; row++)
       {
         uval = 0.5 * (sol[ Mesh.PressureCellUNeighbor[ idx2( row, 0, 2 ) ] - 1 ] \
-                    + sol[ Mesh.PressureCellUNeighbor[ idx2( row, 1, 2 ) ] - 1] );
+                    + sol[ Mesh.PressureCellUNeighbor[ idx2( row, 1, 2 ) ] - 1 ] );
         horizCount++;
         if (horizCount < 1000)
         {
