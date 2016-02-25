@@ -11,7 +11,7 @@ import re
 # GRID INFORMATION. USER PROVIDES PATH .DAT FILE CONTAINING
 # VOXEL ARRAY OF 0S 1S AND 2S.
 # ALSO, USER PROVIDES TOTAL GRID LENGTHS IN EACH DIRECTION.
-gridfiles = '../grids/GB_2_matrix'
+gridfiles = '../grids/HS_2_matrix'
 L = 1.
 W = 1.
 H = 1.
@@ -29,10 +29,10 @@ nThreads = 4
 
 # SET SOLVER PARAMETERS: ILU PRECONDITIONER LEVEL,
 # ABSOLUTE AND RELATIVE RESIDUAL TOLERANCES, AND MAXIMUM ITERATIONS
-prec = 0
+prec = 2
 tolAbs = 1e-8;
 tolRel = 1e-8;
-maxIt = 3000;
+maxIt = 5000;
 solver = 0;
 relax = 0;
 MX = 4
@@ -40,7 +40,7 @@ MY = 4
 MZ = 4
 
 # OUTPUT TYPE, 0 = TECPLOT, 1 = VTK/PARAVIEW
-output = 1
+output = 0
 
 ##########################################################
 ### SWIG TRANSLATION, USER SHOULD NOT EDIT BELOW HERE ####
