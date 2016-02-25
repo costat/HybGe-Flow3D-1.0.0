@@ -1,0 +1,12 @@
+length= 1.0
+width= 1.0
+height= 1.0
+visc= 1.0
+direction= 0
+output= 1
+nThreads= 4
+prec= 0
+tolAbs= 1e-8
+tolRel= 1e-8
+maxIt= 3000
+nCuts= 4
