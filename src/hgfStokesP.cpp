@@ -42,7 +42,7 @@ StokesSolveDirect( const FluidMesh& Mesh, std::vector<double>& Solution, const P
   // build the rowPTR vector for CSR rep of the array. first we sort the COO vecs
   sortCOO( matIs, matJs, matVals );
 
-  set_omp_threads_paralution( Par.nThrads );
+  set_omp_threads_paralution( Par.nThreads );
 
   // paralution arrays
   LocalVector<double> sol;
@@ -72,7 +72,7 @@ StokesSolveDirect( const FluidMesh& Mesh, std::vector<double>& Solution, const P
 
   // preconditioning
   ILU<LocalMatrix<double>, LocalVector<double>, double> p;
-  p.Set(prec);
+  p.Set(Par.prec);
   ls.SetPreconditioner(p);
 
   // build
