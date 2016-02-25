@@ -171,20 +171,6 @@ problemParameters( ProbParam& Par, const bfs::path& ParameterPath )
   }
   std::istringstream iprec(line);
   iprec >> str >> Par.prec;
-  // grab solver
-  if (ifs.good())
-  {
-    std::getline(ifs, line);
-  }
-  std::istringstream isolver(line);
-  isolver >> str >> Par.solver;
-  // grab relax
-  if (ifs.good())
-  {
-    std::getline(ifs, line);
-  }
-  std::istringstream irelax(line);
-  irelax >> str >> Par.relax;
   // grab tolAbs
   if (ifs.good())
   {
@@ -224,8 +210,6 @@ void printParams( ProbParam& Par )
   std::cout << "Output= " << Par.output << "\n";
   std::cout << "OMP Threads= " << Par.nThreads << "\n";
   std::cout << "ILU P-Level= " << Par.prec << "\n";
-  std::cout << "Solver Switch= " << Par.solver << "\n";
-  std::cout << "Relaxation= " << Par.relax << "\n";
   std::cout << "Absolute Tolernace= " << Par.tolAbs << "\n";
   std::cout << "Relative Tolerance= " << Par.tolRel << "\n";
   std::cout << "Maximum Iterations= " << Par.maxIt << "\n";
