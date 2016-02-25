@@ -9,29 +9,34 @@ void
 computeKTensorL ( const FluidMesh& Mesh, \
                   const std::vector<double>& xSolution, \
                   const std::vector<double>& ySolution, \
-                  const std::vector<double>& zSolution );
+                  const std::vector<double>& zSolution, \
+                  const std::vector<std::string>& KoutNames );
 
 void
 computeAveragesX ( const FluidMesh& Mesh, \
                    const std::vector<double>& Solution,
-                   double& V, double& G, int print );
+                   double& V, double& G, int print, \
+                   const std::string& KoutName );
 
 void
 computeAveragesY ( const FluidMesh& Mesh, \
                    const std::vector<double>& Solution, \
-                   double& V, double& G, int print );
+                   double& V, double& G, int print, \
+                   const std::string& KoutName );
 
 void
 computeAveragesZ ( const FluidMesh& Mesh, \
                    const std::vector<double>& Solution, \
-                   double& V, double& G, int print );
+                   double& V, double& G, int print, \
+                   const std::string& KoutName );
 
 void
 computeKConstantDrive ( const FluidMesh& Mesh, \
                         const std::vector<double>& Solution,
                         double& K, \
                         int direction, \
-                        int print );
+                        int print, \
+                        const std::string& KoutName );
 
 void
 computeKPoreNetwork( const PoreNetwork& pn, const std::vector<double>& Solution, \

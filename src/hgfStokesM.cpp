@@ -45,7 +45,6 @@ StokesSolveDirect( const FluidMesh& Mesh, std::vector<double>& Solution, const P
 
   // magma declarations
   magma_int_t info = 0;
-  magma_init();
   magma_dopts opts;
   magma_queue_t queue = NULL;
   magma_queue_create( &queue );
@@ -95,5 +94,14 @@ StokesSolveDirect( const FluidMesh& Mesh, std::vector<double>& Solution, const P
   magma_d_vfree( &d_b, queue );
   magma_d_vfree( &d_x, queue );
   magma_queue_destroy( queue );
+}
+
+void SolverInit( void )
+{
+  magma_init();
+}
+
+void SolverFinalize( void )
+{
   magma_finalize();
 }

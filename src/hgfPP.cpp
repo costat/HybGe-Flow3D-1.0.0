@@ -1,32 +1,23 @@
 #include <iostream>
+#include <fstream>
 #include <cstdlib>
 #include <vector>
 #include <string>
-#include <paralution.hpp>
 
 // hgf includes
-#ifndef CUDA_BUILD
-# define CUDA_BUILD 0
-#endif
-
-#if CUDA_BUILD
 #include "hgfMeshCu.hpp"
-#else
-#include "hgfMesh.hpp"
-#endif
-
 #include "hgfPP.hpp"
 
 #define idx2(i, j, ldi) ((i * ldi) + j)
 
-using namespace paralution;
 /* computeKTensorL computes an upscaled conductivity tensor using
    flow solutions in each principal axis direction */
 void
 computeKTensorL ( const FluidMesh& Mesh, \
                   const std::vector<double>& xSolution, \
                   const std::vector<double>& ySolution, \
-                  const std::vector<double>& zSolution )
+                  const std::vector<double>& zSolution, \
+                  const std::vector<std::string>& KoutNames )
 {
   switch ( Mesh.DIM )
   {
@@ -61,58 +52,23 @@ computeKTensorL ( const FluidMesh& Mesh, \
       }
 
       // Compute averages
-      computeAveragesX ( Mesh, xSolution, Vels[0], GVals[0], 1 );
-      computeAveragesY ( Mesh, xSolution, Vels[1], GVals[1], 0 );
-      computeAveragesZ ( Mesh, xSolution, Vels[2], GVals[2], 0 );
-      computeAveragesX ( Mesh, ySolution, Vels[3], GVals[3], 0 );
-      computeAveragesY ( Mesh, ySolution, Vels[4], GVals[4], 1 );
-      computeAveragesZ ( Mesh, ySolution, Vels[5], GVals[5], 0 );
-      computeAveragesX ( Mesh, zSolution, Vels[6], GVals[6], 0 );
-      computeAveragesY ( Mesh, zSolution, Vels[7], GVals[7], 0 );
-      computeAveragesZ ( Mesh, zSolution, Vels[8], GVals[8], 1 );
+      computeAveragesX ( Mesh, xSolution, Vels[0], GVals[0], 1, KoutNames[0] );
+      computeAveragesY ( Mesh, xSolution, Vels[1], GVals[1], 0, KoutNames[0] );
+      computeAveragesZ ( Mesh, xSolution, Vels[2], GVals[2], 0, KoutNames[0] );
+      computeAveragesX ( Mesh, ySolution, Vels[3], GVals[3], 0, KoutNames[1] );
+      computeAveragesY ( Mesh, ySolution, Vels[4], GVals[4], 1, KoutNames[1] );
+      computeAveragesZ ( Mesh, ySolution, Vels[5], GVals[5], 0, KoutNames[1] );
+      computeAveragesX ( Mesh, zSolution, Vels[6], GVals[6], 0, KoutNames[2] );
+      computeAveragesY ( Mesh, zSolution, Vels[7], GVals[7], 0, KoutNames[2] );
+      computeAveragesZ ( Mesh, zSolution, Vels[8], GVals[8], 1, KoutNames[2] );
 
       for (int i = 0; i < 9; i++) {
         GVals[i+9] = GVals[i];
         GVals[i+18] = GVals[i];
       }
 
-      // Initialize paralution arrays
-      LocalVector<double> K;
-      LocalVector<double> MacroVels;
-      LocalMatrix<double> MacroPresGrads;
+      // solve linear system for K tensor
 
-      // Conductivity tensor
-      K.Allocate("conductivity tensor", 9);
-      K.Zeros();
-
-      // Macro velocities
-      MacroVels.Allocate("macroscopic velocities", 9);
-      MacroVels.Zeros();
-      for (int i = 0; i < 9; i++) {
-        MacroVels[i] = Vels[i];
-      }
-
-      // Pressure gradients matrix
-      MacroPresGrads.Assemble(GIs, GJs, GVals, 27, "pressure gradients", 9, 9);
-
-      // Solver setup
-      GMRES<LocalMatrix<double>, LocalVector<double>, double > ls;
-      ls.SetOperator(MacroPresGrads);
-      ls.Verbose(0);
-      ls.Build();
-
-      ls.Solve(MacroVels, &K);
-
-      // Write out solution to file
-      std::ofstream KTensor;
-      KTensor.open ("./output/KTensor.dat");
-      KTensor << K[0]*Mesh.porosity << "\t" << K[1]*Mesh.porosity << "\t" << K[2]*Mesh.porosity << "\n";
-      KTensor << K[3]*Mesh.porosity << "\t" << K[4]*Mesh.porosity << "\t" << K[5]*Mesh.porosity << "\n";
-      KTensor << K[6]*Mesh.porosity << "\t" << K[7]*Mesh.porosity << "\t" << K[8]*Mesh.porosity;
-      KTensor.close();
-      MacroVels.Clear();
-      K.Clear();
-      MacroPresGrads.Clear();
       break;
     }
     case 2 :
@@ -135,51 +91,17 @@ computeKTensorL ( const FluidMesh& Mesh, \
       }
 
       // Compute averages
-      computeAveragesX ( Mesh, xSolution, Vels[0], GVals[0], 1 );
-      computeAveragesY ( Mesh, xSolution, Vels[1], GVals[1], 0 );
-      computeAveragesX ( Mesh, ySolution, Vels[2], GVals[2], 0 );
-      computeAveragesY ( Mesh, ySolution, Vels[3], GVals[3], 1 );
+      computeAveragesX ( Mesh, xSolution, Vels[0], GVals[0], 1, KoutNames[0] );
+      computeAveragesY ( Mesh, xSolution, Vels[1], GVals[1], 0, KoutNames[0] );
+      computeAveragesX ( Mesh, ySolution, Vels[2], GVals[2], 0, KoutNames[1] );
+      computeAveragesY ( Mesh, ySolution, Vels[3], GVals[3], 1, KoutNames[1] );
 
       for (int i = 0; i < 4; i++) {
         GVals[i+4] = GVals[i];
       }
 
-      // Initialize paralution arrays
-      LocalVector<double> K;
-      LocalVector<double> MacroVels;
-      LocalMatrix<double> MacroPresGrads;
+      // solve linear system for K tensor
 
-      // Conductivity tensor
-      K.Allocate("conductivity tensor", 4);
-      K.Zeros();
-
-      // Macro velocities
-      MacroVels.Allocate("macroscopic velocities", 4);
-      MacroVels.Zeros();
-      for (int i = 0; i < 4; i++) {
-        MacroVels[i] = Vels[i];
-      }
-
-      // Pressure gradients matrix
-      MacroPresGrads.Assemble(GIs, GJs, GVals, 8, "pressure gradients", 4, 4);
-
-      // Solver setup
-      GMRES<LocalMatrix<double>, LocalVector<double>, double > ls;
-      ls.SetOperator(MacroPresGrads);
-      ls.Verbose(0);
-      ls.Build();
-
-      ls.Solve(MacroVels, &K);
-
-      // Write out solution to file
-      std::ofstream KTensor;
-      KTensor.open ("./output/KTensor.dat");
-      KTensor << K[0]*Mesh.porosity << "\t" << K[1]*Mesh.porosity << "\n";
-      KTensor << K[2]*Mesh.porosity << "\t" << K[3]*Mesh.porosity << "\n";
-      KTensor.close();
-      MacroVels.Clear();
-      K.Clear();
-      MacroPresGrads.Clear();
       break;
     }
   }
@@ -192,7 +114,8 @@ computeKTensorL ( const FluidMesh& Mesh, \
 void
 computeAveragesX ( const FluidMesh& Mesh, \
                    const std::vector< double >& Solution, \
-                   double& V, double& G, int print )
+                   double& V, double& G, int print, \
+                   const std::string& KoutName )
 {
   double xmin, xmax, xmid, midRangex, ymin, ymax, zmin, zmax, K, pNode1, pNode2;
   double P1 = 0;
@@ -293,7 +216,7 @@ computeAveragesX ( const FluidMesh& Mesh, \
         K = V / G;
         // Write out K
         std::ofstream KConstantX;
-        KConstantX.open("./output/KConstantX.dat");
+        KConstantX.open( KoutName.c_str() );
         KConstantX << K*Mesh.porosity;
         KConstantX.close();
       }
@@ -369,7 +292,7 @@ computeAveragesX ( const FluidMesh& Mesh, \
         K = V / G;
         // Write out K
         std::ofstream KConstantX;
-        KConstantX.open("./output/KConstantX.dat");
+        KConstantX.open( KoutName.c_str() );
         KConstantX << K*Mesh.porosity;
         KConstantX.close();
       }
@@ -386,7 +309,8 @@ computeAveragesX ( const FluidMesh& Mesh, \
 void
 computeAveragesY ( const FluidMesh& Mesh, \
                    const std::vector<double>& Solution, \
-                   double& V, double& G, int print )
+                   double& V, double& G, int print, \
+                   const std::string& KoutName )
 {
   double xmin, xmax, midRangey, ymin, ymax, ymid, zmin, zmax, K, pNode1, pNode2;
   double P1 = 0;
@@ -484,7 +408,7 @@ computeAveragesY ( const FluidMesh& Mesh, \
         K = V / G;
         // Write out K
         std::ofstream KConstantY;
-        KConstantY.open("./output/KConstantY.dat");
+        KConstantY.open( KoutName.c_str() );
         KConstantY << K*Mesh.porosity;
         KConstantY.close();
       }
@@ -561,7 +485,7 @@ computeAveragesY ( const FluidMesh& Mesh, \
         K = V / G;
         // Write out K
         std::ofstream KConstantY;
-        KConstantY.open("./output/KConstantY.dat");
+        KConstantY.open( KoutName.c_str() );
         KConstantY << K*Mesh.porosity;
         KConstantY.close();
       }
@@ -577,7 +501,8 @@ computeAveragesY ( const FluidMesh& Mesh, \
 void
 computeAveragesZ ( const FluidMesh& Mesh, \
                    const std::vector<double>& Solution, \
-                   double& V, double& G, int print )
+                   double& V, double& G, int print, \
+                   const std::string& KoutName )
 {
   double xmin, xmax, midRangez, ymin, ymax, zmid, zmin, zmax, K, pNode1, pNode2;
   double P1 = 0;
@@ -671,7 +596,7 @@ computeAveragesZ ( const FluidMesh& Mesh, \
     K = V / G;
     // Write out K
     std::ofstream KConstantZ;
-    KConstantZ.open("./output/KConstantZ.dat");
+    KConstantZ.open( KoutName.c_str() );
     KConstantZ << K*Mesh.porosity;
     KConstantZ.close();
   }
@@ -684,19 +609,20 @@ computeKConstantDrive ( const FluidMesh & Mesh, \
                         const std::vector<double>& Solution, \
                         double& K, \
                         int direction, \
-                        int print )
+                        int print, \
+                        const std::string& KoutName )
 {
   double V, G;
   switch ( direction )
   {
     case 0 :
-      computeAveragesX ( Mesh, Solution, V, G, print );
+      computeAveragesX ( Mesh, Solution, V, G, print, KoutName );
       break;
     case 1 :
-      computeAveragesY ( Mesh, Solution, V, G, print );
+      computeAveragesY ( Mesh, Solution, V, G, print, KoutName );
       break;
     case 2 :
-      computeAveragesZ ( Mesh, Solution, V, G, print );
+      computeAveragesZ ( Mesh, Solution, V, G, print, KoutName );
       break;
   }
   K = (V/G) * Mesh.porosity;
@@ -772,7 +698,7 @@ writeSolutionTP ( const FluidMesh& Mesh, const std::vector<double>& sol, \
       for (int row = 0; row < nEls; row++)
       {
         uval = 0.5 * (sol[ Mesh.PressureCellUNeighbor[ idx2( row, 0, 2 ) ] - 1 ] \
-                    + sol[ Mesh.PressureCellUNeighbor[ idx2( row, 1, 2 ) ] - 1] );
+                    + sol[ Mesh.PressureCellUNeighbor[ idx2( row, 1, 2 ) ] - 1 ] );
         horizCount++;
         if (horizCount < 1000)
         {
