@@ -277,7 +277,7 @@ MeshSubdivide( unsigned long *gridin, int ldi1, int ldi2, \
 // Function to compute cell face connectivity information
 void innerFaceConnectivity( \
        std::vector<unsigned long>& ComponentFaceConnectivity, \
-       std::vector<double> ComponentCellCenters, \
+       const std::vector<double>& ComponentCellCenters, \
        double dx, double dy, double dz, int nCells, int DIM )
 {
 

@@ -28,7 +28,7 @@ void MeshSubdivide( unsigned long *gridin, int ldi1, int ldi2, \
                     std::vector<int>& nys, \
                     std::vector<int>& nzs );
 void innerFaceConnectivity( std::vector<unsigned long>& ComponentFaceConnectivity, \
-                            std::vector<double> ComponentCellCenters, \
+                            const std::vector<double>& ComponentCellCenters, \
                             double dx, double dy, double dz, int nCells, int DIM );
 
 class FluidMesh
@@ -103,6 +103,7 @@ class FluidMesh
     int PressureCellVelocityNeighborLDI, VelocityCellPressureNeighborLDI;
     int DIM, NX, NY, NZ, dofTotal, maxNNZ;
     double xLim[2], yLim[2], zLim[2], porosity;
+    bool percolation;
     // Public functions
     int VelocityDOF( void );
     void BuildUniformMesh( const ProbParam& Par );
