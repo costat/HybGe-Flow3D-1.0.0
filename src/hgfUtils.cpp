@@ -89,6 +89,9 @@ geoFromFile( ProbParam& Par, const bfs::path& Geo )
           Par.gridin.push_back( n );
         }
       }
+      if (ifs.good()) {
+        std::getline(ifs, line);
+      }
     }
   }
   else {
