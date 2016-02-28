@@ -16,6 +16,16 @@
 #include "hgfPP.hpp"
 #include "hgfAuxTools.hpp"
 
+#define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
+inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=true)
+{
+   if (code != cudaSuccess)
+   {
+      fprintf(stderr,"GPUassert: %s %s %d\n", cudaGetErrorString(code), file, line);
+      if (abort) exit(code);
+   }
+}
+
 /* Define a 2d -> 1d array index, uses row major ordering */
 #define idx2(i, j, ldi) ((i * ldi) + j)
 /* Define a 3d -> 1d array index, uses row major ordering */
@@ -281,7 +291,6 @@ void innerFaceConnectivity( \
        double dx, double dy, double dz, int nCells, int DIM )
 {
 
-  cudaError_t err = cudaSuccess;
   double epsx = 0.2 * dx;
   double epsy = 0.2 * dy;
   double epsz = 0.2 * dz;
@@ -293,23 +302,13 @@ void innerFaceConnectivity( \
   unsigned long *d_CFC = NULL;
   double *d_CCC = NULL;
 
-  err = cudaMalloc( (void **)&d_CFC, ComponentFaceConnectivity.size() * sizeof(unsigned long) );
-  if (err != cudaSuccess)
-  {
-    std::cout << "Failed to allocate device vector d_CFC\n";
-    exit(EXIT_FAILURE);
-  }
+  gpuErrchk( cudaMalloc( (void **)&d_CFC, ComponentFaceConnectivity.size() * sizeof(unsigned long) ) );
 
-  err = cudaMalloc( (void **)&d_CCC, ComponentCellCenters.size() * sizeof(double) );
-  if (err != cudaSuccess)
-  {
-    std::cout << "Failed to allocate device vector d_CCC\n";
-    exit(EXIT_FAILURE);
-  }
+  gpuErrchk( cudaMalloc( (void **)&d_CCC, ComponentCellCenters.size() * sizeof(double) ) );
 
   // copy cell centers data from host to device
-  cudaMemcpy( d_CCC, ComponentCellCenters.data(), \
-    ComponentCellCenters.size() * sizeof(double), cudaMemcpyHostToDevice );
+  gpuErrchk( cudaMemcpy( d_CCC, ComponentCellCenters.data(), \
+    ComponentCellCenters.size() * sizeof(double), cudaMemcpyHostToDevice ) );
 
   int blockSize;
   int minGridSize;
@@ -318,25 +317,27 @@ void innerFaceConnectivity( \
   // compute
   if (DIM == 2)
   {
-    cudaOccupancyMaxPotentialBlockSize( &minGridSize, &blockSize, ifcKernel2D, 0, nCells );
+    gpuErrchk( cudaOccupancyMaxPotentialBlockSize( &minGridSize, &blockSize, ifcKernel2D, 0, nCells ) );
     gridSize = (nCells + blockSize - 1) / blockSize;
     ifcKernel2D<<< gridSize, blockSize >>>( d_CFC, d_CCC, epsx, epsy, xtol, ytol, nCells );
+    gpuErrchk( cudaPeekAtLastError() );
   }
   else if (DIM == 3)
   {
-    cudaOccupancyMaxPotentialBlockSize( &minGridSize, &blockSize, ifcKernel3D, 0, nCells );
+    gpuErrchk( cudaOccupancyMaxPotentialBlockSize( &minGridSize, &blockSize, ifcKernel3D, 0, nCells ) );
     gridSize = (nCells + blockSize - 1) / blockSize;
     ifcKernel3D<<< gridSize, blockSize >>>( d_CFC, d_CCC, epsx, epsy, epsz, xtol, ytol, ztol, nCells );
+    gpuErrchk( cudaPeekAtLastError() );
   }
 
   // copy results back to host
-  cudaMemcpy( ComponentFaceConnectivity.data(), d_CFC, \
+  gpuErrchk( cudaMemcpy( ComponentFaceConnectivity.data(), d_CFC, \
     ComponentFaceConnectivity.size() * sizeof(unsigned long), \
-    cudaMemcpyDeviceToHost );
+    cudaMemcpyDeviceToHost ) );
 
   // free device memory
-  cudaFree( d_CFC );
-  cudaFree( d_CCC );
+  gpuErrchk( cudaFree( d_CFC ) );
+  gpuErrchk( cudaFree( d_CCC ) );
 
 }
 // Function to construct the mesh from voxel array input
@@ -1295,17 +1296,21 @@ void PoreNetwork::UniformPN( double length, double width, double height, int nx,
 void SaveFluidMesh( const FluidMesh& Mesh, const std::string& outName )
 {
   {
+    /*
     std::ofstream ofs(outName.c_str());
     boost::archive::text_oarchive oa(ofs);
     oa << Mesh;
+    */
   }
 }
 void LoadFluidMesh( FluidMesh& Mesh, const std::string& inName )
 {
   // load vectors
   {
+    /*
     std::ifstream ifs(inName.c_str());
     boost::archive::text_iarchive ia(ifs);
     ia >> Mesh;
+    */
   }
 }
