@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <cuda_runtime.h>
 #include <fstream>
+#include <boost/filesystem.hpp>
 
 #include "hgfMeshCu.hpp"
 #include "hgf.hpp"
