@@ -111,7 +111,7 @@ StokesSolveDirect( const FluidMesh& Mesh, std::vector<double>& Solution, const P
   // clear paralution objects
   ls.Clear();
   mat.Clear();
-  //p.Clear();
+  p.Clear();
   forceP.Clear();
   sol.Clear();
 
@@ -352,7 +352,23 @@ void StokesSolveUZCG( const FluidMesh& Mesh, std::vector<double>& Solution, cons
 //  NewPressure :
 
 
-//  cleanup :
+  cleanup :
+    // paralution clears
+    ls1.Clear();
+    mat1.Clear();
+    p1.Clear();
+    b1.Clear();
+    x1.Clear();
+    ls2.Clear();
+    mat2.Clear();
+    p2.Clear();
+    b2.Clear();
+    x2.Clear();
+    ls3.Clear();
+    mat3.Clear();
+    p3.Clear();
+    b3.Clear();
+    x3.Clear();
 
 }
 
