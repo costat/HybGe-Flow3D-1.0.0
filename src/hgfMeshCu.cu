@@ -321,6 +321,7 @@ void innerFaceConnectivity( \
     gridSize = (nCells + blockSize - 1) / blockSize;
     ifcKernel2D<<< gridSize, blockSize >>>( d_CFC, d_CCC, epsx, epsy, xtol, ytol, nCells );
     gpuErrchk( cudaPeekAtLastError() );
+    gpuErrchk( cudaDeviceSynchronize() );
   }
   else if (DIM == 3)
   {
@@ -328,6 +329,7 @@ void innerFaceConnectivity( \
     gridSize = (nCells + blockSize - 1) / blockSize;
     ifcKernel3D<<< gridSize, blockSize >>>( d_CFC, d_CCC, epsx, epsy, epsz, xtol, ytol, ztol, nCells );
     gpuErrchk( cudaPeekAtLastError() );
+    gpuErrchk( cudaDeviceSynchronize() );
   }
 
   // copy results back to host
