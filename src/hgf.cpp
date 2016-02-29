@@ -83,7 +83,22 @@ hgfDrive( const bfs::path& ProblemPath, const bfs::path& MeshPath, ProbParam& Pa
 
       // Build mesh object
       FluidMesh Mesh;
-      Mesh.BuildUniformMesh( Par );
+      if (!Par.isMesh) {
+        Mesh.BuildUniformMesh( Par );
+        SaveFluidMesh( Mesh, MeshPath.string() );
+        if (Par.direction == -1) {
+          std::cout << "\nRequested mesh only. Mesh finished and saved. Exiting.\n";
+          goto cleanup;
+        }
+      }
+      else if (Par.isMesh) {
+        LoadFluidMesh( Mesh, MeshPath.string() );
+        if (Par.direction == -1) {
+          std::cout << "\nRequested mesh only, but mesh already exists! Exiting.\n";
+          goto cleanup;
+        }
+      }
+      std::cout << "\nMesh has been loaded\n";
 
       // Mesh Timer
       mesh_duration = ( omp_get_wtime() - start );
@@ -410,5 +425,6 @@ hgfDrive( const bfs::path& ProblemPath, const bfs::path& MeshPath, ProbParam& Pa
     }
     */
   }
-  SolverFinalize();
+  cleanup :
+    SolverFinalize();
 }

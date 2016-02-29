@@ -68,6 +68,7 @@ class FluidMesh
       ar & WBoundaryCells;
       ar & ImmersedBoundary;
       ar & FullGrid;
+      ar & DOF;
       ar & NodesLDI;
       ar & CellCentersLDI;
       ar & CellWidthsLDI;
