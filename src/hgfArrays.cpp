@@ -362,6 +362,60 @@ continuityDrive ( const FluidMesh& Mesh, std::vector<int>& matIs, \
   }
 }
 
+void
+GradientTranspose ( const FluidMesh& Mesh, std::vector<int>& matIs, std::vector<int>& matJs, \
+                    std::vector<double>& matVals )
+{
+  switch (Mesh.DIM)
+  {
+    case 2 :
+    {
+      for (int ii = 0; ii < Mesh.DOF[0]; ii++) {
+        matIs.push_back( ii );
+        matJs.push_back( Mesh.PressureCellUNeighbor[ idx2( ii, 0, 2 ) ]-1 );
+        matVals.push_back( -Mesh.PCellWidths[ idx2( ii, 1, Mesh.DIM ) ] );
+        matIs.push_back( ii );
+        matJs.push_back( Mesh.PressureCellUNeighbor[ idx2( ii, 1, 2 ) ]-1 );
+        matVals.push_back( Mesh.PCellWidths[ idx2( ii, 1, Mesh.DIM ) ] );
+
+        matIs.push_back( ii );
+        matJs.push_back( Mesh.PressureCellVNeighbor[ idx2( ii, 0, 2 ) ]-1+Mesh.DOF[1] );
+        matVals.push_back( -Mesh.PCellWidths[ idx2( ii, 0, Mesh.DIM ) ] );
+        matIs.push_back( ii );
+        matJs.push_back( Mesh.PressureCellVNeighbor[ idx2( ii, 1, 2 ) ]-1+Mesh.DOF[1] );
+        matVals.push_back( Mesh.PCellWidths[ idx2( ii, 0, Mesh.DIM ) ] );
+      }
+      break; // dim 2 break
+    }
+    default :
+    {
+      for (int ii = 0; ii < Mesh.DOF[0]; ii++) {
+        matIs.push_back( ii );
+        matJs.push_back( Mesh.PressureCellUNeighbor[ idx2( ii, 0, 2 ) ]-1 );
+        matVals.push_back( -Mesh.PCellWidths[ idx2( ii, 1, Mesh.DIM ) ]*Mesh.PCellWidths[ idx2( ii, 2, Mesh.DIM ) ] );
+        matIs.push_back( ii );
+        matJs.push_back( Mesh.PressureCellUNeighbor[ idx2( ii, 1, 2 ) ]-1 );
+        matVals.push_back( Mesh.PCellWidths[ idx2( ii, 1, Mesh.DIM ) ]*Mesh.PCellWidths[ idx2( ii, 2, Mesh.DIM ) ] );
+
+        matIs.push_back( ii );
+        matJs.push_back( Mesh.PressureCellVNeighbor[ idx2( ii, 0, 2 ) ]-1+Mesh.DOF[1] );
+        matVals.push_back( -Mesh.PCellWidths[ idx2( ii, 2, Mesh.DIM ) ]*Mesh.PCellWidths[ idx2( ii, 0, Mesh.DIM ) ] );
+        matIs.push_back( ii );
+        matJs.push_back( Mesh.PressureCellVNeighbor[ idx2( ii, 1, 2 ) ]-1+Mesh.DOF[1] );
+        matVals.push_back( Mesh.PCellWidths[ idx2( ii, 2, Mesh.DIM ) ]*Mesh.PCellWidths[ idx2( ii, 0, Mesh.DIM ) ] );
+
+        matIs.push_back( ii );
+        matJs.push_back( Mesh.PressureCellWNeighbor[ idx2( ii, 0, 2 ) ]-1+Mesh.DOF[1]+Mesh.DOF[2] );
+        matVals.push_back( -Mesh.PCellWidths[ idx2( ii, 1, Mesh.DIM ) ]*Mesh.PCellWidths[ idx2( ii, 0, Mesh.DIM ) ] );
+        matIs.push_back( ii );
+        matJs.push_back( Mesh.PressureCellWNeighbor[ idx2( ii, 1, 2 ) ]-1+Mesh.DOF[1]+Mesh.DOF[2] );
+        matVals.push_back( Mesh.PCellWidths[ idx2( ii, 1, Mesh.DIM ) ]*Mesh.PCellWidths[ idx2( ii, 0, Mesh.DIM ) ] );
+      }
+      break; // dim 3 break
+    }
+  }
+}
+
 /* StokesArray organizes the call to the previously defined functions
    to set up a finite volume discretization of the Stokes equations or
    the linear part of the Navier-Stokes equations in 2 or 3D.

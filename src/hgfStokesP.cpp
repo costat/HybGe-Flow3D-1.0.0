@@ -217,11 +217,9 @@ void StokesSolveUZCG( const FluidMesh& Mesh, std::vector<double>& Solution, cons
 
   //========= problems setup ============//
 
-  // declarations
+  // declarations for momentum solves
   std::vector<int> i1, i2, i3, j1, j2, j3;
   std::vector<double> val1, val2, val3, f1, f2, f3;
-  int continueKrylov = 1;
-  double res = Par.tolAbs + 1;
 
   i1.reserve( Mesh.DOF[1] * 7 );
   j1.reserve( Mesh.DOF[1] * 7 );
@@ -240,7 +238,7 @@ void StokesSolveUZCG( const FluidMesh& Mesh, std::vector<double>& Solution, cons
     f3.resize( Mesh.DOF[3] );
   }
 
-  // build arrays
+  // build momentum arrays
   // interior cells
   VelocityArray( Mesh, Par.visc, i1, j1, val1, 0 );
   VelocityArray( Mesh, Par.visc, i2, j2, val2, 1 );
@@ -256,11 +254,21 @@ void StokesSolveUZCG( const FluidMesh& Mesh, std::vector<double>& Solution, cons
   immersedBoundarySingleComponent( Mesh, i2, j2, val2, 1 );
   if (Mesh.DIM == 3) immersedBoundarySingleComponent( Mesh, i3, j3, val3, 2 );
 
+  // declarations for SpMVs; \grad^T matrix
+  std::vector<int> bti, btj;
+  std::vector<double> btval;
+
+  bti.reserve( 6 * Mesh.DOF[0] );
+  btj.reserve( 6 * Mesh.DOF[0] );
+  btval.reserve( 6 * Mesh.DOF[0] );
+
+  GradientTranspose( Mesh, bti, btj, btval );
+
   //============ Paralution setup =============//
 
   set_omp_threads_paralution( Par.nThreads );
 
-  // delcare paralution objects
+  // paralution objects for momentum equations
   LocalVector<double> x1, x2, x3, y;
   LocalVector<double> b1, b2, b3, by;
   LocalMatrix<double> mat1, mat2, mat3;
@@ -323,37 +331,82 @@ void StokesSolveUZCG( const FluidMesh& Mesh, std::vector<double>& Solution, cons
   ls2.Build();
   if (Mesh.DIM == 3) ls3.Build();
 
+  // paralution objects for Krylov steps
+  LocalVector<double> r, pone1, pone2, pone3, poneall, ptwo, vall;
+  LocalMatrix<double> gtmat;
+
+  int vdof = Mesh.DOF[1] + Mesh.DOF[2];
+  if (Mesh.DIM == 3) vdof += Mesh.DOF[3];
+
+  r.Allocate("residual vector", Mesh.DOF[0]);
+  r.Zeros();
+  pone1.Allocate("p upper vector 1 in cg", Mesh.DOF[1]);
+  pone1.Zeros();
+  pone2.Allocate("p upper vector 2 in cg", Mesh.DOF[2]);
+  pone2.Zeros();
+  if (Mesh.DIM == 3) {
+    pone3.Allocate("p upper vector 3 in cg", Mesh.DOF[3]);
+    pone3.Zeros();
+  }
+  ptwo.Allocate("p vector in cg", Mesh.DOF[0]);
+  ptwo.Zeros();
+  vall.Allocate("full velocity", vdof);
+  vall.Zeros();
+
+  gtmat.Assemble( bti.data(), btj.data(), btval.data(), bti.size(), "grad transpose operator", Mesh.DOF[0], vdof );
+
   // set the initial pressure
   InitPressure( Mesh, Solution, Par );
 
-  //========= krylov solve section =========//
+  //=========================================//
+  //========= krylov uzawa section =========//
+  //=========================================//
+  int continueKrylov = 1;
+  int kit = 1;
+  double res = Par.tolAbs + 1;
 
   SolveMomentum :
+  {
     // set the force in the momentum equations
     SetForceUZCG( Mesh, Solution, b1, f1, 0 );
     SetForceUZCG( Mesh, Solution, b2, f2, 1 );
     if (Mesh.DIM == 3) SetForceUZCG( Mesh, Solution, b3, f3, 2 );
 
     // solve momentum equations
+    ls1.Solve( b1, &x1 );
+    ls2.Solve( b2, &x2 );
+    if (Mesh.DIM == 3) ls3.Solve( b3, &x3 );
+    goto KryOne;
+  }
 
+  KryOne :
+  {
+    vall.CopyFrom( x1, 0, 0, Mesh.DOF[1] );
+    vall.CopyFrom( x2, 0, Mesh.DOF[1], Mesh.DOF[2] );
+    if (Mesh.DIM == 3) vall.CopyFrom( x3, 0, (Mesh.DOF[1] + Mesh.DOF[2]), Mesh.DOF[3] );
+    // compute residual r = \grad^T * [u,v,w]^T
+    gtmat.Apply( vall, &r );
+    ptwo.CopyFrom( r );
+    goto KryIt;
+  }
 
+  KryNotOne :
+  {
+    kit++;
 
-//    if (continueKrylov) goto KrylovDirection;
-//    else goto cleanup;
+    goto KryIt;
+  }
 
-//  KrylovDirection :
+  KryIt :
+  {
 
-    // compute residual r
-
-    // set p2
-
-    //
-
-//  NewPressure :
-
+    if (continutKrylov) goto KryNotOne;
+    else goto cleanup;
+  }
 
   cleanup :
     // paralution clears
+    // momentum solve objects
     ls1.Clear();
     mat1.Clear();
     p1.Clear();
@@ -369,6 +422,15 @@ void StokesSolveUZCG( const FluidMesh& Mesh, std::vector<double>& Solution, cons
     p3.Clear();
     b3.Clear();
     x3.Clear();
+    // spmv objects
+    gtmat.Clear();
+    r.Clear();
+    pone1.Clear();
+    pone2.Clear();
+    pone3.Clear();
+    poneall.Clear();
+    ptwo.Clear();
+    vall.Clear();
 
 }
 
