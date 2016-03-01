@@ -254,15 +254,33 @@ void StokesSolveUZCG( const FluidMesh& Mesh, std::vector<double>& Solution, cons
   immersedBoundarySingleComponent( Mesh, i2, j2, val2, 1 );
   if (Mesh.DIM == 3) immersedBoundarySingleComponent( Mesh, i3, j3, val3, 2 );
 
-  // declarations for SpMVs; \grad^T matrix
-  std::vector<int> bti, btj;
-  std::vector<double> btval;
+  // declarations for SpMVs; \grad^T matrix and grad_x/y/z matrices
+  std::vector<int> bti, btj, bi1, bj1, bi2, bj2, bi3, bj3;
+  std::vector<double> btval, bval1, bval2, bval3;
 
   bti.reserve( 6 * Mesh.DOF[0] );
   btj.reserve( 6 * Mesh.DOF[0] );
   btval.reserve( 6 * Mesh.DOF[0] );
 
+  bi1.reserve( 2 * Mesh.DOF[1] );
+  bj1.reserve( 2 * Mesh.DOF[1] );
+  bval1.reserve( 2 * Mesh.DOF[1] );
+
+  bi2.reserve( 2 * Mesh.DOF[2] );
+  bj2.reserve( 2 * Mesh.DOF[2] );
+  bval2.reserve( 2 * Mesh.DOF[2] );
+
+  if (Mesh.DIM == 3) {
+    bi3.reserve( 2 * Mesh.DOF[3] );
+    bj3.reserve( 2 * Mesh.DOF[3] );
+    bval3.reserve( 2 * Mesh.DOF[3] );
+  }
+
   GradientTranspose( Mesh, bti, btj, btval );
+  Gradient( Mesh, bi1, bj1, bval1, 0 );
+  Gradient( Mesh, bi2, bj2, bval2, 1 );
+  if (Mesh.DIM == 3) Gradient( Mesh, bi3, bj3, bval3, 2 );
+
 
   //============ Paralution setup =============//
 
@@ -333,7 +351,7 @@ void StokesSolveUZCG( const FluidMesh& Mesh, std::vector<double>& Solution, cons
 
   // paralution objects for Krylov steps
   LocalVector<double> r, pone1, pone2, pone3, poneall, ptwo, vall;
-  LocalMatrix<double> gtmat;
+  LocalMatrix<double> gmat1, gmat2, gmat3, gtmat;
 
   int vdof = Mesh.DOF[1] + Mesh.DOF[2];
   if (Mesh.DIM == 3) vdof += Mesh.DOF[3];
@@ -348,12 +366,16 @@ void StokesSolveUZCG( const FluidMesh& Mesh, std::vector<double>& Solution, cons
     pone3.Allocate("p upper vector 3 in cg", Mesh.DOF[3]);
     pone3.Zeros();
   }
+  poneall.Allocate("p upper full", vdof);
   ptwo.Allocate("p vector in cg", Mesh.DOF[0]);
   ptwo.Zeros();
   vall.Allocate("full velocity", vdof);
   vall.Zeros();
 
   gtmat.Assemble( bti.data(), btj.data(), btval.data(), bti.size(), "grad transpose operator", Mesh.DOF[0], vdof );
+  gmat1.Assemble( bi1.data(), bj1.data(), bval1.data(), bi1.size(), "grad x operator", Mesh.DOF[1], Mesh.DOF[0] );
+  gmat2.Assemble( bi2.data(), bj2.data(), bval2.data(), bi2.size(), "grad y operator", Mesh.DOF[2], Mesh.DOF[0] );
+  if (Mesh.DIM == 3) gmat3.Assemble( bi3.data(), bj3.data(), bval3.data(), bi3.size(), "grad z operator", Mesh.DOF[3], Mesh.DOF[0] );
 
   // set the initial pressure
   InitPressure( Mesh, Solution, Par );
@@ -400,7 +422,7 @@ void StokesSolveUZCG( const FluidMesh& Mesh, std::vector<double>& Solution, cons
   KryIt :
   {
 
-    if (continutKrylov) goto KryNotOne;
+    if (continueKrylov) goto KryNotOne;
     else goto cleanup;
   }
 
@@ -422,7 +444,7 @@ void StokesSolveUZCG( const FluidMesh& Mesh, std::vector<double>& Solution, cons
     p3.Clear();
     b3.Clear();
     x3.Clear();
-    // spmv objects
+    // krylov it objects
     gtmat.Clear();
     r.Clear();
     pone1.Clear();
@@ -431,7 +453,6 @@ void StokesSolveUZCG( const FluidMesh& Mesh, std::vector<double>& Solution, cons
     poneall.Clear();
     ptwo.Clear();
     vall.Clear();
-
 }
 
 void SolverInit( void )

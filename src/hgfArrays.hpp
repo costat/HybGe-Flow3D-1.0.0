@@ -50,6 +50,9 @@ GradientTranspose( const FluidMesh& Mesh, std::vector<int>& matIs, \
                    std::vector<int>& matJs, std::vector<double>& matVals );
 
 void
+Gradient ( const FluidMesh& Mesh, std::vector<int>& matIs, std::vector<int>& matJs, std::vector<double>& matVals, int component );
+
+void
 StokesArray ( const FluidMesh& Mesh, double visc, std::vector<int>& matIs, \
               std::vector<int>& matJs, std::vector<double>& matVals );
 

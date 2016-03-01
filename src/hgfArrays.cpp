@@ -416,6 +416,54 @@ GradientTranspose ( const FluidMesh& Mesh, std::vector<int>& matIs, std::vector<
   }
 }
 
+void
+Gradient ( const FluidMesh& Mesh, std::vector<int>& matIs, std::vector<int>& matJs, std::vector<double>& matVals, int component )
+{
+  switch (component)
+  {
+    case 0 :
+    {
+      for (int ii = 0; ii < Mesh.DOF[1]; ii++) {
+        matIs.push_back( ii );
+        matJs.push_back( Mesh.UCellPressureNeighbor[ idx2( ii, 0, 2 ) ]-1 );
+        if (Mesh.DIM == 2) matVals.push_back( -Mesh.UCellWidths[ idx2( ii, 1, Mesh.DIM ) ] );
+        else matVals.push_back( -Mesh.UCellWidths[ idx2( ii, 1, Mesh.DIM ) ]*Mesh.UCellWidths[ idx2( ii, 2, Mesh.DIM ) ] );
+        matIs.push_back( ii );
+        matJs.push_back( Mesh.UCellPressureNeighbor[ idx2( ii, 1, 2 ) ]-1 );
+        if (Mesh.DIM == 2) matVals.push_back( Mesh.UCellWidths[ idx2( ii, 1, Mesh.DIM ) ] );
+        else matVals.push_back( Mesh.UCellWidths[ idx2( ii, 1, Mesh.DIM ) ]*Mesh.UCellWidths[ idx2( ii, 2, Mesh.DIM ) ] );
+      }
+      break; // x component break;
+    }
+    case 1 :
+    {
+      for (int ii = 0; ii < Mesh.DOF[2]; ii++) {
+        matIs.push_back( ii );
+        matJs.push_back( Mesh.VCellPressureNeighbor[ idx2( ii, 0, 2 ) ]-1 );
+        if (Mesh.DIM == 2) matVals.push_back( -Mesh.VCellWidths[ idx2( ii, 0, Mesh.DIM ) ] );
+        else matVals.push_back( -Mesh.VCellWidths[ idx2( ii, 0, Mesh.DIM ) ]*Mesh.VCellWidths[ idx2( ii, 2, Mesh.DIM ) ] );
+        matIs.push_back( ii );
+        matJs.push_back( Mesh.VCellPressureNeighbor[ idx2( ii, 1, 2 ) ]-1 );
+        if (Mesh.DIM == 2) matVals.push_back( Mesh.VCellWidths[ idx2( ii, 0, Mesh.DIM ) ] );
+        else matVals.push_back( Mesh.VCellWidths[ idx2( ii, 0, Mesh.DIM ) ]*Mesh.VCellWidths[ idx2( ii, 2, Mesh.DIM ) ] );
+      }
+      break; // y component break;
+    }
+    case 2 :
+    {
+      for (int ii = 0; ii < Mesh.DOF[3]; ii++) {
+        matIs.push_back( ii );
+        matJs.push_back( Mesh.WCellPressureNeighbor[ idx2( ii, 0, 2 ) ]-1 );
+        matVals.push_back( -Mesh.WCellWidths[ idx2( ii, 1, Mesh.DIM ) ]*Mesh.WCellWidths[ idx2( ii, 0, Mesh.DIM ) ] );
+        matIs.push_back( ii );
+        matJs.push_back( Mesh.WCellPressureNeighbor[ idx2( ii, 1, 2 ) ]-1 );
+        matVals.push_back( Mesh.WCellWidths[ idx2( ii, 1, Mesh.DIM ) ]*Mesh.WCellWidths[ idx2( ii, 0, Mesh.DIM ) ] );
+      }
+      break; // z component break;
+    }
+  }
+}
+
 /* StokesArray organizes the call to the previously defined functions
    to set up a finite volume discretization of the Stokes equations or
    the linear part of the Navier-Stokes equations in 2 or 3D.
