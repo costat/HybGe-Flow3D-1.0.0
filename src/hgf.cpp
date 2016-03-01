@@ -108,6 +108,7 @@ hgfDrive( const bfs::path& ProblemPath, const bfs::path& MeshPath, ProbParam& Pa
       std::vector< double > sol;
       sol.resize( Mesh.dofTotal );
       StokesSolveDirect( Mesh, sol, Par );
+      //StokesSolveUZCG( Mesh, sol, Par );
 
       // Linear solve timer
       stokes_duration = ( omp_get_wtime() - stokes_start );

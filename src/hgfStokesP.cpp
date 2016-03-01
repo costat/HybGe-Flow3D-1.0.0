@@ -281,7 +281,6 @@ void StokesSolveUZCG( const FluidMesh& Mesh, std::vector<double>& Solution, cons
   Gradient( Mesh, bi2, bj2, bval2, 1 );
   if (Mesh.DIM == 3) Gradient( Mesh, bi3, bj3, bval3, 2 );
 
-
   //============ Paralution setup =============//
 
   set_omp_threads_paralution( Par.nThreads );
@@ -317,16 +316,16 @@ void StokesSolveUZCG( const FluidMesh& Mesh, std::vector<double>& Solution, cons
   GMRES<LocalMatrix<double>, LocalVector<double>, double> ls1;
   ls1.Init( Par.tolAbs, Par.tolRel, 1e8, Par.maxIt );
   ls1.SetOperator( mat1 );
-  ls1.Verbose( 1 );
+  ls1.Verbose( 2 );
   GMRES<LocalMatrix<double>, LocalVector<double>, double> ls2;
   ls2.Init( Par.tolAbs, Par.tolRel, 1e8, Par.maxIt );
   ls2.SetOperator( mat2 );
-  ls2.Verbose( 1 );
+  ls2.Verbose( 2 );
   GMRES<LocalMatrix<double>, LocalVector<double>, double> ls3;
   if (Mesh.DIM == 3) {
     ls3.Init( Par.tolAbs, Par.tolRel, 1e8, Par.maxIt );
     ls3.SetOperator( mat3 );
-    ls3.Verbose( 1 );
+    ls3.Verbose( 2 );
   }
 
   // preconditioning
@@ -350,7 +349,7 @@ void StokesSolveUZCG( const FluidMesh& Mesh, std::vector<double>& Solution, cons
   if (Mesh.DIM == 3) ls3.Build();
 
   // paralution objects for Krylov steps
-  LocalVector<double> r, pone1, pone2, pone3, poneall, ptwo, vall;
+  LocalVector<double> r, pone1, pone2, pone3, poneall, ptwo, vall, ptp1, ptp2, ptp3, atwo, resvec;
   LocalMatrix<double> gmat1, gmat2, gmat3, gtmat;
 
   int vdof = Mesh.DOF[1] + Mesh.DOF[2];
@@ -371,14 +370,30 @@ void StokesSolveUZCG( const FluidMesh& Mesh, std::vector<double>& Solution, cons
   ptwo.Zeros();
   vall.Allocate("full velocity", vdof);
   vall.Zeros();
+  ptp1.Allocate("from p2 to p1", Mesh.DOF[1]);
+  ptp1.Zeros();
+  ptp2.Allocate("from p2 to p1", Mesh.DOF[2]);
+  ptp2.Zeros();
+  if (Mesh.DIM == 3) {
+    ptp3.Allocate("from p2 to p1", Mesh.DOF[3]);
+    ptp3.Zeros();
+  }
+  atwo.Allocate("atwo", Mesh.DOF[0]);
+  atwo.Zeros();
 
-  gtmat.Assemble( bti.data(), btj.data(), btval.data(), bti.size(), "grad transpose operator", Mesh.DOF[0], vdof );
   gmat1.Assemble( bi1.data(), bj1.data(), bval1.data(), bi1.size(), "grad x operator", Mesh.DOF[1], Mesh.DOF[0] );
   gmat2.Assemble( bi2.data(), bj2.data(), bval2.data(), bi2.size(), "grad y operator", Mesh.DOF[2], Mesh.DOF[0] );
   if (Mesh.DIM == 3) gmat3.Assemble( bi3.data(), bj3.data(), bval3.data(), bi3.size(), "grad z operator", Mesh.DOF[3], Mesh.DOF[0] );
+  gtmat.Assemble( bti.data(), btj.data(), btval.data(), bti.size(), "grad transpose operator", Mesh.DOF[0], vdof );
 
   // set the initial pressure
   InitPressure( Mesh, Solution, Par );
+  y.Allocate("pressure para", Mesh.DOF[0]);
+  y.CopyFromData( &Solution[vdof] );
+  resvec.Allocate("residual vector", Mesh.DOF[0]);
+  resvec.Zeros();
+
+  std::cout << "\nSolving model with CG-Uzawa Scheme...\n";
 
   //=========================================//
   //========= krylov uzawa section =========//
@@ -386,6 +401,7 @@ void StokesSolveUZCG( const FluidMesh& Mesh, std::vector<double>& Solution, cons
   int continueKrylov = 1;
   int kit = 1;
   double res = Par.tolAbs + 1;
+  double alpha, beta;
 
   SolveMomentum :
   {
@@ -415,18 +431,49 @@ void StokesSolveUZCG( const FluidMesh& Mesh, std::vector<double>& Solution, cons
   KryNotOne :
   {
     kit++;
-
+    beta = r.Dot( atwo )/ptwo.Dot( atwo );
+    ptwo.ScaleAddScale( (-beta), r, 1 );
     goto KryIt;
   }
 
   KryIt :
   {
+    gmat1.Apply( ptwo, &ptp1 );
+    gmat2.Apply( ptwo, &ptp2 );
+    if (Mesh.DIM == 3 ) gmat3.Apply( ptwo, &ptp3 );
+    ls1.Solve( ptp1, &pone1 );
+    ls2.Solve( ptp2, &pone2 );
+    if (Mesh.DIM == 3) ls3.Solve( ptp3, &pone3 );
+    poneall.CopyFrom( pone1, 0, 0, Mesh.DOF[1] );
+    poneall.CopyFrom( pone2, 0, Mesh.DOF[1], Mesh.DOF[2] );
+    if (Mesh.DIM == 3) poneall.CopyFrom( pone3, 0, (Mesh.DOF[1]+Mesh.DOF[2]), Mesh.DOF[3] );
+    gtmat.Apply( poneall, &atwo );
+    alpha = ptwo.Dot( r ) / ptwo.Dot( atwo );
 
+    // updates
+    y.AddScale( ptwo, alpha );
+    r.AddScale( atwo, (-alpha) );
+    vall.AddScale( poneall, (-alpha) );
+
+    // check continuity eq residual
+    gtmat.Apply( vall, &resvec );
+    res = resvec.Norm();
+    std::cout << "\nKrylov-Uzawa Residual " << res << " at iteration " << kit << "\n";
+    if (res < Par.tolAbs) continueKrylov = 0;
+
+    // end or advance an iteration
     if (continueKrylov) goto KryNotOne;
     else goto cleanup;
   }
 
   cleanup :
+    // get solution data to Solution vector
+    for (int ii = 0; ii < vdof; ii++) {
+      Solution[ii] = vall[ii];
+    }
+    for (int ii = 0; ii < Mesh.DOF[0]; ii++) {
+      Solution[vdof+ii] = y[ii];
+    }
     // paralution clears
     // momentum solve objects
     ls1.Clear();
@@ -453,6 +500,11 @@ void StokesSolveUZCG( const FluidMesh& Mesh, std::vector<double>& Solution, cons
     poneall.Clear();
     ptwo.Clear();
     vall.Clear();
+    atwo.Clear();
+    resvec.Clear();
+    gmat1.Clear();
+    gmat2.Clear();
+    gmat3.Clear();
 }
 
 void SolverInit( void )
