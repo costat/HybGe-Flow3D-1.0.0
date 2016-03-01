@@ -287,7 +287,7 @@ void StokesSolveUZCG( const FluidMesh& Mesh, std::vector<double>& Solution, cons
 
   // paralution objects for momentum equations
   LocalVector<double> x1, x2, x3, y;
-  LocalVector<double> b1, b2, b3, by;
+  LocalVector<double> b1, b2, b3;
   LocalMatrix<double> mat1, mat2, mat3;
 
   // initialize force and solution vectors
@@ -295,11 +295,10 @@ void StokesSolveUZCG( const FluidMesh& Mesh, std::vector<double>& Solution, cons
   b1.Zeros();
   b2.Allocate("force vector v", Mesh.DOF[2]);
   b2.Zeros();
-  if (Mesh.DIM == 3)
   x1.Allocate("solution u", Mesh.DOF[1]);
   x1.Zeros();
   x2.Allocate("solution v", Mesh.DOF[2]);
-  x3.Zeros();
+  x2.Zeros();
   if (Mesh.DIM == 3) {
     b3.Allocate("force vector w", Mesh.DOF[3]);
     b3.Zeros();
