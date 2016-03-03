@@ -346,8 +346,6 @@ void innerFaceConnectivity( \
 // Function to construct the mesh from voxel array input
 void FluidMesh::BuildUniformMesh( const ProbParam& Par )
 {
-  int checkVert;
-  int maxPNodes;
   int numPCells = 0;
   int numVoid = 0;
   xLim[0] = 0;
@@ -372,9 +370,7 @@ void FluidMesh::BuildUniformMesh( const ProbParam& Par )
       NY = Par.ny;
       NZ = Par.nz;
 
-      // Max pressure nodes
-      std::vector<double> nodeHold;
-      nodeHold.resize(2);
+      // # pressure nodes
       for (int yi = 0; yi < Par.ny; yi++) {
         for (int xi = 0; xi < Par.nx; xi++) {
           if (Par.gridin[ idx2(yi, xi, Par.nx) ] != 1) {
@@ -383,60 +379,44 @@ void FluidMesh::BuildUniformMesh( const ProbParam& Par )
           }
         }
       }
-      maxPNodes = numPCells * 4;
-      int nNodes = 0;
+      int nNodes = numPCells * 4;
       double dx = Par.length / Par.nx;
       double dy = Par.width / Par.ny;
       double dz = 0;
-      int countCell = -1;
       mv.resize( (numPCells * 4) );
-      double cellVert [ 8 ];
       porosity = numVoid/(double)(Par.nx * Par.ny);
 
       // First we buil FullGrid, ImmersedBoundary, and Nodes.
       FullGrid.reserve((Par.nx * Par.ny));
       ImmersedBoundary.reserve(numPCells);
-      Nodes.reserve((maxPNodes * 2));
-
+      Nodes.reserve((nNodes * 2));
+      int countCell = -1;
       for (int yi = 0; yi < Par.ny; yi++) {
         for (int xi = 0; xi < Par.nx; xi++) {
           FullGrid.push_back(Par.gridin[ idx2(yi, xi, Par.nx) ]);
           if (Par.gridin[ idx2( yi, xi, Par.nx ) ] != 1) {
             countCell++;
             ImmersedBoundary.push_back(Par.gridin[ idx2(yi, xi, Par.nx) ]);
-            cellVert[0] = (xi + 1) * dx - dx;
-            cellVert[1] = (yi + 1) * dy - dy;
-            cellVert[2] = (xi + 1) * dx;
-            cellVert[3] = cellVert[1];
-            cellVert[4] = cellVert[2];
-            cellVert[5] = (yi + 1) * dy;
-            cellVert[6] = cellVert[0];
-            cellVert[7] = cellVert[5];
 
-            for (int pcount = 0; pcount < 4; pcount++) {
-              nodeHold[0] = cellVert[ idx2( pcount, 0, 2 ) ];
-              nodeHold[1] = cellVert[ idx2( pcount, 1, 2 ) ];
-              if ( !countCell ) { // countCell = 0 -> first cell so no possible
-                                // node duplicates
-                checkVert = -1;
-              }
-              else {
-                checkVert = isNear2d( nodeHold, Nodes, dx, dy, dz, nNodes );
-              }
-              if (checkVert == -1) { // node is not a duplicate
-                nNodes++;
-                Nodes.push_back(nodeHold[0]);
-                Nodes.push_back(nodeHold[1]);
-                mv[ idx2( countCell, pcount, 4 ) ] = nNodes-1;
-              }
-              else { // node is a duplicate
-                mv[ idx2( countCell, pcount, 4 ) ] = checkVert;
-              }
-            }
+            Nodes.push_back( (xi + 1) * dx - dx );
+            Nodes.push_back( (yi + 1) * dy - dy );
+
+            Nodes.push_back( (xi + 1) * dx );
+            Nodes.push_back( (yi + 1) * dy - dy );
+
+            Nodes.push_back( (xi + 1) * dx );
+            Nodes.push_back( (yi + 1) * dy );
+
+            Nodes.push_back( (xi + 1) * dx - dx );
+            Nodes.push_back( (yi + 1) * dy );
+
+            mv[ idx2( countCell, 0, 4 ) ] = countCell*4;
+            mv[ idx2( countCell, 1, 4 ) ] = countCell*4 + 1;
+            mv[ idx2( countCell, 2, 4 ) ] = countCell*4 + 2;
+            mv[ idx2( countCell, 3, 4 ) ] = countCell*4 + 3;
           }
         }
       }
-      Nodes.resize(Nodes.size());
 
       // Next we compute cell centers for pressures
       PCellCenters.resize((numPCells * 2));
@@ -455,6 +435,7 @@ void FluidMesh::BuildUniformMesh( const ProbParam& Par )
       /* We finish mesh construction concurrently, since staggered grids
          for each component are constructed from the P grid, independent
          of other velocity components */
+      double cellVert[8];
       #pragma omp parallel sections
       {
         { // Final P computations
@@ -664,10 +645,11 @@ void FluidMesh::BuildUniformMesh( const ProbParam& Par )
       FaceConnectivityLDI = 6;
       PressureCellVelocityNeighborLDI = 2;
       VelocityCellPressureNeighborLDI = 2;
+      NX = Par.nx;
+      NY = Par.ny;
+      NZ = Par.nz;
 
-      // Max pressure nodes
-      std::vector<double> nodeHold;
-      nodeHold.resize(3);
+      // # pressure nodes
       for (int zi = 0; zi < Par.nz; zi++) {
         for (int yi = 0; yi < Par.ny; yi++) {
           for (int xi = 0; xi < Par.nx; xi++) {
@@ -678,21 +660,18 @@ void FluidMesh::BuildUniformMesh( const ProbParam& Par )
           }
         }
       }
-      maxPNodes = numPCells * 8;
-
-      int nNodes = 0;
+      int nNodes = numPCells * 8;
       double dx = Par.length / Par.nx;
       double dy = Par.width / Par.ny;
       double dz = Par.height / Par.nz;
-      int countCell = -1;
       mv.resize( (numPCells * 8) );
-      double cellVert [ 24 ];
       porosity = numVoid /(double)(Par.nx * Par.ny * Par.nz);
 
       // First we buil FullGrid, ImmersedBoundary, and Nodes.
       FullGrid.reserve((Par.nx * Par.ny * Par.nz));
       ImmersedBoundary.reserve(numPCells);
-      Nodes.reserve((maxPNodes * 3));
+      Nodes.reserve((nNodes * 3));
+      int countCell = -1;
       for (int zi = 0; zi < Par.nz; zi++) {
         for (int yi = 0; yi < Par.ny; yi++) {
           for (int xi = 0; xi < Par.nx; xi++) {
@@ -701,60 +680,46 @@ void FluidMesh::BuildUniformMesh( const ProbParam& Par )
               countCell++;
               ImmersedBoundary.push_back(Par.gridin[ idx3(zi, yi, xi, Par.ny, Par.nx) ]);
 
-              cellVert[0] = (xi + 1) * dx - dx;
-              cellVert[1] = (yi + 1) * dy - dy;
-              cellVert[2] = (zi + 1) * dz - dz;
+              Nodes.push_back( (xi + 1) * dx - dx );
+              Nodes.push_back( (yi + 1) * dy - dy );
+              Nodes.push_back( (zi + 1) * dz - dz );
 
-              cellVert[3] = (xi + 1) * dx;
-              cellVert[4] = cellVert[1];
-              cellVert[5] = cellVert[2];
+              Nodes.push_back( (xi + 1) * dx );
+              Nodes.push_back( (yi + 1) * dy - dy );
+              Nodes.push_back( (zi + 1) * dz - dz );
 
-              cellVert[6] = cellVert[3];
-              cellVert[7] = (yi + 1) * dy;
-              cellVert[8] = cellVert[2];
+              Nodes.push_back( (xi + 1) * dx );
+              Nodes.push_back( (yi + 1) * dy );
+              Nodes.push_back( (zi + 1) * dz - dz );
 
-              cellVert[9] = cellVert[0];
-              cellVert[10] = cellVert[7];
-              cellVert[11] = cellVert[2];
+              Nodes.push_back( (xi + 1) * dx - dx );
+              Nodes.push_back( (yi + 1) * dy );
+              Nodes.push_back( (zi + 1) * dz - dz );
 
-              cellVert[12] = cellVert[0];
-              cellVert[13] = cellVert[7];
-              cellVert[14] = (zi + 1) * dz;
+              Nodes.push_back( (xi + 1) * dx - dx);
+              Nodes.push_back( (yi + 1) * dy );
+              Nodes.push_back( (zi + 1) * dz );
 
-              cellVert[15] = cellVert[3];
-              cellVert[16] = cellVert[7];
-              cellVert[17] = cellVert[14];
+              Nodes.push_back( (xi + 1) * dx );
+              Nodes.push_back( (yi + 1) * dy );
+              Nodes.push_back( (zi + 1) * dz );
 
-              cellVert[18] = cellVert[3];
-              cellVert[19] = cellVert[1];
-              cellVert[20] = cellVert[14];
+              Nodes.push_back( (xi + 1) * dx );
+              Nodes.push_back( (yi + 1) * dy - dy );
+              Nodes.push_back( (zi + 1) * dz );
 
-              cellVert[21] = cellVert[0];
-              cellVert[22] = cellVert[1];
-              cellVert[23] = cellVert[14];
+              Nodes.push_back( (xi + 1) * dx - dx );
+              Nodes.push_back( (yi + 1) * dy - dy );
+              Nodes.push_back( (zi + 1) * dz );
 
-              for (int pcount = 0; pcount < 8; pcount++) {
-                nodeHold[0] = cellVert[ idx2( pcount, 0, 3 ) ];
-                nodeHold[1] = cellVert[ idx2( pcount, 1, 3 ) ];
-                nodeHold[2] = cellVert[ idx2( pcount, 2, 3 ) ];
-                if ( !countCell ) { // countCell = 0 -> first cell so no possible
-                                  // node duplicates
-                  checkVert = -1;
-                }
-                else {
-                  checkVert = isNear3d( nodeHold, Nodes, dx, dy, dz, nNodes );
-                }
-                if (checkVert == -1) { // node is not a duplicate
-                  nNodes++;
-                  Nodes.push_back(nodeHold[0]);
-                  Nodes.push_back(nodeHold[1]);
-                  Nodes.push_back(nodeHold[2]);
-                  mv[ idx2( countCell, pcount, 8 ) ] = nNodes-1;
-                }
-                else { // node is a duplicate
-                  mv[ idx2( countCell, pcount, 8 ) ] = checkVert;
-                }
-              }
+              mv[ idx2( countCell, 0, 8 ) ] = countCell*8;
+              mv[ idx2( countCell, 1, 8 ) ] = countCell*8+1;
+              mv[ idx2( countCell, 2, 8 ) ] = countCell*8+2;
+              mv[ idx2( countCell, 3, 8 ) ] = countCell*8+3;
+              mv[ idx2( countCell, 4, 8 ) ] = countCell*8+4;
+              mv[ idx2( countCell, 5, 8 ) ] = countCell*8+5;
+              mv[ idx2( countCell, 6, 8 ) ] = countCell*8+6;
+              mv[ idx2( countCell, 7, 8 ) ] = countCell*8+7;
             }
           }
         }
@@ -781,6 +746,7 @@ void FluidMesh::BuildUniformMesh( const ProbParam& Par )
       /* We finish mesh construction concurrently, since staggered grids
          for each component are constructed from the P grid, indendent of other
          velocity components.*/
+      double cellVert [ 24 ];
       #pragma omp parallel sections
       {
         { // Final P computations
