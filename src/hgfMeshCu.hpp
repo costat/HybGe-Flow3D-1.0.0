@@ -109,10 +109,6 @@ class FluidMesh
     int VelocityDOF( void );
     void BuildUniformMesh( const ProbParam& Par );
   private:
-    int isNear2d( std::vector<double>& Vector1, std::vector<double>& Vector2, \
-                  double dx, double dy, double dz, int nNodes );
-    int isNear3d( std::vector<double>& Vector1, std::vector<double>& Vector2, \
-                  double dx, double dy, double dz, int nNodes );
     void TotalDOF( void );
     void MaxNonZero( void );
     void sortPV( void );

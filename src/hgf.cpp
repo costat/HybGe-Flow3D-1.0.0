@@ -88,6 +88,8 @@ hgfDrive( const bfs::path& ProblemPath, const bfs::path& MeshPath, ProbParam& Pa
         SaveFluidMesh( Mesh, MeshPath.string() );
         if (Par.direction == -1) {
           std::cout << "\nRequested mesh only. Mesh finished and saved. Exiting.\n";
+          mesh_duration = ( omp_get_wtime() - start );
+          std::cout << "Mesh constructed in " << mesh_duration << "seconds.\n\n";
           goto cleanup;
         }
       }
@@ -426,6 +428,7 @@ hgfDrive( const bfs::path& ProblemPath, const bfs::path& MeshPath, ProbParam& Pa
     }
     */
   }
+
   cleanup :
     SolverFinalize();
 }
