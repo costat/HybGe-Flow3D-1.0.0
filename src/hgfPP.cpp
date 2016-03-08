@@ -1071,7 +1071,8 @@ writeSolutionPV ( const FluidMesh& Mesh, const std::vector<double>& sol, \
 }
 void
 computeKPoreNetwork( const PoreNetwork& pn, const std::vector<double>& Solution, \
-                     const std::vector<double>& Ks, double& K, int direction, int print )
+                     const std::vector<double>& Ks, double& K, int direction, int print, \
+                     const std::string& KoutName )
 {
   int dirIn;
   double A, L;
@@ -1138,7 +1139,7 @@ computeKPoreNetwork( const PoreNetwork& pn, const std::vector<double>& Solution,
   if (print) {
     // Write out K
     std::ofstream KPNout;
-    KPNout.open("./output/KPoreNetwork.dat");
+    KPNout.open(KoutName.c_str());
     KPNout << K;
     KPNout.close();
   }

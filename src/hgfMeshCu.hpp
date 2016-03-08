@@ -16,17 +16,8 @@ __global__ void ifcKernel3D ( unsigned long *d_CFC, const double *d_CCC, \
                               double epsx, double epsy, double epsz, \
                               double xtol, double ytol, double ztol, \
                               int nCells );
-void MeshSubdivide( unsigned long *gridin, int ldi1, int ldi2, \
-                    int nx, int ny, int nz, \
-                    double length, double width, double height, \
-                    int MX, int MY, int MZ, \
-                    std::vector< std::vector<unsigned long> >& slices, \
-                    std::vector<double>& lengths, \
-                    std::vector<double>& widths, \
-                    std::vector<double>& heights, \
-                    std::vector<int>& nxs, \
-                    std::vector<int>& nys, \
-                    std::vector<int>& nzs );
+void MeshSubdivide( const ProbParam& Par, \
+                    std::vector< ProbParam >& SubPar );
 void innerFaceConnectivity( std::vector<unsigned long>& ComponentFaceConnectivity, \
                             const std::vector<double>& ComponentCellCenters, \
                             double dx, double dy, double dz, int nCells, int DIM );
@@ -124,7 +115,7 @@ class PoreNetwork
     int DIM, nPores, nThroats;
     double dx, dy, dz, psLength, psWidth, psHeight;
     // public functions
-    void UniformPN( double length, double width, double height, int nx, int ny, int nz );
+    void UniformPN( const ProbParam& Par );
 };
 
 void SaveFluidMesh( const FluidMesh& Mesh, const std::string& outName );

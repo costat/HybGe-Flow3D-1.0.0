@@ -194,7 +194,6 @@ hgfDrive( const bfs::path& ProblemPath, const bfs::path& MeshPath, ProbParam& Pa
       std::cout << "Total time: " << total_duration << "seconds\n";
       break;
     }
-    /*
     case 2 :
     { // compute conductivities on subdomains, then solve constructed pore-network problem
 
@@ -202,21 +201,27 @@ hgfDrive( const bfs::path& ProblemPath, const bfs::path& MeshPath, ProbParam& Pa
       double start, stokes_start, pn_start;
 
       start = omp_get_wtime();
-      // determine array slices for subdomains
-      std::vector< std::vector< unsigned long > > slices;
-      std::vector< double > lengths, widths, heights;
-      std::vector< int > nxs, nys, nzs;
-      MeshSubdivide( gridin, ldi1, ldi2, nx, ny, nz, \
-                     length, width, height, MX, MY, MZ, \
-                     slices, lengths, widths, heights, \
-                     nxs, nys, nzs );
+      // setup problem parameter objects for subdomains
+      std::vector< ProbParam > SubPar;
+      if (Par.nz) SubPar.resize( Par.nCuts * Par.nCuts * Par.nCuts );
+      else SubPar.resize( Par.nCuts * Par.nCuts );
+      for (int ii = 0; ii < SubPar.size(); ii++) {
+        SubPar[ii].nThreads = Par.nThreads;
+        SubPar[ii].prec = Par.prec;
+        SubPar[ii].direction = Par.direction;
+        SubPar[ii].output = Par.output;
+        SubPar[ii].maxIt = Par.maxIt;
+        SubPar[ii].visc = Par.visc;
+        SubPar[ii].tolAbs = Par.tolAbs;
+        SubPar[ii].tolRel = Par.tolRel;
+      }
+      MeshSubdivide( Par, SubPar );
 
       // build meshes
       std::vector< FluidMesh > Meshes;
-      Meshes.resize( slices.size() );
-      for (unsigned long sd = 0; sd < slices.size(); sd++) {
-        Meshes[sd].BuildUniformMesh( slices[sd].data(), nys[sd], nzs[sd], nxs[sd], nys[sd], nzs[sd], \
-                                     lengths[sd], widths[sd], heights[sd] );
+      Meshes.resize( SubPar.size() );
+      for (int sd = 0; sd < SubPar.size(); sd++) {
+        Meshes[sd].BuildUniformMesh( SubPar[sd] );
       }
 
       mesh_duration = ( omp_get_wtime() - start );
@@ -224,89 +229,67 @@ hgfDrive( const bfs::path& ProblemPath, const bfs::path& MeshPath, ProbParam& Pa
 
       // solve porescale problems
       std::vector< std::vector< double > > Solutions;
-      Solutions.resize( Meshes[0].DIM*slices.size() );
+      Solutions.resize( Meshes[0].DIM*SubPar.size() );
 
-      if ( nz ) {
-        for (unsigned long sd = 0; sd < slices.size(); sd++) {
+      if ( Par.nz ) {
+        for (int sd = 0; sd < SubPar.size(); sd++) {
           Solutions[ idx2( sd, 0, 3 ) ].resize( Meshes[sd].dofTotal );
           Solutions[ idx2( sd, 1, 3 ) ].resize( Meshes[sd].dofTotal );
           Solutions[ idx2( sd, 2, 3 ) ].resize( Meshes[sd].dofTotal );
-          if (solver == 0) {
-            std::cout << "\nSolving x-flow problem on submesh " << sd << "\n\n";
-            StokesSolveDirect( Meshes[sd], visc, 0, Solutions[ idx2( sd, 0, 3 ) ], \
-                               tolAbs, tolRel, maxIt, nThreads, prec );
-            std::cout << "\nSolving y-flow problem on submesh " << sd << "\n\n";
-            StokesSolveDirect( Meshes[sd], visc, 1, Solutions[ idx2( sd, 1, 3 ) ], \
-                               tolAbs, tolRel, maxIt, nThreads, prec );
-            std::cout << "\nSolving z-flow problem on submesh " << sd << "\n\n";
-            StokesSolveDirect( Meshes[sd], visc, 2, Solutions[ idx2( sd, 2, 3 ) ], \
-                               tolAbs, tolRel, maxIt, nThreads, prec );
-          }
-          else {
-            std::cout << "\nSolving x-flow problem on submesh " << sd << "\n\n";
-            StokesSolveRich( Meshes[sd], visc, 0, Solutions[ idx2( sd, 0, 3 ) ], \
-                             tolAbs, tolRel, maxIt, nThreads, prec, relax );
-            std::cout << "\nSolving y-flow problem on submesh " << sd << "\n\n";
-            StokesSolveRich( Meshes[sd], visc, 1, Solutions[ idx2( sd, 1, 3 ) ], \
-                             tolAbs, tolRel, maxIt, nThreads, prec, relax );
-            std::cout << "\nSolving z-flow problem on submesh " << sd << "\n\n";
-            StokesSolveRich( Meshes[sd], visc, 2, Solutions[ idx2( sd, 2, 3 ) ], \
-                             tolAbs, tolRel, maxIt, nThreads, prec, relax );
-          }
+          std::cout << "\nSolving x-flow problem on submesh " << sd << "\n\n";
+          SubPar[sd].direction = 0;
+          StokesSolveDirect( Meshes[sd], Solutions[ idx2( sd, 0, 3 ) ], SubPar[sd] );
+          std::cout << "\nSolving y-flow problem on submesh " << sd << "\n\n";
+          SubPar[sd].direction = 1;
+          StokesSolveDirect( Meshes[sd], Solutions[ idx2( sd, 1, 3 ) ], SubPar[sd]);
+          std::cout << "\nSolving z-flow problem on submesh " << sd << "\n\n";
+          SubPar[sd].direction = 2;
+          StokesSolveDirect( Meshes[sd], Solutions[ idx2( sd, 2, 3 ) ], SubPar[sd] );
         }
       }
       else {
-        for (unsigned long sd = 0; sd < slices.size(); sd++) {
+        for (int sd = 0; sd < SubPar.size(); sd++) {
           Solutions[ idx2( sd, 0, 2 ) ].resize( Meshes[sd].dofTotal );
           Solutions[ idx2( sd, 1, 2 ) ].resize( Meshes[sd].dofTotal );
-          if (solver == 0) {
-            std::cout << "\nSolving x-flow problem on submesh " << sd << "\n\n";
-            StokesSolveDirect( Meshes[sd], visc, 0, Solutions[ idx2( sd, 0, 2 ) ], \
-                               tolAbs, tolRel, maxIt, nThreads, prec );
-            std::cout << "\nSolving y-flow problem on submesh " << sd << "\n\n";
-            StokesSolveDirect( Meshes[sd], visc, 1, Solutions[ idx2( sd, 1, 2 ) ], \
-                               tolAbs, tolRel, maxIt, nThreads, prec );
-          }
-          else {
-            std::cout << "\nSolving x-flow problem on submesh " << sd << "\n\n";
-            StokesSolveRich( Meshes[sd], visc, 0, Solutions[ idx2( sd, 0, 2 ) ], \
-                             tolAbs, tolRel, maxIt, nThreads, prec, relax );
-            std::cout << "\nSolving y-flow problem on submesh " << sd << "\n\n";
-            StokesSolveRich( Meshes[sd], visc, 1, Solutions[ idx2( sd, 1, 2 ) ], \
-                             tolAbs, tolRel, maxIt, nThreads, prec, relax );
-          }
+          std::cout << "\nSolving x-flow problem on submesh " << sd << "\n\n";
+          SubPar[sd].direction = 0;
+          StokesSolveDirect( Meshes[sd], Solutions[ idx2( sd, 0, 2 ) ], SubPar[sd] );
+          std::cout << "\nSolving y-flow problem on submesh " << sd << "\n\n";
+          SubPar[sd].direction = 1;
+          StokesSolveDirect( Meshes[sd], Solutions[ idx2( sd, 1, 2 ) ], SubPar[sd] );
         }
       }
 
       stokes_duration = ( omp_get_wtime() - stokes_start );
       pn_start = omp_get_wtime();
 
+      std::string outt = "temp";
+
       // post-process porescale solutions
       std::vector< double > Ks;
-      Ks.resize( Meshes[0].DIM*slices.size() );
-      if ( nz ) {
-        for (unsigned long sd = 0; sd < slices.size(); sd++) {
+      Ks.resize( Meshes[0].DIM*SubPar.size() );
+      if ( Par.nz ) {
+        for (int sd = 0; sd < SubPar.size(); sd++) {
           computeKConstantDrive( Meshes[sd], \
-            Solutions[ idx2( sd, 0, 3 ) ], Ks[ idx2( sd, 0, 3 ) ], 0, 0 );
+            Solutions[ idx2( sd, 0, 3 ) ], Ks[ idx2( sd, 0, 3 ) ], 0, 0, outt );
           computeKConstantDrive( Meshes[sd], \
-            Solutions[ idx2( sd, 1, 3 ) ], Ks[ idx2( sd, 1, 3 ) ], 1, 0 );
+            Solutions[ idx2( sd, 1, 3 ) ], Ks[ idx2( sd, 1, 3 ) ], 1, 0, outt );
           computeKConstantDrive( Meshes[sd], \
-            Solutions[ idx2( sd, 2, 3 ) ], Ks[ idx2( sd, 2, 3 ) ], 2, 0 );
+            Solutions[ idx2( sd, 2, 3 ) ], Ks[ idx2( sd, 2, 3 ) ], 2, 0, outt );
         }
       }
       else {
-        for (unsigned long sd = 0; sd < slices.size(); sd++) {
+        for (int sd = 0; sd < SubPar.size(); sd++) {
           computeKConstantDrive( Meshes[sd], \
-            Solutions[ idx2( sd, 0, 2 ) ], Ks[ idx2( sd, 0, 2 ) ], 0, 0 );
+            Solutions[ idx2( sd, 0, 2 ) ], Ks[ idx2( sd, 0, 2 ) ], 0, 0, outt );
           computeKConstantDrive( Meshes[sd], \
-            Solutions[ idx2( sd, 1, 2 ) ], Ks[ idx2( sd, 1, 2 ) ], 1, 0 );
+            Solutions[ idx2( sd, 1, 2 ) ], Ks[ idx2( sd, 1, 2 ) ], 1, 0, outt );
         }
       }
-      if (Meshes[0].DIM == 2) MZ = 0;
 
       // solve pore-network model with porescale computed Ks
       PoreNetwork pn;
-      pn.UniformPN( length, width, height, MX, MY, MZ );
+      pn.UniformPN( Par );
       std::vector<double> PNSolution;
       PNSolution.resize( pn.nPores );
       double KPN;
@@ -317,12 +300,12 @@ hgfDrive( const bfs::path& ProblemPath, const bfs::path& MeshPath, ProbParam& Pa
       total_duration = ( omp_get_wtime() - start );
 
       // Write PN
-      std::string outName;
-      outName = "./output/PNSolution.dat";
+      std::string outName = outputfolder.string() + "PNSolution" + outExt;
+      std::string KoutName = outputfolder.string() + "PNK.dat";
       writePoreNetworkSolutionTP ( pn, PNSolution, outName );
 
       // compute and save K
-      computeKPoreNetwork( pn, PNSolution, Ks, KPN, 0, 1 );
+      computeKPoreNetwork( pn, PNSolution, Ks, KPN, 0, 1, KoutName );
 
       std::cout << "\nPorescale meshes constructed in " << mesh_duration << "seconds\n";
       std::cout << "Stokes problems solved in " << stokes_duration << "seconds\n";
@@ -332,6 +315,7 @@ hgfDrive( const bfs::path& ProblemPath, const bfs::path& MeshPath, ProbParam& Pa
       std::cout << "Total time: " << total_duration << "seconds\n";
       break;
     }
+    /*
     case 3 :
     { // compute empirical distributions on subdomains, sample for constructed pore-network problem
       std::string outNameX;

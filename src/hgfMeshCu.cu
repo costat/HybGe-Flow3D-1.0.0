@@ -174,57 +174,41 @@ __global__ void ifcKernel3D( unsigned long *d_CFC, const double *d_CCC, \
   d_CFC[ idx2(cl, 5, 6) ] = int5;
 }
 void
-MeshSubdivide( unsigned long *gridin, int ldi1, int ldi2, \
-               int nx, int ny, int nz, \
-               double length, double width, double height, \
-               int MX, int MY, int MZ, \
-               std::vector< std::vector<unsigned long> >& slices, \
-               std::vector<double>& lengths, \
-               std::vector<double>& widths, \
-               std::vector<double>& heights, \
-               std::vector<int>& nxs, \
-               std::vector<int>& nys, \
-               std::vector<int>& nzs )
+MeshSubdivide( const ProbParam& Par, \
+               std::vector< ProbParam >& SubPar  )
 {
-  switch ( nz )
+  switch ( Par.nz )
   {
     case 0 :
     {
       int nSubDomains = 0;
       int xStart, nxRemainder, yStart, nyRemainder, nyG, nxG, xCount, yCount;
-      slices.resize( MX * MY );
-      lengths.resize( MX * MY );
-      widths.resize( MX * MY );
-      heights.resize( MX * MY );
-      nxs.resize( MX * MY );
-      nys.resize( MX * MY );
-      nzs.resize( MX * MY );
       yCount = 0;
       yStart = 0;
-      nyRemainder = ny;
-      for (int yy = 0; yy < MY; yy++) {
+      nyRemainder = Par.ny;
+      for (int yy = 0; yy < Par.nCuts; yy++) {
         xStart = 0;
-        nxRemainder = nx;
+        nxRemainder = Par.nx;
         xCount = 0;
-        nyG = (int)(round(((double)nyRemainder)/(MY-yCount)));
-        for (int xx = 0; xx < MX; xx++) {
+        nyG = (int)(round(((double)nyRemainder)/(Par.nCuts-yCount)));
+        for (int xx = 0; xx < Par.nCuts; xx++) {
           nSubDomains++;
-          nxG = (int)(round(((double)nxRemainder)/(MX-xCount)));
-          for (int cx = 0; cx < nxG; cx++) {
-            for (int cy = 0; cy < nyG; cy++) {
-              slices[ nSubDomains-1 ].push_back( gridin[ idx2( (cx+xStart), (cy+yStart), ldi1 ) ] );
+          nxG = (int)(round(((double)nxRemainder)/(Par.nCuts-xCount)));
+          for (int cy = 0; cy < nyG; cy++) {
+            for (int cx = 0; cx < nxG; cx++) {
+              SubPar[ nSubDomains-1 ].gridin.push_back( Par.gridin[ idx2( (cy+yStart), (cx+xStart), Par.nx ) ] );
             }
           }
-          lengths[ nSubDomains-1 ] = length * ((double)nxG / nx);
-          widths[ nSubDomains-1 ] = width * ((double)nyG / ny);
-          nxs[ nSubDomains-1 ] = nxG;
-          nys[ nSubDomains-1 ] = nyG;
+          SubPar[ nSubDomains-1 ].length = Par.length * ((double)nxG / Par.nx);
+          SubPar[ nSubDomains-1 ].width = Par.width * ((double)nyG / Par.ny);
+          SubPar[ nSubDomains-1 ].nx = nxG;
+          SubPar[ nSubDomains-1 ].ny = nyG;
           xStart = xStart + nxG;
-          nxRemainder = nx - xStart;
+          nxRemainder = Par.nx - xStart;
           xCount++;
         }
         yStart = yStart + nyG;
-        nyRemainder = ny - yStart;
+        nyRemainder = Par.ny - yStart;
         yCount++;
       }
       break;
@@ -233,52 +217,45 @@ MeshSubdivide( unsigned long *gridin, int ldi1, int ldi2, \
     {
       int nSubDomains = 0;
       int xStart, nxRemainder, yStart, nyRemainder, zStart, nzRemainder, nxG, nyG, nzG, xCount, yCount, zCount;
-      slices.resize( MX * MY * MZ );
-      lengths.resize( MX * MY * MZ );
-      widths.resize( MY * MY * MZ );
-      heights.resize( MX * MY * MZ );
-      nxs.resize( MX * MY * MZ );
-      nys.resize( MX * MY * MZ );
-      nzs.resize( MX * MY * MZ );
       zCount = 0;
       zStart = 0;
-      nzRemainder = nz;
-      for (int zz = 0; zz < MZ; zz++) {
+      nzRemainder = Par.nz;
+      for (int zz = 0; zz < Par.nCuts; zz++) {
         yStart = 0;
-        nyRemainder = ny;
+        nyRemainder = Par.ny;
         yCount = 0;
-        nzG = (int)(round(((double)nzRemainder)/(MZ-zCount)));
-        for (int yy = 0; yy < MY; yy++) {
+        nzG = (int)(round(((double)nzRemainder)/(Par.nCuts-zCount)));
+        for (int yy = 0; yy < Par.nCuts; yy++) {
           xStart = 0;
-          nxRemainder = nx;
+          nxRemainder = Par.nx;
           xCount = 0;
-          nyG = (int)(round(((double)nyRemainder)/(MY-yCount)));
-          for (int xx = 0; xx < MX; xx++) {
+          nyG = (int)(round(((double)nyRemainder)/(Par.nCuts-yCount)));
+          for (int xx = 0; xx < Par.nCuts; xx++) {
             nSubDomains++;
-            nxG = (int)(round(((double)nxRemainder)/(MX-xCount)));
-            for (int cx = 0; cx < nxG; cx++) {
+            nxG = (int)(round(((double)nxRemainder)/(Par.nCuts-xCount)));
+            for (int cz = 0; cz < nzG; cz++) {
               for (int cy = 0; cy < nyG; cy++) {
-                for (int cz = 0; cz < nzG; cz++) {
-                  slices[ nSubDomains-1 ].push_back( gridin[ idx3( (cx+xStart), (cy+yStart), (cz+zStart), ldi1, ldi2 ) ] );
+                for (int cx = 0; cx < nxG; cx++) {
+                  SubPar[ nSubDomains-1 ].gridin.push_back( Par.gridin[ idx3( (cz+zStart), (cy+yStart), (cx+xStart), Par.ny, Par.nx ) ] );
                 }
               }
             }
-            lengths[ nSubDomains-1 ] = length * ((double)nxG / nx);
-            widths[ nSubDomains-1 ] = width * ((double)nyG / ny);
-            heights[ nSubDomains-1 ] = height * ((double)nzG / nz);
-            nxs[ nSubDomains-1 ] = nxG;
-            nys[ nSubDomains-1 ] = nyG;
-            nzs[ nSubDomains-1 ] = nzG;
+            SubPar[ nSubDomains-1 ].length = Par.length * ((double)nxG / Par.nx);
+            SubPar[ nSubDomains-1 ].width = Par.width * ((double)nyG / Par.ny);
+            SubPar[ nSubDomains-1 ].height = Par.height * ((double)nzG / Par.nz);
+            SubPar[ nSubDomains-1 ].nx = nxG;
+            SubPar[ nSubDomains-1 ].ny = nyG;
+            SubPar[ nSubDomains-1 ].nz = nzG;
             xStart = xStart + nxG;
-            nxRemainder = nx - xStart;
+            nxRemainder = Par.nx - xStart;
             xCount++;
           }
           yStart = yStart + nyG;
-          nyRemainder = ny - yStart;
+          nyRemainder = Par.ny - yStart;
           yCount++;
         }
         zStart = zStart + nzG;
-        nzRemainder = nz - zStart;
+        nzRemainder = Par.nz - zStart;
         zCount++;
       }
       break;
@@ -1007,42 +984,42 @@ void FluidMesh::sortPV( void )
   }
 }
 // create the pore-network from porescale meshes
-void PoreNetwork::UniformPN( double length, double width, double height, int nx, int ny, int nz )
+void PoreNetwork::UniformPN( const ProbParam& Par )
 {
-  if (nz) {
+  if (Par.nz) {
     DIM = 3;
-    nPores = nx * ny * nz;
-    dx = length/nx;
-    dy = width/ny;
-    dz = height/nz;
+    nPores = Par.nCuts * Par.nCuts * Par.nCuts;
+    dx = Par.length/Par.nCuts;
+    dy = Par.width/Par.nCuts;
+    dz = Par.height/Par.nCuts;
   }
   else {
     DIM = 2;
-    nPores = nx * ny;
-    dx = length/nx;
-    dy = width/ny;
+    nPores = Par.nCuts * Par.nCuts;
+    dx = Par.length/Par.nCuts;
+    dy = Par.width/Par.nCuts;
   }
-  psLength = length;
-  psWidth = width;
-  psHeight = height;
+  psLength = Par.length;
+  psWidth = Par.width;
+  psHeight = Par.height;
   PoresXYZ.resize( nPores * DIM );
   Throats.resize( nPores * DIM * 2 );
   // set pore locations
   if (DIM == 2) {
-    for (int porey = 0; porey < ny; porey++) {
-      for (int porex = 0; porex < nx; porex++) {
-        PoresXYZ[ idx2( idx2( porey, porex, ny ), 0, 2 ) ] = 0.5 * dx + dx * ( porex );
-        PoresXYZ[ idx2( idx2( porey, porex, ny ), 1, 2 ) ] = 0.5 * dy + dy * ( porey );
+    for (int porey = 0; porey < Par.nCuts; porey++) {
+      for (int porex = 0; porex < Par.nCuts; porex++) {
+        PoresXYZ[ idx2( idx2( porey, porex, Par.nCuts ), 0, 2 ) ] = 0.5 * dx + dx * ( porex );
+        PoresXYZ[ idx2( idx2( porey, porex, Par.nCuts ), 1, 2 ) ] = 0.5 * dy + dy * ( porey );
       }
     }
   }
   else {
-    for (int porez = 0; porez < nz; porez++) {
-      for (int porey = 0; porey < ny; porey++) {
-        for (int porex = 0; porex < nx; porex++) {
-          PoresXYZ[ idx2( idx3( porez, porey, porex, ny, nz ), 0, 3 ) ] = 0.5 * dx + dx * ( porex );
-          PoresXYZ[ idx2( idx3( porez, porey, porex, ny, nz ), 1, 3 ) ] = 0.5 * dy + dy * ( porey );
-          PoresXYZ[ idx2( idx3( porez, porey, porex, ny, nz ), 2, 3 ) ] = 0.5 * dz + dz * ( porez );
+    for (int porez = 0; porez < Par.nCuts; porez++) {
+      for (int porey = 0; porey < Par.nCuts; porey++) {
+        for (int porex = 0; porex < Par.nCuts; porex++) {
+          PoresXYZ[ idx2( idx3( porez, porey, porex, Par.nCuts, Par.nCuts ), 0, 3 ) ] = 0.5 * dx + dx * ( porex );
+          PoresXYZ[ idx2( idx3( porez, porey, porex, Par.nCuts, Par.nCuts ), 1, 3 ) ] = 0.5 * dy + dy * ( porey );
+          PoresXYZ[ idx2( idx3( porez, porey, porex, Par.nCuts, Par.nCuts ), 2, 3 ) ] = 0.5 * dz + dz * ( porez );
         }
       }
     }
