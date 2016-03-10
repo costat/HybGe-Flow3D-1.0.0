@@ -98,11 +98,12 @@ class FluidMesh
     bool percolation;
     // Public functions
     int VelocityDOF( void );
-    void BuildUniformMesh( const ProbParam& Par );
+    void BuildUniformMesh( ProbParam& Par );
   private:
     void TotalDOF( void );
     void MaxNonZero( void );
     void sortPV( void );
+    int Sanity( ProbParam& Par );
 };
 
 class PoreNetwork

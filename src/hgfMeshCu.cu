@@ -37,119 +37,39 @@ __global__ void ifcKernel2D ( unsigned long *d_CFC, const double *d_CCC, \
                               double xtol, double ytol, int nCells )
 {
   int cl = blockIdx.x * blockDim.x + threadIdx.x;
-  int incr;
-  double xr, yr;
-  int numNeighbors = 0;
-  int nl = 0;
-  double cccl0 = d_CCC[ idx2( cl, 0, 2 ) ];
-  double cccl1 = d_CCC[ idx2( cl, 1, 2 ) ];
-  int int0 = 0;
-  int int1 = 0;
-  int int2 = 0;
-  int int3 = 0;
-  do
-  {
-    incr = nl + 1;
-    xr = d_CCC[ idx2(nl, 0, 2) ] \
-         - cccl0;
-    yr = d_CCC[ idx2(nl, 1, 2) ] \
-         - cccl1;
-    if (fabs(xr) < epsx) {
-      if (fabs(yr) < ytol) {
-        if (yr < 0)
-        {
-          int0 = incr;
-          numNeighbors++;
-        }
-        else if (yr > 0)
-        {
-          int2 = incr;
-          numNeighbors++;
-        }
-      }
-    }
-    else if (fabs(yr) < epsy) {
-      if (fabs(xr) < xtol) {
-        if (xr < 0)
-        {
-          int3 = incr;
-          numNeighbors++;
-        }
-        else if (xr > 0)
-        {
-          int1 = incr;
-          numNeighbors++;
-        }
-      }
-    }
-    nl++;
-  } while (nl < nCells && numNeighbors < 4);
-  d_CFC[ idx2(cl, 0, 4) ] = int0;
-  d_CFC[ idx2(cl, 1, 4) ] = int1;
-  d_CFC[ idx2(cl, 2, 4) ] = int2;
-  d_CFC[ idx2(cl, 3, 4) ] = int3;
-}
-__global__ void ifcKernel3D( unsigned long *d_CFC, const double *d_CCC, \
-                             double epsx, double epsy, double epsz, \
-                             double xtol, double ytol, double ztol, \
-                             int nCells )
-{
-  int cl = blockIdx.x * blockDim.x + threadIdx.x;
-  int incr;
-  double xr, yr, zr;
-  int numNeighbors = 0;
-  double cccl0 = d_CCC[ idx2( cl, 0, 3 ) ];
-  double cccl1 = d_CCC[ idx2( cl, 1, 3 ) ];
-  double cccl2 = d_CCC[ idx2( cl, 2, 3 ) ];
-  int int0 = 0;
-  int int1 = 0;
-  int int2 = 0;
-  int int3 = 0;
-  int int4 = 0;
-  int int5 = 0;
-  int nl = 0;
-  do
-  {
-    incr = nl + 1;
-    xr = d_CCC[ idx2(nl, 0, 3) ] \
-         - cccl0;
-    yr = d_CCC[ idx2(nl, 1, 3) ] \
-         - cccl1;
-    zr = d_CCC[ idx2(nl, 2, 3) ] \
-         - cccl2;
-
-    if (fabs(xr) < epsx) {
-      if (fabs(yr) < epsy) {
-        if (fabs(zr) < ztol) {
-          if (zr < 0)
+  if (cl < nCells) {
+    int incr;
+    double xr, yr;
+    int numNeighbors = 0;
+    int nl = 0;
+    double cccl0 = d_CCC[ idx2( cl, 0, 2 ) ];
+    double cccl1 = d_CCC[ idx2( cl, 1, 2 ) ];
+    int int0 = 0;
+    int int1 = 0;
+    int int2 = 0;
+    int int3 = 0;
+    do
+    {
+      incr = nl + 1;
+      xr = d_CCC[ idx2(nl, 0, 2) ] \
+           - cccl0;
+      yr = d_CCC[ idx2(nl, 1, 2) ] \
+           - cccl1;
+      if (fabs(xr) < epsx) {
+        if (fabs(yr) < ytol) {
+          if (yr < 0)
           {
             int0 = incr;
             numNeighbors++;
           }
-          else if (zr > 0)
+          else if (yr > 0)
           {
             int2 = incr;
             numNeighbors++;
           }
         }
       }
-      if (fabs(zr) < epsz) {
-        if (fabs(yr) < ytol) {
-          if (yr < 0)
-          {
-            int5 = incr;
-            numNeighbors++;
-          }
-          else if (yr > 0)
-          {
-            int4 = incr;
-            numNeighbors++;
-          }
-        }
-      }
-    }
-    else if (fabs(yr) < epsy) {
-      if (fabs(zr) < epsz) {
+      else if (fabs(yr) < epsy) {
         if (fabs(xr) < xtol) {
           if (xr < 0)
           {
@@ -163,15 +83,99 @@ __global__ void ifcKernel3D( unsigned long *d_CFC, const double *d_CCC, \
           }
         }
       }
-    }
-    nl++;
-  } while (nl < nCells && numNeighbors < 6);
-  d_CFC[ idx2(cl, 0, 6) ] = int0;
-  d_CFC[ idx2(cl, 1, 6) ] = int1;
-  d_CFC[ idx2(cl, 2, 6) ] = int2;
-  d_CFC[ idx2(cl, 3, 6) ] = int3;
-  d_CFC[ idx2(cl, 4, 6) ] = int4;
-  d_CFC[ idx2(cl, 5, 6) ] = int5;
+      nl++;
+    } while (nl < nCells && numNeighbors < 4);
+    d_CFC[ idx2(cl, 0, 4) ] = int0;
+    d_CFC[ idx2(cl, 1, 4) ] = int1;
+    d_CFC[ idx2(cl, 2, 4) ] = int2;
+    d_CFC[ idx2(cl, 3, 4) ] = int3;
+  }
+}
+__global__ void ifcKernel3D( unsigned long *d_CFC, const double *d_CCC, \
+                             double epsx, double epsy, double epsz, \
+                             double xtol, double ytol, double ztol, \
+                             int nCells )
+{
+  int cl = blockIdx.x * blockDim.x + threadIdx.x;
+  if (cl < nCells) {
+    int incr;
+    double xr, yr, zr;
+    int numNeighbors = 0;
+    double cccl0 = d_CCC[ idx2( cl, 0, 3 ) ];
+    double cccl1 = d_CCC[ idx2( cl, 1, 3 ) ];
+    double cccl2 = d_CCC[ idx2( cl, 2, 3 ) ];
+    int int0 = 0;
+    int int1 = 0;
+    int int2 = 0;
+    int int3 = 0;
+    int int4 = 0;
+    int int5 = 0;
+    int nl = 0;
+    do
+    {
+      incr = nl + 1;
+      xr = d_CCC[ idx2(nl, 0, 3) ] \
+           - cccl0;
+      yr = d_CCC[ idx2(nl, 1, 3) ] \
+           - cccl1;
+      zr = d_CCC[ idx2(nl, 2, 3) ] \
+           - cccl2;
+
+      if (fabs(xr) < epsx) {
+        if (fabs(yr) < epsy) {
+          if (fabs(zr) < ztol) {
+            if (zr < 0)
+            {
+              int0 = incr;
+              numNeighbors++;
+            }
+            else if (zr > 0)
+            {
+              int2 = incr;
+              numNeighbors++;
+            }
+          }
+        }
+        if (fabs(zr) < epsz) {
+          if (fabs(yr) < ytol) {
+            if (yr < 0)
+            {
+              int5 = incr;
+              numNeighbors++;
+            }
+            else if (yr > 0)
+            {
+              int4 = incr;
+              numNeighbors++;
+            }
+          }
+        }
+      }
+      else if (fabs(yr) < epsy) {
+        if (fabs(zr) < epsz) {
+          if (fabs(xr) < xtol) {
+            if (xr < 0)
+            {
+              int3 = incr;
+              numNeighbors++;
+            }
+            else if (xr > 0)
+            {
+              int1 = incr;
+              numNeighbors++;
+            }
+          }
+        }
+      }
+      nl++;
+    } while (nl < nCells && numNeighbors < 6);
+    d_CFC[ idx2(cl, 0, 6) ] = int0;
+    d_CFC[ idx2(cl, 1, 6) ] = int1;
+    d_CFC[ idx2(cl, 2, 6) ] = int2;
+    d_CFC[ idx2(cl, 3, 6) ] = int3;
+    d_CFC[ idx2(cl, 4, 6) ] = int4;
+    d_CFC[ idx2(cl, 5, 6) ] = int5;
+  }
 }
 void
 MeshSubdivide( const ProbParam& Par, \
@@ -321,7 +325,7 @@ void innerFaceConnectivity( \
 
 }
 // Function to construct the mesh from voxel array input
-void FluidMesh::BuildUniformMesh( const ProbParam& Par )
+void FluidMesh::BuildUniformMesh( ProbParam& Par )
 {
   int numPCells = 0;
   int numVoid = 0;
@@ -573,17 +577,23 @@ void FluidMesh::BuildUniformMesh( const ProbParam& Par )
       NY = Par.ny;
       NZ = Par.nz;
 
-      // # pressure nodes
+      // call to trim dead pores and incompatible cells
+      Sanity( Par );
+
+      // # P cells
       for (int zi = 0; zi < Par.nz; zi++) {
         for (int yi = 0; yi < Par.ny; yi++) {
           for (int xi = 0; xi < Par.nx; xi++) {
-            if (Par.gridin[ idx3(zi, yi, xi, Par.ny, Par.nx) ] != 1) {
+            if (Par.gridin[ idx3( zi, yi, xi, Par.ny, Par.nx ) ] != 1) {
               numPCells++;
-              if (Par.gridin[ idx3(zi, yi, xi, Par.ny, Par.nx ) ] == 0) numVoid++;
+              if (Par.gridin[ idx3( zi, yi, xi, Par.ny, Par.nx ) ] == 0) {
+                numVoid++;
+              }
             }
           }
         }
       }
+
       int nNodes = numPCells * 8;
       double dx = Par.length / Par.nx;
       double dy = Par.width / Par.ny;
@@ -982,6 +992,155 @@ void FluidMesh::sortPV( void )
       break;
     }
   }
+}
+// function removes cells that are boundaries in opposite directions
+int FluidMesh::Sanity( ProbParam& Par )
+{
+  int totalChanged = 0;
+  int nChanged;
+
+  if (DIM == 3) goto sanityCheck3;
+  else goto sanityCheck2;
+
+  sanityCheck3 :
+  {
+    nChanged = 0;
+    // sanity
+    for (int zi = 0; zi < Par.nz; zi++) {
+      for (int yi = 0; yi < Par.ny; yi++) {
+        for (int xi = 0; xi < Par.nx; xi++) {
+          if (Par.gridin[ idx3(zi, yi, xi, Par.ny, Par.nx) ] != 1) {
+            // xi sanity
+            if (xi==0) {
+              if (Par.gridin[ idx3( zi, yi, (xi+1), Par.ny, Par.nx ) ] == 1) {
+                Par.gridin[ idx3( zi, yi, xi, Par.ny, Par.nx ) ] = 1;
+                nChanged++;
+              }
+            }
+            else if (xi==Par.nx-1) {
+              if (Par.gridin[ idx3( zi, yi, (xi-1), Par.ny, Par.nx ) ] == 1) {
+                Par.gridin[ idx3( zi, yi, xi, Par.ny, Par.nx ) ] = 1;
+                nChanged++;
+              }
+            }
+            else {
+              if (Par.gridin[ idx3( zi, yi, (xi+1), Par.ny, Par.nx ) ] == 1 \
+                  && Par.gridin[ idx3( zi, yi, (xi-1), Par.ny, Par.nx ) ] == 1) {
+                Par.gridin[ idx3( zi, yi, xi, Par.ny, Par.nx ) ] = 1;
+                nChanged++;
+              }
+            }
+            // yi sanity
+            if (yi==0) {
+              if (Par.gridin[ idx3( zi, (yi+1), xi, Par.ny, Par.nx ) ] == 1) {
+                Par.gridin[ idx3( zi, yi, xi, Par.ny, Par.nx ) ] = 1;
+                nChanged++;
+              }
+            }
+            else if (yi==Par.ny-1) {
+              if (Par.gridin[ idx3( zi, (yi-1), xi, Par.ny, Par.nx ) ] == 1) {
+                Par.gridin[ idx3( zi, yi, xi, Par.ny, Par.nx ) ] = 1;
+                nChanged++;
+              }
+            }
+            else {
+              if (Par.gridin[ idx3( zi, (yi+1), xi, Par.ny, Par.nx ) ] == 1 \
+                  && Par.gridin[ idx3( zi, (yi-1), xi, Par.ny, Par.nx ) ] == 1) {
+                Par.gridin[ idx3( zi, yi, xi, Par.ny, Par.nx ) ] = 1;
+                nChanged++;
+              }
+            }
+            // zi sanity
+            if (zi==0) {
+              if (Par.gridin[ idx3( (zi+1), yi, xi, Par.ny, Par.nx ) ] == 1) {
+                Par.gridin[ idx3( zi, yi, xi, Par.ny, Par.nx ) ] = 1;
+                nChanged++;
+              }
+            }
+            else if (zi==Par.nz-1) {
+              if (Par.gridin[ idx3( (zi-1), yi, xi, Par.ny, Par.nx ) ] == 1) {
+                Par.gridin[ idx3( zi, yi, xi, Par.ny, Par.nx ) ] = 1;
+                nChanged++;
+              }
+            }
+            else {
+              if (Par.gridin[ idx3( (zi+1), yi, xi, Par.ny, Par.nx ) ] == 1 \
+                  && Par.gridin[ idx3( (zi-1), yi, xi, Par.ny, Par.nx ) ] == 1) {
+                Par.gridin[ idx3( zi, yi, xi, Par.ny, Par.nx ) ] = 1;
+                nChanged++;
+              }
+            }
+          }
+        }
+      }
+    }
+    totalChanged += nChanged;
+    if (nChanged != 0) goto sanityCheck3;
+    else goto cleanup;
+  }
+
+  sanityCheck2 :
+  {
+    nChanged = 0;
+    // sanity
+    for (int yi = 0; yi < Par.ny; yi++) {
+      for (int xi = 0; xi < Par.nx; xi++) {
+        if (Par.gridin[ idx2( yi, xi, Par.nx ) ] != 1) {
+          // xi sanity
+          if (xi==0) {
+            if (Par.gridin[ idx2( yi, (xi+1), Par.nx ) ] == 1) {
+              Par.gridin[ idx2( yi, xi, Par.nx ) ] = 1;
+              nChanged++;
+            }
+          }
+          else if (xi==Par.nx-1) {
+            if (Par.gridin[ idx2( yi, (xi-1), Par.nx ) ] == 1) {
+              Par.gridin[ idx2( yi, xi, Par.nx ) ] = 1;
+              nChanged++;
+            }
+          }
+          else {
+            if (Par.gridin[ idx2( yi, (xi+1), Par.nx ) ] == 1 \
+                && Par.gridin[ idx2( yi, (xi-1), Par.nx ) ] == 1) {
+              Par.gridin[ idx2( yi, xi, Par.nx ) ] = 1;
+              nChanged++;
+            }
+          }
+          // yi sanity
+          if (yi==0) {
+            if (Par.gridin[ idx2( (yi+1), xi, Par.nx ) ] == 1) {
+              Par.gridin[ idx2( yi, xi, Par.nx ) ] = 1;
+              nChanged++;
+            }
+          }
+          else if (yi==Par.ny-1) {
+            if (Par.gridin[ idx2( (yi-1), xi, Par.nx ) ] == 1) {
+              Par.gridin[ idx2( yi, xi, Par.nx ) ] = 1;
+              nChanged++;
+            }
+          }
+          else {
+            if (Par.gridin[ idx2( (yi+1), xi, Par.nx ) ] == 1 \
+                && Par.gridin[ idx2( (yi-1), xi, Par.nx ) ] == 1) {
+              Par.gridin[ idx2( yi, xi, Par.nx ) ] = 1;
+              nChanged++;
+            }
+          }
+        }
+      }
+    }
+    totalChanged += nChanged;
+    if (nChanged != 0) goto sanityCheck2;
+    else goto cleanup;
+  }
+
+  cleanup :
+    std::cout << "\nWarning, input geometry was incompatible.\n";
+    std::cout << totalChanged << " cells, representing ";
+    if (DIM == 3) std::cout << (double)100*totalChanged/(Par.nx*Par.ny*Par.nz);
+    else std::cout << (double)100*totalChanged/(Par.nx*Par.ny);
+    std::cout << "% of the input geometry, with boundaries on opposite faces \nwere found and removed from void space.\n\n";
+    return totalChanged;
 }
 // create the pore-network from porescale meshes
 void PoreNetwork::UniformPN( const ProbParam& Par )
