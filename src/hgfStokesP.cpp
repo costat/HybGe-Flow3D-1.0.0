@@ -64,14 +64,16 @@ StokesSolveDirect( const FluidMesh& Mesh, std::vector<double>& Solution, const P
   }
 
   // GMRES object
-  GMRES<LocalMatrix<double>, LocalVector<double>, double> ls;
+  FGMRES<LocalMatrix<double>, LocalVector<double>, double> ls;
   ls.Init(Par.tolAbs, Par.tolRel, 1e8, Par.maxIt);
   ls.SetOperator(mat);
   ls.Verbose(2);
   ls.SetBasisSize(100);
 
   // preconditioning
-/*  BlockPreconditioner<LocalMatrix<double>, LocalVector<double>, double> p;
+  DiagJacobiSaddlePointPrecond<LocalMatrix<double>, LocalVector<double>, double> p;
+  // Upper preconditioner is a block preconditioner broken up for velocity components
+  BlockPreconditioner<LocalMatrix<double>, LocalVector<double>, double> p_k;
   Solver<LocalMatrix<double>, LocalVector<double>, double> **p2;
   int n = Mesh.DIM;
   int *size;
@@ -81,20 +83,21 @@ StokesSolveDirect( const FluidMesh& Mesh, std::vector<double>& Solution, const P
   if (Mesh.DIM == 3) {
     size[2] = Mesh.DOF[3];
   }
-
   p2 = new Solver<LocalMatrix<double>, LocalVector<double>, double> *[n];
-
   for (int i = 0; i < n; ++i) {
-    ILU<LocalMatrix<double>, LocalVector<double>, double> *mc;
-    mc = new ILU<LocalMatrix<double>, LocalVector<double>, double>;
+    MultiColoredILU<LocalMatrix<double>, LocalVector<double>, double> *mc;
+    mc = new MultiColoredILU<LocalMatrix<double>, LocalVector<double>, double>;
     mc->Set(Par.prec);
     p2[i] = mc;
   }
+  p_k.Set(n, size, p2);
 
-  p.Set(n, size, p2);
-*/
-  ILU<LocalMatrix<double>, LocalVector<double>, double> p;
-  p.Set(Par.prec);
+  // lower preconditioner
+  Jacobi<LocalMatrix<double>, LocalVector<double>, double> p_s;
+  p.Set(p_k, p_s);
+
+//  ILU<LocalMatrix<double>, LocalVector<double>, double> p;
+//  p.Set(Par.prec);
   ls.SetPreconditioner(p);
 
   // build
