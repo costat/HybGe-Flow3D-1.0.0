@@ -55,4 +55,7 @@ void
 writePoreNetworkSolutionTP ( const PoreNetwork& pn, const std::vector<double>& sol, \
                              std::string& outName );
 
+void
+writeKCollection( const std::vector<double>& Kvec, int dim, std::string& outName );
+
 #endif

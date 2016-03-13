@@ -315,17 +315,17 @@ hgfDrive( const bfs::path& ProblemPath, const bfs::path& MeshPath, ProbParam& Pa
       std::cout << "Total time: " << total_duration << "seconds\n";
       break;
     }
-    /*
     case 3 :
     { // compute empirical distributions on subdomains, sample for constructed pore-network problem
       std::string outNameX;
       std::string outNameY;
       std::string outNameZ;
-      int NVF = 2;
-      int nSims = 2;
+      std::string outNameK;
+      int NVF = 5;
+      int nSims = 10;
       double mesh_duration, stokes_duration, pn_duration, total_duration;
       double start, stokes_start, pn_start;
-      double objectVolumeFrac = 0.05;
+      double objectVolumeFrac = 0.01;
 
       start = omp_get_wtime();
       // determine array slices for subdomains
@@ -358,11 +358,30 @@ hgfDrive( const bfs::path& ProblemPath, const bfs::path& MeshPath, ProbParam& Pa
       std::vector< std::vector< double > > Solutions;
       Solutions.resize( Meshes[0].DIM*SubPar.size() );
 
+      // k vectors. Ks[sd][vf][ idx2( spl, i, DIM ) ] <- K on subdomain sd, with volume fraction # vf, sample # spl, in direction i
+      std::string outt = "temp";
+      std::vector< std::vector< std::vector<double> > > Ks;
+      Ks.resize( SubPar.size() );
+      for (int sd = 0; sd < Meshes.size(); sd++) {
+        Ks[sd].resize( NVF );
+        for (int vf = 0; vf < NVF; vf++) {
+          Ks[sd][vf].resize( Meshes[0].DIM * nSims );
+        }
+      }
+
       // loop for subdomains
       for (int sd = 0; sd < Meshes.size(); sd++) {
+
+        // set up subdomain folder
+        std::string tempsd;
+        tempsd = "Output/Subdomain_" + patch::to_string(sd);
+        bfs::path outputfoldersd( ProblemPath / tempsd );
+        if (!bfs::exists(outputfoldersd)) bfs::create_directory(outputfoldersd);
+
         Solutions[ idx2( sd, 0, Meshes[sd].DIM ) ].resize( Meshes[sd].dofTotal );
         Solutions[ idx2( sd, 1, Meshes[sd].DIM ) ].resize( Meshes[sd].dofTotal );
         if (Meshes[sd].DIM == 3) Solutions[ idx2( sd, 2, Meshes[sd].DIM ) ].resize( Meshes[sd].dofTotal );
+
         // loop for volume franction
         for (int vf = 0; vf < NVF; vf++) {
           // loop for samples
@@ -387,12 +406,12 @@ hgfDrive( const bfs::path& ProblemPath, const bfs::path& MeshPath, ProbParam& Pa
               StokesSolveDirect( Meshes[sd], Solutions[ idx2( sd, 2, Meshes[sd].DIM ) ], SubPar[sd] );
             }
             // store solutions
-            outNameX = outputfolder.string() + "sd" + patch::to_string(sd) + "_" + patch::to_string((vf+1)) + "obs_sample" + patch::to_string(spl) + "_X" + outExt;
-            outNameY = outputfolder.string() + "sd" + patch::to_string(sd) + "_" + patch::to_string((vf+1)) + "obs_sample" + patch::to_string(spl) + "_Y" + outExt;
+            outNameX = outputfoldersd.string() + "/" + patch::to_string((vf+1)) + "obs_sample" + patch::to_string(spl) + "_X" + outExt;
+            outNameY = outputfoldersd.string() + "/" + patch::to_string((vf+1)) + "obs_sample" + patch::to_string(spl) + "_Y" + outExt;
             if (Meshes[sd].DIM == 3) {
-              outNameZ = outputfolder.string() + "sd" + patch::to_string(sd) + "_" + patch::to_string((vf+1)) + "obs_sample" + patch::to_string(spl) + "_Z" + outExt;
+              outNameZ = outputfoldersd.string() + "/" + patch::to_string((vf+1)) + "obs_sample" + patch::to_string(spl) + "_Z" + outExt;
             }
-            if (output) {
+            if (Par.output) {
               writeSolutionPV ( Meshes[sd], Solutions[ idx2( sd, 0, Meshes[sd].DIM ) ], outNameX );
               writeSolutionPV ( Meshes[sd], Solutions[ idx2( sd, 1, Meshes[sd].DIM ) ], outNameY );
               if (Meshes[sd].DIM == 3) {
@@ -407,16 +426,29 @@ hgfDrive( const bfs::path& ProblemPath, const bfs::path& MeshPath, ProbParam& Pa
               }
             }
             // compute K
-
-            // save K in appropriate vector
-
+            if ( Par.nz ) {
+              computeKConstantDrive( Meshes[sd], \
+                Solutions[ idx2( sd, 0, 3 ) ], Ks[sd][vf][ idx2( spl, 0, 3 ) ], 0, 0, outt );
+              computeKConstantDrive( Meshes[sd], \
+                Solutions[ idx2( sd, 1, 3 ) ], Ks[sd][vf][ idx2( spl, 1, 3 ) ], 1, 0, outt );
+              computeKConstantDrive( Meshes[sd], \
+                Solutions[ idx2( sd, 2, 3 ) ], Ks[sd][vf][ idx2( spl, 2, 3 ) ], 2, 0, outt );
+            }
+            else {
+              computeKConstantDrive( Meshes[sd], \
+                Solutions[ idx2( sd, 0, 2 ) ], Ks[sd][vf][ idx2( spl, 0, 2 ) ], 0, 0, outt );
+              computeKConstantDrive( Meshes[sd], \
+                Solutions[ idx2( sd, 1, 2 ) ], Ks[sd][vf][ idx2( spl, 1, 2 ) ], 1, 0, outt );
+            }
           }
+          // save ks with vf+1 obs
+          outNameK = outputfoldersd.string() + "/K_" + patch::to_string((vf+1)) + "obs.dat";
+          writeKCollection( Ks[sd][vf], Meshes[0].DIM, outNameK );
         }
       }
 
       break; // break type 3
     }
-    */
   }
 
   cleanup :

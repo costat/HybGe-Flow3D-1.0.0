@@ -67,7 +67,7 @@ StokesSolveDirect( const FluidMesh& Mesh, std::vector<double>& Solution, const P
   FGMRES<LocalMatrix<double>, LocalVector<double>, double> ls;
   ls.Init(Par.tolAbs, Par.tolRel, 1e8, Par.maxIt);
   ls.SetOperator(mat);
-  ls.Verbose(2);
+  ls.Verbose(1);
   ls.SetBasisSize(100);
 
   // preconditioning

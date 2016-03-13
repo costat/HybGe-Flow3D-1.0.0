@@ -1189,4 +1189,20 @@ writePoreNetworkSolutionTP ( const PoreNetwork& pn, const std::vector<double>& s
     flowrun << ThroatConns[ idx2( ii, 0, 2 ) ]+1 << "\t" << ThroatConns[ idx2( ii, 0, 2 ) ]+1 << "\t" << ThroatConns[ idx2( ii, 0, 2 ) ]+1;
     flowrun << "\t" << ThroatConns[ idx2( ii, 1, 2 ) ]+1 << "\n";
   }
+
+  flowrun.close();
+}
+
+void
+writeKCollection( const std::vector<double>& Kvec, int dim, std::string& outName )
+{
+  std::ofstream kv;
+  kv.open( outName.c_str() );
+  for (int ii = 0; ii < (Kvec.size() / dim); ii++) {
+    kv << Kvec[ idx2( ii, 0, dim ) ];
+    kv << "\t" << Kvec[ idx2( ii, 1, dim ) ];
+    if (dim == 3) kv << "\t" << Kvec[ idx2( ii, 2, dim ) ];
+    kv << "\n";
+  }
+  kv.close();
 }
