@@ -299,7 +299,7 @@ void innerFaceConnectivity( \
   // compute
   if (DIM == 2)
   {
-    gpuErrchk( cudaOccupancyMaxPotentialBlockSize( &minGridSize, &blockSize, ifcKernel2D, 0, nCells ) );
+    gpuErrchk( cudaOccupancyMaxPotentialBlockSize( &minGridSize, &blockSize, (void*)ifcKernel2D, 0, nCells ) );
     gridSize = (nCells + blockSize - 1) / blockSize;
     ifcKernel2D<<< gridSize, blockSize >>>( d_CFC, d_CCC, epsx, epsy, xtol, ytol, nCells );
     gpuErrchk( cudaPeekAtLastError() );
@@ -307,7 +307,7 @@ void innerFaceConnectivity( \
   }
   else if (DIM == 3)
   {
-    gpuErrchk( cudaOccupancyMaxPotentialBlockSize( &minGridSize, &blockSize, ifcKernel3D, 0, nCells ) );
+    gpuErrchk( cudaOccupancyMaxPotentialBlockSize( &minGridSize, &blockSize, (void*)ifcKernel3D, 0, nCells ) );
     gridSize = (nCells + blockSize - 1) / blockSize;
     ifcKernel3D<<< gridSize, blockSize >>>( d_CFC, d_CCC, epsx, epsy, epsz, xtol, ytol, ztol, nCells );
     gpuErrchk( cudaPeekAtLastError() );

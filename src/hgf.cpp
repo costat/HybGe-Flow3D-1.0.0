@@ -22,8 +22,8 @@
 # include "hgfStokesP.hpp"
 # include "hgfPoreNetworkP.hpp"
 #else
-# include "hgfStokesM.hpp"
-# include "hgfPoreNetworkM.hpp"
+# include "hgfStokesA.hpp"
+# include "hgfPoreNetworkA.hpp"
 #endif
 
 namespace bfs = boost::filesystem;

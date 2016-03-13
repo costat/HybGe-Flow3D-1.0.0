@@ -6,7 +6,7 @@
 #include "hgfMeshCu.hpp"
 #include "hgfArrays.hpp"
 #include "hgfBC.hpp"
-#include "hgfPoreNetworkM.hpp"
+#include "hgfPoreNetworkA.hpp"
 
 /* Define a 2d -> 1d array index,
    uses row major indexing */
