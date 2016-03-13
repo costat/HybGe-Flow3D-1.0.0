@@ -322,7 +322,7 @@ hgfDrive( const bfs::path& ProblemPath, const bfs::path& MeshPath, ProbParam& Pa
       std::string outNameZ;
       std::string outNameK;
       int NVF = 5;
-      int nSims = 10;
+      int nSims = 1000;
       double mesh_duration, stokes_duration, pn_duration, total_duration;
       double start, stokes_start, pn_start;
       double objectVolumeFrac = 0.01;
