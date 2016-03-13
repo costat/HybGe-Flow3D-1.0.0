@@ -329,20 +329,26 @@ hgfDrive( const bfs::path& ProblemPath, const bfs::path& MeshPath, ProbParam& Pa
 
       start = omp_get_wtime();
       // determine array slices for subdomains
-      std::vector< std::vector< unsigned long > > slices;
-      std::vector< double > lengths, widths, heights;
-      std::vector< int > nxs, nys, nzs;
-      MeshSubdivide( gridin, ldi1, ldi2, nx, ny, nz, \
-                     length, width, height, MX, MY, MZ, \
-                     slices, lengths, widths, heights, \
-                     nxs, nys, nzs );
+      std::vector< ProbParam > SubPar;
+      if (Par.nz) SubPar.resize( Par.nCuts * Par.nCuts * Par.nCuts );
+      else SubPar.resize( Par.nCuts * Par.nCuts );
+      for (int ii = 0; ii < SubPar.size(); ii++) {
+        SubPar[ii].nThreads = Par.nThreads;
+        SubPar[ii].prec = Par.prec;
+        SubPar[ii].direction = Par.direction;
+        SubPar[ii].output = Par.output;
+        SubPar[ii].maxIt = Par.maxIt;
+        SubPar[ii].visc = Par.visc;
+        SubPar[ii].tolAbs = Par.tolAbs;
+        SubPar[ii].tolRel = Par.tolRel;
+      }
+      MeshSubdivide( Par, SubPar );
 
       // build meshes
       std::vector< FluidMesh > Meshes;
-      Meshes.resize( slices.size() );
-      for (unsigned long sd = 0; sd < slices.size(); sd++) {
-        Meshes[sd].BuildUniformMesh( slices[sd].data(), nys[sd], nzs[sd], nxs[sd], nys[sd], nzs[sd], \
-                                     lengths[sd], widths[sd], heights[sd] );
+      Meshes.resize( SubPar.size() );
+      for (int sd = 0; sd < SubPar.size(); sd++) {
+        Meshes[sd].BuildUniformMesh( SubPar[sd] );
       }
 
       mesh_duration = ( omp_get_wtime() - start );
@@ -350,7 +356,7 @@ hgfDrive( const bfs::path& ProblemPath, const bfs::path& MeshPath, ProbParam& Pa
 
       // solve porescale problems
       std::vector< std::vector< double > > Solutions;
-      Solutions.resize( Meshes[0].DIM*slices.size() );
+      Solutions.resize( Meshes[0].DIM*SubPar.size() );
 
       // loop for subdomains
       for (int sd = 0; sd < Meshes.size(); sd++) {
@@ -372,19 +378,19 @@ hgfDrive( const bfs::path& ProblemPath, const bfs::path& MeshPath, ProbParam& Pa
             // build and set immersed boundary
             BuildImmersedBoundary( Meshes[sd], objectVolumeFrac, (vf+1) );
             // solve problems
-            StokesSolveDirect( Meshes[sd], visc, 0, Solutions[ idx2( sd, 0, Meshes[sd].DIM ) ], \
-                               tolAbs, tolRel, maxIt, nThreads, prec );
-            StokesSolveDirect( Meshes[sd], visc, 1, Solutions[ idx2( sd, 1, Meshes[sd].DIM ) ], \
-                               tolAbs, tolRel, maxIt, nThreads, prec );
+            SubPar[sd].direction = 0;
+            StokesSolveDirect( Meshes[sd], Solutions[ idx2( sd, 0, Meshes[sd].DIM ) ], SubPar[sd] );
+            SubPar[sd].direction = 1;
+            StokesSolveDirect( Meshes[sd], Solutions[ idx2( sd, 1, Meshes[sd].DIM ) ], SubPar[sd] );
             if (Meshes[sd].DIM == 3) {
-              StokesSolveDirect( Meshes[sd], visc, 2, Solutions[ idx2( sd, 2, Meshes[sd].DIM ) ], \
-                                 tolAbs, tolRel, maxIt, nThreads, prec );
+              SubPar[sd].direction = 3;
+              StokesSolveDirect( Meshes[sd], Solutions[ idx2( sd, 2, Meshes[sd].DIM ) ], SubPar[sd] );
             }
             // store solutions
-            outNameX = "./output/domain" + patch::to_string(sd) + "_" + patch::to_string((vf+1)) + "obs_sample" + patch::to_string(spl) + "_X" + outExt;
-            outNameY = "./output/domain" + patch::to_string(sd) + "_" + patch::to_string((vf+1)) + "obs_sample" + patch::to_string(spl) + "_Y" + outExt;
+            outNameX = outputfolder.string() + "sd" + patch::to_string(sd) + "_" + patch::to_string((vf+1)) + "obs_sample" + patch::to_string(spl) + "_X" + outExt;
+            outNameY = outputfolder.string() + "sd" + patch::to_string(sd) + "_" + patch::to_string((vf+1)) + "obs_sample" + patch::to_string(spl) + "_Y" + outExt;
             if (Meshes[sd].DIM == 3) {
-              outNameZ = "./output/domain" + patch::to_string(sd) + "_" + patch::to_string((vf+1)) + "obs_sample" + patch::to_string(spl) + "_Z" + outExt;
+              outNameZ = outputfolder.string() + "sd" + patch::to_string(sd) + "_" + patch::to_string((vf+1)) + "obs_sample" + patch::to_string(spl) + "_Z" + outExt;
             }
             if (output) {
               writeSolutionPV ( Meshes[sd], Solutions[ idx2( sd, 0, Meshes[sd].DIM ) ], outNameX );
