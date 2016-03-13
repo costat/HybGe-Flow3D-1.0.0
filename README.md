@@ -1,6 +1,6 @@
 # HybGe-Flow3D #
 
-HybGe-Flow3D is a finite volume solver for laminar fluid flow in complex 3D and 2D geometries. Complex geometries are enforced through an immersed boundary representation. Addtionally, HybGe-Flow3D has modules for computing upscaled conductivity (constant or tensor) for connections to Pore-Network and Darcy Scale models.
+HybGe-Flow3D is a multiscale solver for laminar fluid flow in complex, uncertain 3D and 2D geometries.
 
 This software was developed under the partial support of the National Science
 Foundation on the project NSF-DMS 1115827 "Hybrid modeling in porous media."
@@ -25,10 +25,9 @@ can also be found at http://www.gnu.org/licenses/.
 
 Publications making use of HybGe-Flow3D should cite this software package. An example citation is given as:
 
-    Costa, T., "HybGe-Flow3D", Package Version 0.0.1,
+    Costa, T., "HybGe-Flow3D", Package Version 1.0.0,
     http://github.com/costat/HybGe-Flow3D.
 
 ### Contact ###
 
 Timothy B. Costa, costat@math.oregonstate.edu
-
