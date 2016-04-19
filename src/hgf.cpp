@@ -322,10 +322,10 @@ hgfDrive( const bfs::path& ProblemPath, const bfs::path& MeshPath, ProbParam& Pa
       std::string outNameZ;
       std::string outNameK;
       int NVF = 5;
-      int nSims = 1000;
+      int nSims = 100;
       double mesh_duration, stokes_duration, pn_duration, total_duration;
       double start, stokes_start, pn_start;
-      double objectVolumeFrac = 0.01;
+      double discreteVolumeFrac = 0.05;
 
       start = omp_get_wtime();
       // determine array slices for subdomains
@@ -391,11 +391,12 @@ hgfDrive( const bfs::path& ProblemPath, const bfs::path& MeshPath, ProbParam& Pa
             std::cout << "\n\n";
             std::cout << "---------------------------------------------------------------------\n";
             std::cout << "Solving sample " << spl << " for volume fraction ";
-            std::cout << (vf+1)*objectVolumeFrac << " on subdomain " << sd << "\n.";
+            std::cout << (vf)*discreteVolumeFrac+1 << " on subdomain " << sd << "\n.";
             std::cout << "---------------------------------------------------------------------\n";
 
-            // build and set immersed boundary
-            BuildImmersedBoundary( Meshes[sd], objectVolumeFrac, (vf+1) );
+            // build and set immersed boundary, break back to VF loop if can't build the IB
+            int BIBF = BuildImmersedBoundary( Meshes[sd], discreteVolumeFrac, vf );
+            if (BIBF) break;
             // solve problems
             SubPar[sd].direction = 0;
             StokesSolveDirect( Meshes[sd], Solutions[ idx2( sd, 0, Meshes[sd].DIM ) ], SubPar[sd] );
