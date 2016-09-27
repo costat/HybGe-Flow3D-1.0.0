@@ -3,7 +3,8 @@
 HybGe-Flow3D is a multiscale solver for laminar fluid flow in complex, uncertain 3D and 2D geometries.
 
 This software was developed under the partial support of the National Science
-Foundation on the project NSF-DMS 1115827 "Hybrid modeling in porous media."
+Foundation on the projects NSF DMS-1115827 "Hybrid modeling in porous media" (PI: M. Peszynska)
+and NFS DMS-1522734 "Phase transitions in porous media across multiple scales" (PI: M. Peszynska).
 
 ### Use ###
 
