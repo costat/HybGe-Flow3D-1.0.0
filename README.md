@@ -26,7 +26,7 @@ can also be found at http://www.gnu.org/licenses/.
 
 Publications making use of HybGe-Flow3D should cite this software package. An example citation is given as:
 
-    Costa, T., "HybGe-Flow3D", Package Version 1.0.0,
+    Costa, T., "HybGe-Flow3D", Package Version 2.0.0,
     http://github.com/costat/HybGe-Flow3D.
 
 ### Contact ###
