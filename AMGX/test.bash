@@ -1,1 +1,0 @@
-nvcc -std=c++11 ../src/driver.cpp ../src/hgf.cpp ../src/hgfUtils.cpp ../src/hgfArrays.cpp ../src/hgfPP.cpp ../src/hgfMeshCu.cu ../src/hgfBC.cpp ../src/hgfIB.cpp ../src/hgfPoreNetworkA.cpp ../src/hgfStokesA.cpp -O3 -o hgfTest -lcuda -lcusparse -lcublas -Xcompiler -fopenmp -lamgxsh -lboost_serialization -lboost_system -lboost_filesystem -DSOLVER=0 -I../src/
