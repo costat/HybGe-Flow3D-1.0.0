@@ -201,7 +201,7 @@ hgf::mesh::build_from_voxel_quad( parameters& par)
     }
 
     // x direction loop on elements
-#pragma omp for schedule(dynamic) nowait
+#pragma omp for schedule(static,1) nowait
     for (int cell = 0; cell < nCells; cell++) {
       // grab ii, jj for coordinates
       int ii = x_index[cell];
@@ -522,7 +522,7 @@ else {
 #pragma omp barrier
     // need unique'd nodes before next section
 
-#pragma omp for schedule(dynamic) nowait
+#pragma omp for schedule(static,1) nowait
       for (int cell = 0; cell < nCells; cell++) {
       gtlNode[idx2(els[cell].vtx[0].gnum, 3, 4)] = cell + 1;
       gtlNode[idx2(els[cell].vtx[1].gnum, 2, 4)] = cell + 1;
@@ -649,7 +649,7 @@ hgf::mesh::build_from_voxel_hex(parameters& par)
 
 #pragma omp barrier
 
-#pragma omp for schedule(dynamic) nowait
+#pragma omp for schedule(static,1) nowait
     for (int cell = 0; cell < nCells; cell++) {
       // grab ii, jj, kk for coordinates
       int ii = x_index[cell];
@@ -1129,7 +1129,7 @@ hgf::mesh::build_from_voxel_hex(parameters& par)
 
 #pragma omp barrier
 
-#pragma omp for schedule(dynamic) nowait
+#pragma omp for schedule(static,1) nowait
     for (int cell = 0; cell < nCells; cell++) {
       // 5 4 7 6 1 0 3 2
       gtlNode[idx2(els[cell].vtx[0].gnum, 5, 8)] = cell + 1;

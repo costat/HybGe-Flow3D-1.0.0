@@ -60,17 +60,8 @@ void
 hgf::models::stokes::setup_xflow_bc(const parameters& par, const hgf::mesh& msh)
 {
 
-  if (par.dimension == 2)
-  {
-
-    xflow_2d(par, msh);
-
-  }
-  else {
-
-    xflow_3d(par, msh);
-
-  }
+  if (par.dimension == 2) xflow_2d(par, msh);
+  else xflow_3d(par, msh);
 
 }
 

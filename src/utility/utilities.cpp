@@ -198,13 +198,96 @@ hgf::import_voxel_geometry(parameters& par, const bfs::path& problem_path)
 }
 
 bool
-hgf::check_symmetry(array_coo& arr)
+hgf::check_symmetry(std::vector< array_coo >& array)
 {
-  return 0;
+
+  std::vector< array_coo > temp_array(array);
+  hgf::unique_array(temp_array);
+  std::vector< array_coo > array_trans(temp_array);
+  std::sort(array_trans.begin(), array_trans.end(), byJbyI());
+
+  for (int ii = 0; ii < temp_array.size(); ii++) {
+    if ((temp_array[ii].i_index != array_trans[ii].j_index) || (temp_array[ii].j_index != array_trans[ii].i_index) || fabs(temp_array[ii].value - array_trans[ii].value) > 1e-12) {
+      return 0;
+    }
+  }
+  return 1;
+
 }
 
+// sorts coo array by rows then by columns (j runs min to max within 1 i)
 void
-hgf::unique_array(array_coo& arr)
+hgf::sort_array(std::vector< array_coo >& array)
 {
 
+  std::sort(array.begin(), array.end(), byIbyJ());
+
+ }
+
+// create unique coo array. array sorted and then values associated to repeat indexes are summed, and extras removed
+void
+hgf::unique_array(std::vector< array_coo >& array)
+{
+
+  std::sort(array.begin(), array.end(), byIbyJ());
+
+  int nthrs = omp_get_max_threads();
+  int block_size = ((int)array.size() % nthrs) ? ((int)array.size() / nthrs) : ((int)array.size() / nthrs + 1);
+  std::vector< std::vector< array_coo > > temp_arrays;
+  temp_arrays.resize(nthrs);
+  for (int ii = 0; ii < nthrs; ii++) temp_arrays[ii].reserve(block_size);
+
+#pragma omp parallel shared(array)
+  {
+#pragma omp for schedule(static,1)
+    for (int ii = 0; ii < nthrs; ii++) {
+      int cpy_beg = ii * block_size;
+      int cpy_end = cpy_beg;
+      int cpy_size = 0;
+      int icount = cpy_beg + 1;
+      int tar_beg = 0;
+      do {
+        if (array[icount].i_index == array[icount - 1].i_index && array[icount].j_index == array[icount - 1].j_index) {
+          cpy_end = icount - 1;
+          array[cpy_end].value += array[icount].value;
+          icount++;
+          while (array[icount].i_index == array[cpy_end].i_index && array[icount].j_index == array[cpy_end].j_index && icount < std::min((ii+1)*block_size, (int)array.size())) {
+            array[cpy_end].value += array[icount].value;
+            icount++;
+          }
+          // copy block to temp
+          cpy_size = cpy_end - cpy_beg + 1;
+          temp_arrays[ii].resize(temp_arrays[ii].size() + cpy_size);
+          memcpy(temp_arrays[ii].data() + tar_beg, array.data() + cpy_beg, cpy_size * sizeof(array_coo));
+
+          // set idx for next iter
+          cpy_beg = icount;
+          tar_beg += cpy_size;
+          icount++;
+        }
+        else {
+          icount++;
+        }
+      } while (icount < std::min((ii+1)*block_size, (int)array.size()));
+      if (cpy_beg < std::min((ii + 1)*block_size, (int)array.size())) {
+        // final copy
+        cpy_size = std::min((ii + 1)*block_size, (int)array.size()) - cpy_beg;
+        temp_arrays[ii].resize(temp_arrays[ii].size() + cpy_size);
+        memcpy(temp_arrays[ii].data() + tar_beg, array.data() + cpy_beg, cpy_size * sizeof(array_coo));
+      }
+    }
+  }
+  // paste
+  int cpy_idx;
+  memcpy(array.data(), temp_arrays[0].data(), temp_arrays[0].size() * sizeof(array_coo));
+  cpy_idx = (int)temp_arrays[0].size();
+  for (int ii = 1; ii < nthrs; ii++) {
+    if (temp_arrays[ii - 1][temp_arrays[ii - 1].size() - 1].i_index == temp_arrays[ii][0].i_index && temp_arrays[ii - 1][temp_arrays[ii - 1].size() - 1].j_index == temp_arrays[ii][0].j_index) {
+      cpy_idx--;
+    }
+    memcpy(array.data() + cpy_idx, temp_arrays[ii].data(), temp_arrays[ii].size() * sizeof(array_coo));
+    cpy_idx += (int)temp_arrays[ii].size();
+  }
+  array.resize(cpy_idx);
+  
 }

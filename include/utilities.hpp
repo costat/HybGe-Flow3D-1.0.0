@@ -28,10 +28,13 @@ namespace hgf
   import_voxel_geometry(parameters& par, const bfs::path& problem_path);
 
   bool
-  check_symmetry(array_coo& arr);
+  check_symmetry(std::vector< array_coo >& array);
 
   void
-  unique_array(array_coo& arr);
+  sort_array(std::vector< array_coo >& array);
+
+  void
+  unique_array(std::vector< array_coo >& array);
 }
 
 #endif

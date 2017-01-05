@@ -63,9 +63,9 @@ hgf::models::stokes::xflow_3d(const parameters& par, const hgf::mesh& msh)
 
       for (int ii = kk*block_size_u; ii < std::min((kk + 1)*block_size_u, (int)interior_u_nums.size()); ii++) {
         double value = 0;
-        if (!interior_u[ii]) goto uexit;
         int bc_contributor[6] = { 0, 0, 0, 0, 0, 0 };
         int nnbr = 0;
+        if (!interior_u[ii]) goto uexit;
         for (int jj = 0; jj < 6; jj++) {
           nbrs[jj] = velocity_u[ii].neighbors[jj];
           if (nbrs[jj] != -1 && interior_u[nbrs[jj]]) nnbr++;
@@ -156,9 +156,9 @@ hgf::models::stokes::xflow_3d(const parameters& par, const hgf::mesh& msh)
 
       for (int ii = kk*block_size_v; ii < std::min((kk + 1)*block_size_v, (int)interior_v_nums.size()); ii++) {
         double value = 0;
-        if (!interior_v[ii]) goto vexit;
         int bc_contributor[6] = { 0, 0, 0, 0, 0, 0 };
         int nnbr = 0;
+        if (!interior_v[ii]) goto vexit;
         for (int jj = 0; jj < 6; jj++) {
           nbrs[jj] = velocity_v[ii].neighbors[jj];
           if (nbrs[jj] != -1 && interior_v[nbrs[jj]]) nnbr++;
@@ -240,9 +240,9 @@ hgf::models::stokes::xflow_3d(const parameters& par, const hgf::mesh& msh)
       for (int ii = kk*block_size_w; ii < std::min((kk + 1)*block_size_w, (int)interior_w_nums.size()); ii++) {
 
         double value = 0;
-        if (!interior_w[ii]) goto wexit;
         int bc_contributor[6] = { 0, 0, 0, 0, 0, 0 };
         int nnbr = 0;
+        if (!interior_w[ii]) goto wexit;
         for (int jj = 0; jj < 6; jj++) {
           nbrs[jj] = velocity_w[ii].neighbors[jj];
           if (nbrs[jj] != -1 && interior_w[nbrs[jj]]) nnbr++;

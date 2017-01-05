@@ -137,13 +137,13 @@ hgf::models::stokes::build_degrees_of_freedom_2d(const parameters& par, const hg
   ptv.resize(pressure.size() * 4, -1);
 #pragma omp parallel
   {
-#pragma omp for schedule(dynamic) nowait
+#pragma omp for schedule(static,1) nowait
     for (int ii = 0; ii < velocity_u.size(); ii++) {
       // pressure cells should know who u cells are
       if (velocity_u[ii].cell_numbers[0] != -1) ptv[idx2(velocity_u[ii].cell_numbers[0], 1, 4)] = ii;
       if (velocity_u[ii].cell_numbers[1] != -1) ptv[idx2(velocity_u[ii].cell_numbers[1], 0, 4)] = ii;
     }
-#pragma omp for schedule(dynamic) nowait
+#pragma omp for schedule(static,1) nowait
     for (int ii = 0; ii < velocity_v.size(); ii++) {
       // pressure cells should know who v cells are
       if (velocity_v[ii].cell_numbers[0] != -1) ptv[idx2(velocity_v[ii].cell_numbers[0], 3, 4)] = ii;
@@ -160,13 +160,13 @@ hgf::models::stokes::build_degrees_of_freedom_2d(const parameters& par, const hg
 #pragma omp parallel
   {
     // determine boundary and interior cells
-#pragma omp for schedule(dynamic) nowait
+#pragma omp for schedule(static,1) nowait
     for (int ii = 0; ii < velocity_u.size(); ii++) {
       if (velocity_u[ii].neighbors[1] != -1 && velocity_u[ii].neighbors[3] != -1) {
         interior_u[ii] = 1;
       }
     }
-#pragma omp for schedule(dynamic) nowait
+#pragma omp for schedule(static,1) nowait
     for (int ii = 0; ii < velocity_v.size(); ii++) {
       if (velocity_v[ii].neighbors[0] != -1 && velocity_v[ii].neighbors[2] != -1) {
         interior_v[ii] = 1;
@@ -228,10 +228,10 @@ hgf::models::stokes::build_degrees_of_freedom_2d(const parameters& par, const hg
 void
 hgf::models::stokes::dof_neighbors_2d(const parameters& par, const hgf::mesh& msh)
 {
- 
+
 #pragma omp parallel
   {
-#pragma omp for schedule(dynamic)
+#pragma omp for schedule(static,1)
     for (int ii = 0; ii < velocity_u.size(); ii++) {
       int no_neighbor_u[4] = { 1, 1, 1, 1 };
       //-- neighbor 0 --//
@@ -282,7 +282,7 @@ hgf::models::stokes::dof_neighbors_2d(const parameters& par, const hgf::mesh& ms
       }
       if (no_neighbor_u[3]) velocity_u[ii].neighbors[3] = -1;
     }
-#pragma omp for schedule(dynamic) nowait 
+#pragma omp for schedule(static,1) nowait
     for (int ii = 0; ii < velocity_v.size(); ii++) {
       int no_neighbor_v[4] = { 1, 1, 1, 1 };
       //-- neighbor 0 --//

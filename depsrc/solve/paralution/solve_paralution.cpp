@@ -52,14 +52,14 @@ hgf::solve::paralution::solve(const parameters& par, \
 #endif
 
   GMRES<LocalMatrix<double>, LocalVector<double>, double> ls;
-  ls.Init(1e-8, 1e-6, 1e8, 100);
+  ls.Init(1e-8, 1e-6, 1e8, 1000);
   ls.SetOperator(mat);
   ls.Verbose(2);
 
   ILU<LocalMatrix<double>, LocalVector<double>, double> p;
-  p.Set(2);
+  p.Set(3);
   ls.SetPreconditioner(p);
-  
+
   ls.Build();
   ls.Solve(force, &sol);
 

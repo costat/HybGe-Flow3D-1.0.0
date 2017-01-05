@@ -104,6 +104,26 @@ struct byYbyXbyZ
   }
 };
 
+// sort struct for coo array
+struct byIbyJ
+{
+  bool operator()(array_coo const &one, array_coo const &two)
+  {
+    return (one.i_index < two.i_index || \
+      (one.i_index == two.i_index && one.j_index < two.j_index));
+  }
+};
+
+// sort struct for coo array
+struct byJbyI
+{
+  bool operator()(array_coo const &one, array_coo const &two)
+  {
+    return (one.j_index < two.j_index || \
+      (one.j_index == two.j_index && one.i_index < two.i_index));
+  }
+};
+
 // bc types and values
 struct boundary_nodes
 {
