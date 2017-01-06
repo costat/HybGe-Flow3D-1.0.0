@@ -18,7 +18,7 @@ hgf::models::stokes::build(const parameters& par, const hgf::mesh& msh)
     int nU = std::accumulate(interior_u.begin(), interior_u.end(), 0);
     int nV = std::accumulate(interior_v.begin(), interior_v.end(), 0);
     int nP = (int)pressure.size();
-    interior.resize(nU + nV + nP);
+    solution_int.resize(nU + nV + nP);
     rhs.resize(nU + nV + nP);
 
     // setup the linear system
@@ -35,7 +35,7 @@ hgf::models::stokes::build(const parameters& par, const hgf::mesh& msh)
     int nV = std::accumulate(interior_v.begin(), interior_v.end(), 0);
     int nW = std::accumulate(interior_w.begin(), interior_w.end(), 0);
     int nP = (int)pressure.size();
-    interior.resize(nU + nV + nW + nP);
+    solution_int.resize(nU + nV + nW + nP);
     rhs.resize(nU + nV + nW + nP);
 
     // setup the linear system

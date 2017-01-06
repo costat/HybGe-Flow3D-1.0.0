@@ -57,7 +57,7 @@ hgf::solve::paralution::solve(const parameters& par, \
   ls.Verbose(2);
 
   ILU<LocalMatrix<double>, LocalVector<double>, double> p;
-  p.Set(3);
+  p.Set(2);
   ls.SetPreconditioner(p);
 
   ls.Build();

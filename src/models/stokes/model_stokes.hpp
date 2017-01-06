@@ -30,9 +30,9 @@ namespace hgf
         std::vector< int > interior_u_nums, interior_v_nums, interior_w_nums;
         std::vector< boundary_nodes > boundary;
         std::vector< array_coo > coo_array;
-        std::vector< double > rhs, solution, interior;
+        std::vector< double > rhs, solution, solution_int;
         void build(const parameters& par, const hgf::mesh& msh);
-        void solution_insert_boundaries(void);
+        void solution_build(void);
         void output_vtk(const parameters& par, const hgf::mesh& msh);
         void setup_xflow_bc(const parameters& par, const hgf::mesh& msh);
       

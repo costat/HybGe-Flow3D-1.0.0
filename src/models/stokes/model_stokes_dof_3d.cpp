@@ -17,7 +17,7 @@ hgf::models::stokes::build_degrees_of_freedom_3d(const parameters& par, const hg
 
 #pragma omp parallel
   {
-#pragma omp sections nowait
+#pragma omp sections
     {
 #pragma omp section
       { // u section
@@ -572,13 +572,13 @@ hgf::models::stokes::dof_neighbors_3d(const parameters& par, const hgf::mesh& ms
         if (pressure[velocity_w[ii].cell_numbers[0]].neighbors[3] != -1) {
           no_neighbor_w[3] = 0;
           int pcell = pressure[velocity_w[ii].cell_numbers[0]].neighbors[3];
-          velocity_w[ii].neighbors[3] = ptv[idx2(pcell, 4, 6)];
+          velocity_w[ii].neighbors[3] = ptv[idx2(pcell, 5, 6)];
         }
       if (no_neighbor_w[3] && velocity_w[ii].cell_numbers[1] != -1)
         if (pressure[velocity_w[ii].cell_numbers[1]].neighbors[3] != -1) {
           no_neighbor_w[3] = 0;
           int pcell = pressure[velocity_w[ii].cell_numbers[1]].neighbors[3];
-          velocity_w[ii].neighbors[3] = ptv[idx2(pcell, 5, 6)];
+          velocity_w[ii].neighbors[3] = ptv[idx2(pcell, 4, 6)];
         }
       if (no_neighbor_w[3]) velocity_w[ii].neighbors[3] = -1;
 

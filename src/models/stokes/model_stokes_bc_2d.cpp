@@ -40,7 +40,8 @@ hgf::models::stokes::xflow_2d(const parameters& par, const hgf::mesh& msh)
   double ymin = 0.0;
   double ymax = par.width;
   double eps = 1E-12;
-  double dx, dy;
+
+  double maxin = 1.0;
 
 #pragma omp parallel
   {
@@ -49,6 +50,7 @@ hgf::models::stokes::xflow_2d(const parameters& par, const hgf::mesh& msh)
 
       int nbrs[4];
       array_coo temp_coo;
+      double dx, dy;
 
       for (int ii = kk*block_size_u; ii < std::min((kk + 1)*block_size_u, (int)interior_u_nums.size()); ii++) {
         double value = 0;
@@ -105,8 +107,9 @@ hgf::models::stokes::xflow_2d(const parameters& par, const hgf::mesh& msh)
           boundary[nbrs[3]].value = 0.0;
           // is it an inflow bdr?
           if (velocity_u[ii].coords[0] - dx < xmin + eps) {
-            rhs[interior_u_nums[ii]] += -(velocity_u[ii].coords[1] - ymin) * (velocity_u[ii].coords[1] - ymax);
-            boundary[nbrs[3]].value += -(velocity_u[ii].coords[1] - ymin) * (velocity_u[ii].coords[1] - ymax);
+            double value = (velocity_u[ii].coords[1] - ymin) * (ymax - velocity_u[ii].coords[1]);
+            rhs[interior_u_nums[ii]] += value * par.viscosity * dy / dx;
+            boundary[nbrs[3]].value += value;
           }
         }
 
@@ -124,6 +127,7 @@ hgf::models::stokes::xflow_2d(const parameters& par, const hgf::mesh& msh)
 
       int nbrs[4];
       array_coo temp_coo;
+      double dx, dy;
 
       for (int ii = kk*block_size_v; ii < std::min((kk + 1)*block_size_v, (int)interior_v_nums.size()); ii++) {
         double value = 0;
@@ -200,16 +204,16 @@ hgf::models::stokes::xflow_2d(const parameters& par, const hgf::mesh& msh)
         if (interior_u_nums[ptv[idx2(ii, 0, 4)]] == -1) {
           if (pressure[ii].coords[0] - 0.5*dxy[0] < xmin + eps) {
             i_index = shift_rows + ii;
-            uval = (velocity_u[ptv[idx2(ii, 0, 4)]].coords[1] - ymin) * (velocity_u[ptv[idx2(ii, 0, 4)]].coords[1] - ymax);
-            rhs[i_index] += (dxy[0] * dxy[1] / dxy[0]) * uval;
+            uval = (velocity_u[ptv[idx2(ii, 0, 4)]].coords[1] - ymin) * (ymax - velocity_u[ptv[idx2(ii, 0, 4)]].coords[1]);
+            rhs[i_index] -= (dxy[0] * dxy[1] / dxy[0]) * uval;
           }
         }
 
         if (interior_u_nums[ptv[idx2(ii, 1, 4)]] == -1) {
           if (pressure[ii].coords[0] + 0.5*dxy[0] > xmax - eps) {
             i_index = shift_rows + ii;
-            uval = (velocity_u[ptv[idx2(ii, 0, 4)]].coords[1] - ymin) * (velocity_u[ptv[idx2(ii, 0, 4)]].coords[1] - ymax); // ugh convert neumann to dirichlet here
-            rhs[i_index] -= (dxy[0] * dxy[1] / dxy[0]) * uval;
+            uval = (velocity_u[ptv[idx2(ii, 0, 4)]].coords[1] - ymin) * (ymax - velocity_u[ptv[idx2(ii, 0, 4)]].coords[1]); // ugh convert neumann to dirichlet here
+            rhs[i_index] += (dxy[0] * dxy[1] / dxy[0]) * uval;
           }
         }
 

@@ -50,7 +50,9 @@ hgf::models::stokes::xflow_3d(const parameters& par, const hgf::mesh& msh)
   double ymax = par.width;
   double zmin = 0.0;
   double zmax = par.height;
-  double eps = 1E-10;
+  double eps = 1E-14;
+
+  double maxin = 1.0;
 
 #pragma omp parallel
   {
@@ -95,7 +97,7 @@ hgf::models::stokes::xflow_3d(const parameters& par, const hgf::mesh& msh)
         if (bc_contributor[1]) {
           // Type Dirichlet?
           if (velocity_u[ii].coords[0] + dx <= xmax - eps) {
-            value += par.viscosity * dx * dy / dx;
+            value += par.viscosity * dz * dy / dx;
             boundary[nbrs[1]].type = 1;
             boundary[nbrs[1]].value = 0.0;
           }
@@ -120,8 +122,10 @@ hgf::models::stokes::xflow_3d(const parameters& par, const hgf::mesh& msh)
           boundary[nbrs[3]].value = 0.0;
           // is it an inflow boundary?
           if (velocity_u[ii].coords[0] - dx < xmin + eps) {
-            rhs[interior_u_nums[ii]] += -1.0;
-            boundary[nbrs[3]].value += -1.0;
+            double value = (velocity_u[ii].coords[1] - ymin) * (ymax - velocity_u[ii].coords[1]) \
+              * (velocity_u[ii].coords[2] - zmin) * (zmax - velocity_u[ii].coords[2]);
+            rhs[interior_u_nums[ii]] += value * par.viscosity * dz * dy / dx;
+            boundary[nbrs[3]].value += value;
           }
         }
 
@@ -171,8 +175,8 @@ hgf::models::stokes::xflow_3d(const parameters& par, const hgf::mesh& msh)
           (2 * (pressure[velocity_v[ii].cell_numbers[1]].coords[1] - velocity_v[ii].coords[1]));
 
         dx = (velocity_v[ii].cell_numbers[0] != -1) ? \
-          (2 * (velocity_u[ptv[idx2(velocity_v[ii].cell_numbers[0], 1, 6)]].coords[1] - velocity_v[ii].coords[1])) : \
-          (2 * (velocity_u[ptv[idx2(velocity_v[ii].cell_numbers[1], 1, 6)]].coords[1] - velocity_v[ii].coords[1]));
+          (2 * (velocity_u[ptv[idx2(velocity_v[ii].cell_numbers[0], 1, 6)]].coords[0] - velocity_v[ii].coords[0])) : \
+          (2 * (velocity_u[ptv[idx2(velocity_v[ii].cell_numbers[1], 1, 6)]].coords[0] - velocity_v[ii].coords[0]));
 
         dz = (velocity_v[ii].cell_numbers[0] != -1) ? \
           (2 * (velocity_w[ptv[idx2(velocity_v[ii].cell_numbers[0], 5, 6)]].coords[2] - velocity_v[ii].coords[2])) : \
@@ -255,12 +259,12 @@ hgf::models::stokes::xflow_3d(const parameters& par, const hgf::mesh& msh)
           (2 * (pressure[velocity_w[ii].cell_numbers[1]].coords[2] - velocity_w[ii].coords[2]));
 
         dx = (velocity_w[ii].cell_numbers[0] != -1) ? \
-          (2 * (velocity_u[ptv[idx2(velocity_w[ii].cell_numbers[0], 1, 6)]].coords[0] - velocity_u[ptv[idx2(velocity_w[ii].cell_numbers[0], 0, 6)]].coords[0])) : \
-          (2 * (velocity_u[ptv[idx2(velocity_w[ii].cell_numbers[1], 1, 6)]].coords[0] - velocity_u[ptv[idx2(velocity_w[ii].cell_numbers[1], 0, 6)]].coords[0]));
+          ((velocity_u[ptv[idx2(velocity_w[ii].cell_numbers[0], 1, 6)]].coords[0] - velocity_u[ptv[idx2(velocity_w[ii].cell_numbers[0], 0, 6)]].coords[0])) : \
+          ((velocity_u[ptv[idx2(velocity_w[ii].cell_numbers[1], 1, 6)]].coords[0] - velocity_u[ptv[idx2(velocity_w[ii].cell_numbers[1], 0, 6)]].coords[0]));
 
         dy = (velocity_w[ii].cell_numbers[0] != -1) ? \
-          (2 * (velocity_v[ptv[idx2(velocity_w[ii].cell_numbers[0], 3, 6)]].coords[1] - velocity_v[ptv[idx2(velocity_w[ii].cell_numbers[0], 2, 6)]].coords[1])) : \
-          (2 * (velocity_v[ptv[idx2(velocity_w[ii].cell_numbers[1], 3, 6)]].coords[1] - velocity_v[ptv[idx2(velocity_w[ii].cell_numbers[1], 2, 6)]].coords[1]));
+          ((velocity_v[ptv[idx2(velocity_w[ii].cell_numbers[0], 3, 6)]].coords[1] - velocity_v[ptv[idx2(velocity_w[ii].cell_numbers[0], 2, 6)]].coords[1])) : \
+          ((velocity_v[ptv[idx2(velocity_w[ii].cell_numbers[1], 3, 6)]].coords[1] - velocity_v[ptv[idx2(velocity_w[ii].cell_numbers[1], 2, 6)]].coords[1]));
 
         // y- neighbor
         if (bc_contributor[0]) {
@@ -290,16 +294,16 @@ hgf::models::stokes::xflow_3d(const parameters& par, const hgf::mesh& msh)
         // z- neighbor
         if (bc_contributor[4]) {
           // Type Dirichlet
-          boundary[nbrs[0] + shift_w].type = 1;
-          boundary[nbrs[0] + shift_w].value = 0.0;
+          boundary[nbrs[4] + shift_w].type = 1;
+          boundary[nbrs[4] + shift_w].value = 0.0;
           value += par.viscosity * dx * dy / dz;
         }
 
         // z+ neighbor
         if (bc_contributor[5]) {
           // Type Dirichlet
-          boundary[nbrs[0] + shift_w].type = 1;
-          boundary[nbrs[0] + shift_w].value = 0.0;
+          boundary[nbrs[5] + shift_w].type = 1;
+          boundary[nbrs[5] + shift_w].value = 0.0;
           value += par.viscosity * dx * dy / dz;
         }
 
@@ -334,15 +338,17 @@ hgf::models::stokes::xflow_3d(const parameters& par, const hgf::mesh& msh)
         if (interior_u_nums[ptv[idx2(ii, 0, 6)]] == -1) {
           if (pressure[ii].coords[0] - 0.5*dxyz[0] < xmin + eps) {
             i_index = shift_rows + ii;
-            uval = 1.0;
-            rhs[i_index] += (dxyz[0] * dxyz[1] * dxyz[2] / dxyz[0]) * uval;
+            uval = (velocity_u[ptv[idx2(ii, 0, 6)]].coords[1] - ymin) * (ymax - velocity_u[ptv[idx2(ii, 0, 6)]].coords[1]) \
+                 * (velocity_u[ptv[idx2(ii, 0, 6)]].coords[2] - zmin) * (zmax - velocity_u[ptv[idx2(ii, 0, 6)]].coords[2]);
+            rhs[i_index] -= (dxyz[0] * dxyz[1] * dxyz[2] / dxyz[0]) * uval;
           }
         }
         if (interior_u_nums[ptv[idx2(ii, 1, 6)]] == -1) {
           if (pressure[ii].coords[0] + 0.5*dxyz[0] > xmax - eps) {
             i_index = shift_rows + ii;
-            uval = 1.0;
-            rhs[i_index] -= (dxyz[0] * dxyz[1] * dxyz[2] / dxyz[0]) * uval;
+            uval = (velocity_u[ptv[idx2(ii, 1, 6)]].coords[1] - ymin) * (ymax - velocity_u[ptv[idx2(ii, 1, 6)]].coords[1]) \
+                 * (velocity_u[ptv[idx2(ii, 1, 6)]].coords[2] - zmin) * (zmax - velocity_u[ptv[idx2(ii, 1, 6)]].coords[2]);
+            rhs[i_index] += (dxyz[0] * dxyz[1] * dxyz[2] / dxyz[0]) * uval;
           }
         }
 
