@@ -14,10 +14,10 @@ namespace hgf
       std::vector< int > gtlNode;
       int order;
       void build( parameters& par);
+      void printVTK(const parameters& par);
     private:
       void build_from_voxel_quad( parameters& par);
       void build_from_voxel_hex(parameters& par);
-      void printVTK(const parameters& par);
   };
 }
 
