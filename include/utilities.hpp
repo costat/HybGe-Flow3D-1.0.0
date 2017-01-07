@@ -35,6 +35,12 @@ namespace hgf
 
   void
   unique_array(std::vector< array_coo >& array);
+
+  int
+  mesh_sanity(parameters& par);
+
+  int
+  remove_dead_pores(parameters& par);
 }
 
 #endif
