@@ -184,7 +184,7 @@ hgf::mesh::build_from_voxel_quad( parameters& par)
     { // various tasks that need to be performed serially
       gtlNode.resize(nNodes * 4);
       els.resize(nCells);
-      std::cout << "\nBuilding " << nCells << " quadrilateral element mesh from voxel data.\n";
+      std::cout << "\nBuilding " << nCells << " quadrilateral element mesh from voxel data.\n\n";
       int cell_num = -1;
       for (int cell = 0; cell < cell_numbers.size(); cell++) {
         if (cell_numbers[cell] != 1) {
@@ -630,7 +630,7 @@ hgf::mesh::build_from_voxel_hex(parameters& par)
     { // various tasks that need to be performed serially
       gtlNode.resize(nNodes * 8);
       els.resize(nCells);
-      std::cout << "\nBuilding " << nCells << " hexahedral cell mesh from voxel data.\n";
+      std::cout << "\nBuilding " << nCells << " hexahedral cell mesh from voxel data.\n\n";
       int cell_num = -1;
       for (int cell = 0; cell < cell_numbers.size(); cell++) {
         if (cell_numbers[cell] != 1) {
@@ -661,7 +661,6 @@ hgf::mesh::build_from_voxel_hex(parameters& par)
       els[cell].dz = dz;
 
       //----- node information -----//
-      // Note: gnums are temporary here, and are unique'd later
       // local node 0
       els[cell].vtx[0].coords[0] = ii*dx;
       els[cell].vtx[0].coords[1] = jj*dy;
@@ -1121,6 +1120,7 @@ hgf::mesh::build_from_voxel_hex(parameters& par)
           }
           else if (xi < par.nx - 1 && par.voxel_geometry[idx3((par.nz - 1), (par.ny - 1), (xi + 1), par.ny, par.nx)] != 1) {
             node_number++;
+            neighbor_number = cell_numbers[idx3((par.nz - 1), (par.ny - 1), (xi + 1), par.ny, par.nx)];
             els[neighbor_number].vtx[4].gnum = node_number;
           }
         }

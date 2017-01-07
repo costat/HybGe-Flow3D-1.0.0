@@ -24,8 +24,7 @@ namespace hgf
       public:
       
         std::vector< degree_of_freedom > velocity_u, velocity_v, velocity_w, pressure;
-        std::vector< int > ptv;       /* pressure.size() x (DIM x 2) size array containing
-                                         IDs of velocity cells related to this pressure cell */
+        std::vector< int > ptv;
         std::vector< int > interior_u, interior_v, interior_w; 
         std::vector< int > interior_u_nums, interior_v_nums, interior_w_nums;
         std::vector< boundary_nodes > boundary;
