@@ -54,7 +54,7 @@ hgf::multiscale::flow::compute_permeability_x(const parameters& par, const std::
     for (int ii = 0; ii < velocity_u.size(); ii++) {
       p1_idx = velocity_u[ii].cell_numbers[0];
       p2_idx = velocity_u[ii].cell_numbers[1];
-      if (p1 != -1 && p2 != -1) {
+      if (p1_idx != -1 && p2_idx != -1) {
         if (velocity_u[ii].coords[0] > min_x) {
           if (velocity_u[ii].coords[0] < max_x) {
             if (velocity_u[ii].coords[1] > min_y) {
@@ -102,7 +102,7 @@ hgf::multiscale::flow::compute_permeability_x(const parameters& par, const std::
     for (int ii = 0; ii < velocity_u.size(); ii++) {
       p1_idx = velocity_u[ii].cell_numbers[0];
       p2_idx = velocity_u[ii].cell_numbers[1];
-      if (p1 != -1 && p2 != -1) {
+      if (p1_idx != -1 && p2_idx != -1) {
         if (velocity_u[ii].coords[0] > min_x) {
           if (velocity_u[ii].coords[0] < max_x) {
             if (velocity_u[ii].coords[1] > min_y) {
@@ -196,7 +196,7 @@ hgf::multiscale::flow::compute_permeability_y(const parameters& par, const std::
     for (int ii = 0; ii < velocity_v.size(); ii++) {
       p1_idx = velocity_v[ii].cell_numbers[0];
       p2_idx = velocity_v[ii].cell_numbers[1];
-      if (p1 != -1 && p2 != -1) {
+      if (p1_idx != -1 && p2_idx != -1) {
         if (velocity_v[ii].coords[0] > min_x) {
           if (velocity_v[ii].coords[0] < max_x) {
             if (velocity_v[ii].coords[1] > min_y) {
@@ -244,7 +244,7 @@ hgf::multiscale::flow::compute_permeability_y(const parameters& par, const std::
     for (int ii = 0; ii < velocity_v.size(); ii++) {
       p1_idx = velocity_v[ii].cell_numbers[0];
       p2_idx = velocity_v[ii].cell_numbers[1];
-      if (p1 != -1 && p2 != -1) {
+      if (p1_idx != -1 && p2_idx != -1) {
         if (velocity_v[ii].coords[0] > min_x) {
           if (velocity_v[ii].coords[0] < max_x) {
             if (velocity_v[ii].coords[1] > min_y) {
@@ -334,24 +334,24 @@ hgf::multiscale::flow::compute_permeability_z(const parameters& par, const std::
   mid_z = 0.5 * (min_z + max_z);
   midrange_z = 0.5 * (max_z + mid_z) - 0.5 * (mid_z + min_z);
   // compute averages
-  for (int ii = 0; ii < velocity_v.size(); ii++) {
-    p1_idx = velocity_v[ii].cell_numbers[0];
-    p2_idx = velocity_v[ii].cell_numbers[1];
-    if (p1 != -1 && p2 != -1) {
-      if (velocity_v[ii].coords[0] > min_x) {
-        if (velocity_v[ii].coords[0] < max_x) {
-          if (velocity_v[ii].coords[1] > min_y) {
-            if (velocity_v[ii].coords[1] < max_y) {
-              if (velocity_v[ii].coords[2] > min_z) {
-                if (velocity_v[ii].coords[2] < max_z) {
+  for (int ii = 0; ii < velocity_w.size(); ii++) {
+    p1_idx = velocity_w[ii].cell_numbers[0];
+    p2_idx = velocity_w[ii].cell_numbers[1];
+    if (p1_idx != -1 && p2_idx != -1) {
+      if (velocity_w[ii].coords[0] > min_x) {
+        if (velocity_w[ii].coords[0] < max_x) {
+          if (velocity_w[ii].coords[1] > min_y) {
+            if (velocity_w[ii].coords[1] < max_y) {
+              if (velocity_w[ii].coords[2] > min_z) {
+                if (velocity_w[ii].coords[2] < max_z) {
                   pressure = 0.5 * (solution[n_velocity + p1_idx] + solution[n_velocity + p2_idx]);
-                  if (velocity_v[ii].coords[0] < mid_z) {
+                  if (velocity_w[ii].coords[0] < mid_z) {
                     p1 += pressure;
                     p1_count++;
                     v += solution[velocity_u.size() + velocity_v.size() + ii];
                     v_count++;
                   }
-                  else if (velocity_v[ii].coords[0] >= mid_z) {
+                  else if (velocity_w[ii].coords[0] >= mid_z) {
                     p2 += pressure;
                     p2_count++;
                     v += solution[velocity_u.size() + velocity_v.size() + ii];

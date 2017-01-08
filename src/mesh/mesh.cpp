@@ -48,9 +48,6 @@ hgf::mesh::build_from_voxel_quad( parameters& par)
   std::vector< int > cell_numbers(par.voxel_geometry.data(), \
     par.voxel_geometry.data() + par.voxel_geometry.size());
 
-  std::vector< int > voxel_to_cell;
-  //voxel_to_cell.resize(par.voxel_geometry.size());
-
 #pragma omp parallel
   {
     // determine the number of elements, edges, nodes
@@ -552,8 +549,6 @@ hgf::mesh::build_from_voxel_hex(parameters& par)
   z_index.resize(par.voxel_geometry.size());
   std::vector< int > cell_numbers(par.voxel_geometry.data(), \
     par.voxel_geometry.data() + par.voxel_geometry.size());
-
-  std::vector< int > voxel_to_cell;
 
 #pragma omp parallel
   {

@@ -65,4 +65,21 @@ hgf::models::stokes::setup_xflow_bc(const parameters& par, const hgf::mesh& msh)
 
 }
 
+void
+hgf::models::stokes::setup_yflow_bc(const parameters& par, const hgf::mesh& msh)
+{
+
+  if (par.dimension == 2) yflow_2d(par, msh);
+  else yflow_3d(par, msh);
+
+}
+
+void
+hgf::models::stokes::setup_zflow_bc(const parameters& par, const hgf::mesh& msh)
+{
+
+  zflow_3d(par, msh);
+
+}
+
 

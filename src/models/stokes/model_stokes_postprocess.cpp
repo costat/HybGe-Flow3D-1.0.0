@@ -80,7 +80,7 @@ hgf::models::stokes::solution_build(void)
           // else z-, calculate using prescribed flux and w value in z- direction
           else {
             dz = velocity_w[ii].coords[2] - velocity_w[velocity_w[ii].neighbors[4]].coords[2];
-            solution[ii + velocity_u.size() + velocity_v.size()] = solution[nU + nV + interior_w_nums[velocity_w[ii].neighbors[4]]] + boundary[ii + velocity_u.size() + velocity_v.size()].value * dz;
+            solution[ii + velocity_u.size() + velocity_v.size()] = solution_int[nU + nV + interior_w_nums[velocity_w[ii].neighbors[4]]] + boundary[ii + velocity_u.size() + velocity_v.size()].value * dz;
           }
         }
       }

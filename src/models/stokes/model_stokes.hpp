@@ -34,6 +34,9 @@ namespace hgf
         void solution_build(void);
         void output_vtk(const parameters& par, const hgf::mesh& msh);
         void setup_xflow_bc(const parameters& par, const hgf::mesh& msh);
+        void setup_yflow_bc(const parameters& par, const hgf::mesh& msh);
+        void setup_zflow_bc(const parameters& par, const hgf::mesh& msh);
+        void immersed_boundary(const parameters& par, double eta);
       
       private:
         
@@ -43,6 +46,7 @@ namespace hgf
         void momentum_2d(double visc);
         void continuity_2d(void);
         void xflow_2d(const parameters& par, const hgf::mesh& msh);
+        void yflow_2d(const parameters& par, const hgf::mesh& msh);
 
         void build_degrees_of_freedom_3d(const parameters& par, const hgf::mesh& msh);
         void dof_neighbors_3d(const parameters& par, const hgf::mesh& msh);
@@ -50,6 +54,8 @@ namespace hgf
         void momentum_3d(double visc);
         void continuity_3d(void);
         void xflow_3d(const parameters& par, const hgf::mesh& msh);
+        void yflow_3d(const parameters& par, const hgf::mesh& msh);
+        void zflow_3d(const parameters& par, const hgf::mesh& msh);
 
     };
   }

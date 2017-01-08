@@ -6,13 +6,7 @@
 // problem parameters
 struct parameters
 {
-  std::string model;                             // problem to solve
-  std::string element;                           // element type
-  std::string mesh_type;                         // mesh type, either 'uniform' or path to file
   double viscosity;
-  std::string bc;
-  int N;                                         // elements in NxN(xN) subdivision
-  double T;                                      // final time
   int dimension;                                 // dimension
   int nx;                                        // x direction voxels in voxel geometry
   int ny;                                        // y direction voxels in voxel geometry

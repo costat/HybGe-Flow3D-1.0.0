@@ -68,14 +68,6 @@ hgf::load_parameters(parameters& par, const bfs::path& problem_path)
   std::istringstream iVisc(line);
   iVisc >> str >> par.viscosity;
 
-  //--- bc ---//
-  if (ifs.good())
-  {
-    std::getline(ifs, line);
-  }
-  std::istringstream iBC(line);
-  iBC >> str >> par.bc;
-
   //--- length ---//
   if (ifs.good())
   {
@@ -105,7 +97,6 @@ void
 hgf::print_parameters(parameters& par)
 {
   std::cout << "Viscosity= " << par.viscosity << "\n";
-  std::cout << "Boundary Condtions= " << par.bc << "\n";
   std::cout << "Dimension= " << par.dimension << "\n";
   std::cout << "Geometry length= " << par.length << "\n";
   std::cout << "Geometry width= " << par.width << "\n";
@@ -601,7 +592,7 @@ hgf::remove_dead_pores(parameters& par)
         if (jj) {
           if (voxel_geometry_cpy[idx2((jj - 1), ii, par.nx)] == 0 || voxel_geometry_cpy[idx2((jj - 1), ii, par.nx)] == 2) {
             voxel_geometry_cpy[idx2((jj - 1), ii, par.nx)] = n_components + 2;
-            current_component.push_back((jj-1));
+            current_component.push_back((jj - 1));
             current_component.push_back(ii);
             search_queue.push_back((jj - 1));
             search_queue.push_back(ii);
@@ -630,7 +621,7 @@ hgf::remove_dead_pores(parameters& par)
         // look left 
         if (ii) {
           if (voxel_geometry_cpy[idx2(jj, (ii - 1), par.nx)] == 0 || voxel_geometry_cpy[idx2(jj, (ii - 1), par.nx)] == 2) {
-            voxel_geometry_cpy[idx2((ii - 1), jj, par.nx)] = n_components + 2;
+            voxel_geometry_cpy[idx2(jj, (ii - 1), par.nx)] = n_components + 2;
             current_component.push_back(jj);
             current_component.push_back((ii - 1));
             search_queue.push_back(jj);
@@ -654,7 +645,7 @@ hgf::remove_dead_pores(parameters& par)
             if (current_component[idx2(cc, 1, 2)] > max_i) max_i = current_component[idx2(cc, 1, 2)];
             if (current_component[idx2(cc, 1, 2)] < min_i) min_i = current_component[idx2(cc, 1, 2)];
           }
-          if (min_i > 0 && min_j > 0 && max_i < par.nx - 1 && max_j < par.ny - 1) {
+          if (min_i > 0 || min_j > 0 || max_i < par.nx - 1 || max_j < par.ny - 1) {
             pores_removed++;
             for (int cc = 0; cc < ((int)current_component.size() / 2); cc++) {
               par.voxel_geometry[idx2(current_component[idx2(cc, 0, 2)], current_component[idx2(cc, 1, 2)], par.nx)] = 1;
