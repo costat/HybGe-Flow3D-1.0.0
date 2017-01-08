@@ -21,6 +21,13 @@ namespace hgf
                                                            const std::vector< degree_of_freedom >& velocity_v, \
                                                            const std::vector< degree_of_freedom >& velocity_w, \
                                                            const std::vector< double > solution);
+      void compute_permeability_tensor(const parameters& par, const std::vector< degree_of_freedom >& velocity_u, \
+                                                           const std::vector< degree_of_freedom >& velocity_v, \
+                                                           const std::vector< degree_of_freedom >& velocity_w, \
+                                                           const std::vector< double > solution_xflow, \
+                                                           const std::vector< double > solution_yflow, \
+                                                           const std::vector< double > solution_zflow, \
+                                                           std::vector< double >& permeability);
     }
   }
 }
