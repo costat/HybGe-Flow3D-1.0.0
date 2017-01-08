@@ -204,13 +204,13 @@ hgf::multiscale::flow::compute_permeability_y(const parameters& par, const std::
                 if (velocity_v[ii].coords[2] > min_z) {
                   if (velocity_v[ii].coords[2] < max_z) {
                     pressure = 0.5 * (solution[n_velocity + p1_idx] + solution[n_velocity + p2_idx]);
-                    if (velocity_v[ii].coords[0] < mid_y) {
+                    if (velocity_v[ii].coords[1] < mid_y) {
                       p1 += pressure;
                       p1_count++;
                       v += solution[velocity_u.size() + ii];
                       v_count++;
                     }
-                    else if (velocity_v[ii].coords[0] >= mid_y) {
+                    else if (velocity_v[ii].coords[1] >= mid_y) {
                       p2 += pressure;
                       p2_count++;
                       v += solution[velocity_u.size() + ii];
@@ -250,13 +250,13 @@ hgf::multiscale::flow::compute_permeability_y(const parameters& par, const std::
             if (velocity_v[ii].coords[1] > min_y) {
               if (velocity_v[ii].coords[1] < max_y) {
                 pressure = 0.5 * (solution[n_velocity + p1_idx] + solution[n_velocity + p2_idx]);
-                if (velocity_v[ii].coords[0] < mid_y) {
+                if (velocity_v[ii].coords[1] < mid_y) {
                   p1 += pressure;
                   p1_count++;
                   v += solution[velocity_u.size() + ii];
                   v_count++;
                 }
-                else if (velocity_v[ii].coords[0] >= mid_y) {
+                else if (velocity_v[ii].coords[1] >= mid_y) {
                   p2 += pressure;
                   p2_count++;
                   v += solution[velocity_u.size() + ii];
@@ -345,13 +345,13 @@ hgf::multiscale::flow::compute_permeability_z(const parameters& par, const std::
               if (velocity_w[ii].coords[2] > min_z) {
                 if (velocity_w[ii].coords[2] < max_z) {
                   pressure = 0.5 * (solution[n_velocity + p1_idx] + solution[n_velocity + p2_idx]);
-                  if (velocity_w[ii].coords[0] < mid_z) {
+                  if (velocity_w[ii].coords[2] < mid_z) {
                     p1 += pressure;
                     p1_count++;
                     v += solution[velocity_u.size() + velocity_v.size() + ii];
                     v_count++;
                   }
-                  else if (velocity_w[ii].coords[0] >= mid_z) {
+                  else if (velocity_w[ii].coords[2] >= mid_z) {
                     p2 += pressure;
                     p2_count++;
                     v += solution[velocity_u.size() + velocity_v.size() + ii];
