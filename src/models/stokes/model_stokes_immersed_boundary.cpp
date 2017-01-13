@@ -10,7 +10,6 @@ hgf::models::stokes::immersed_boundary(const parameters& par, double eta)
 
   array_coo temp_coo;
   temp_coo.value = (double)1 / eta;
-  int ib;
   int dim_mult = 2 * par.dimension;
   int n_u = std::accumulate(interior_u.begin(), interior_u.end(), 0);
   int n_v = std::accumulate(interior_v.begin(), interior_v.end(), 0);
@@ -71,9 +70,9 @@ void
 hgf::models::stokes::random_immersed_boundary(const parameters& par, double eta, double vol_frac)
 {
   std::vector< unsigned long > temp_list;
-  int n_flow = pressure.size();
+  int n_flow = (int)pressure.size();
 
-  int n_switch = (vol_frac / 100) * n_flow;
+  int n_switch = (int)((vol_frac / 100) * n_flow);
   // nothing to do if domain is too small to fill vol_frac% of flow cells with IB
   if (n_switch <= 0) return;
 
@@ -96,6 +95,7 @@ new_ib_cell:
   int dim_mult = 2 * par.dimension;
   int n_u = std::accumulate(interior_u.begin(), interior_u.end(), 0);
   int n_v = std::accumulate(interior_v.begin(), interior_v.end(), 0);
+
   for (int ii = 0; ii < (int)temp_list.size(); ii++) {
     ib = temp_list[ii];
     // u component
@@ -141,11 +141,15 @@ new_ib_cell:
 
 // imports ib to array from an input vector of 1s and 0s. size of input must match size of pressure array
 void
-hgf::models::stokes::import_immersed_boundary(parameters& par, std::vector< int >& input_ib)
+hgf::models::stokes::import_immersed_boundary(parameters& par, std::vector< int >& input_ib, double eta)
 {
   pressure_ib_list = input_ib;
   array_coo temp_coo;
+  temp_coo.value = (double)1 / eta;
   int dim_mult = par.dimension * 2;
+  int n_u = std::accumulate(interior_u.begin(), interior_u.end(), 0);
+  int n_v = std::accumulate(interior_v.begin(), interior_v.end(), 0);
+
   for (int ib = 0; ib < (int)pressure.size(); ib++) {
     if (pressure_ib_list[ib]) {
       // u component

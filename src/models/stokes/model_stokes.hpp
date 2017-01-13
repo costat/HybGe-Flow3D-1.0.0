@@ -39,7 +39,7 @@ namespace hgf
         void setup_zflow_bc(const parameters& par, const hgf::mesh& msh);
         void random_immersed_boundary(const parameters& par, double eta, double vol_frac);
         void immersed_boundary(const parameters& par, double eta);
-        void import_immersed_boundary(parameters& par, std::vector< int >& input_ib)
+        void import_immersed_boundary(parameters& par, std::vector< int >& input_ib, double eta);
     
       private:
         
