@@ -7,7 +7,7 @@
 #define idx2(i, j, ldi) ((i * ldi) + j)
 
 void
-hgf::models::porenetwork::setup_xflow_bc(const parameters& par)
+hgf::models::uniform_porenetwork::setup_xflow_bc(const parameters& par)
 {
   array_coo temp_coo[7];
   double pn_epsilon = 1E-12;
@@ -59,7 +59,7 @@ hgf::models::porenetwork::setup_xflow_bc(const parameters& par)
 }
 
 void
-hgf::models::porenetwork::setup_yflow_bc(const parameters& par)
+hgf::models::uniform_porenetwork::setup_yflow_bc(const parameters& par)
 {
   array_coo temp_coo[7];
   double pn_epsilon = 1E-12;
@@ -111,7 +111,7 @@ hgf::models::porenetwork::setup_yflow_bc(const parameters& par)
 }
 
 void
-hgf::models::porenetwork::setup_zflow_bc(const parameters& par)
+hgf::models::uniform_porenetwork::setup_zflow_bc(const parameters& par)
 {
   // quick exit
   if (par.dimension == 2) {

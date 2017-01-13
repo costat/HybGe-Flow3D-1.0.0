@@ -27,17 +27,20 @@ namespace hgf
         std::vector< int > ptv;
         std::vector< int > interior_u, interior_v, interior_w; 
         std::vector< int > interior_u_nums, interior_v_nums, interior_w_nums;
+        std::vector< int > pressure_ib_list;
         std::vector< boundary_nodes > boundary;
         std::vector< array_coo > coo_array;
         std::vector< double > rhs, solution, solution_int;
         void build(const parameters& par, const hgf::mesh& msh);
         void solution_build(void);
-        void output_vtk(const parameters& par, const hgf::mesh& msh);
+        void output_vtk(const parameters& par, const hgf::mesh& msh, std::string& file_name);
         void setup_xflow_bc(const parameters& par, const hgf::mesh& msh);
         void setup_yflow_bc(const parameters& par, const hgf::mesh& msh);
         void setup_zflow_bc(const parameters& par, const hgf::mesh& msh);
+        void random_immersed_boundary(const parameters& par, double eta, double vol_frac);
         void immersed_boundary(const parameters& par, double eta);
-      
+        void import_immersed_boundary(parameters& par, std::vector< int >& input_ib)
+    
       private:
         
         void build_degrees_of_freedom_2d(const parameters& par, const hgf::mesh& msh);

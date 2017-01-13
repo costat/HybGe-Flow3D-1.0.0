@@ -28,6 +28,12 @@ namespace hgf
                                                            const std::vector< double > solution_yflow, \
                                                            const std::vector< double > solution_zflow, \
                                                            std::vector< double >& permeability);
+      double compute_permeability_porenetwork_x(const parameters& par, const std::vector< degree_of_freedom >& pressure, \
+                                                           const std::vector< double >& solution);
+      double compute_permeability_porenetwork_y(const parameters& par, const std::vector< degree_of_freedom >& pressure, \
+                                                           const std::vector< double >& solution);
+      double compute_permeability_porenetwork_z(const parameters& par, const std::vector< degree_of_freedom >& pressure, \
+                                                           const std::vector< double >& solution);
     }
   }
 }

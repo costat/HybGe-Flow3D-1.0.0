@@ -9,7 +9,7 @@
 #define idx2(i, j, ldi) ((i * ldi) + j)
 
 void
-hgf::models::porenetwork::init_permeability_one(const parameters& par)
+hgf::models::uniform_porenetwork::init_permeability_one(const parameters& par)
 {
   permeability.assign(pressure.size() * par.dimension * 2, 0.0);
   for (int ii = 0; ii < pressure.size(); ii++) {
@@ -22,7 +22,7 @@ hgf::models::porenetwork::init_permeability_one(const parameters& par)
 }
 
 void 
-hgf::models::porenetwork::init_permeability_random(const parameters& par, double min, double max)
+hgf::models::uniform_porenetwork::init_permeability_random(const parameters& par, double min, double max)
 {
   permeability.assign(pressure.size() * par.dimension * 2, 0.0);
   std::uniform_real_distribution<double> unif(min, max);

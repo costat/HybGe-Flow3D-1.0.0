@@ -7,7 +7,7 @@
 #define idx2(i, j, ldi) ((i * ldi) + j)
 
 void
-hgf::models::porenetwork::output_vtk(const parameters& par)
+hgf::models::uniform_porenetwork::output_vtk(const parameters& par)
 {
   int nlines = 0;
   for (int ii = 0; ii < (int)pressure.size(); ii++) {

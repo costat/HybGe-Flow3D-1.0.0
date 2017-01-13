@@ -7,7 +7,7 @@
 #define idx2(i, j, ldi) ((i * ldi) + j)
 
 void
-hgf::models::porenetwork::build(const parameters& par)
+hgf::models::uniform_porenetwork::build(const parameters& par)
 {
   rhs.resize(pressure.size());
   solution.resize(pressure.size());

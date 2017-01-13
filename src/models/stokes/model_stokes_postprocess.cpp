@@ -144,7 +144,7 @@ hgf::models::stokes::solution_build(void)
 }
 
 void
-hgf::models::stokes::output_vtk(const parameters& par, const hgf::mesh& msh)
+hgf::models::stokes::output_vtk(const parameters& par, const hgf::mesh& msh, std::string& file_name)
 {
 
   if (par.dimension == 3) { // 3d output
@@ -208,7 +208,8 @@ hgf::models::stokes::output_vtk(const parameters& par, const hgf::mesh& msh)
       }
     }
     // write to vtk file
-    bfs::path output_path( par.problem_path / "Solution.vtk" );
+    bfs::path output_path(par.problem_path / file_name.c_str());
+    output_path += ".vtk";
     std::ofstream outstream;
     outstream.open(output_path.string());
     outstream << "# vtk DataFile Version 3.0\n";
@@ -290,7 +291,8 @@ hgf::models::stokes::output_vtk(const parameters& par, const hgf::mesh& msh)
       }
     }
     // write solution vtk file
-    bfs::path output_path( par.problem_path / "Solution.vtk" );
+    bfs::path output_path( par.problem_path / file_name.c_str() );
+    output_path += ".vtk";
     std::ofstream outstream;
     outstream.open(output_path.string());
     outstream << "# vtk DataFile Version 3.0\n";

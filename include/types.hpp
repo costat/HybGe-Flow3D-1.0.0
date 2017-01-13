@@ -61,6 +61,15 @@ struct degree_of_freedom
   int neighbors[6];              // list of neighbors for the dof
 };
 
+struct dof_unstructured
+{
+  int doftype;
+  double coords[3];
+  std::vector<double> normals;
+  std::vector<int> cell_numbers;
+  std::vector<int> neighbors;
+};
+
 struct array_coo
 {
   int i_index;

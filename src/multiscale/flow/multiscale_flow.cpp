@@ -478,8 +478,18 @@ hgf::multiscale::flow::compute_permeability_tensor(const parameters& par, const 
     // solve linear system for K tensor
     dgesv(&n, &nrhs, mat, &n, ipiv, vel, &n, &info);
 
+    // determine porosity
+    double por;
+    int n_voxels = 0;
+    int n_void = 0;
+    for (int ii = 0; ii < par.voxel_geometry.size(); ii++) {
+      n_voxels++;
+      if (par.voxel_geometry[ii] == 0) n_void++;
+    }
+    por = (double)n_void / n_voxels;
+
     permeability.resize(9);
-    for (int ii = 0; ii < 9; ii++) permeability[ii] = vel[ii];
+    for (int ii = 0; ii < 9; ii++) permeability[ii] = por * vel[ii];
 
   }
   else {
@@ -524,8 +534,65 @@ hgf::multiscale::flow::compute_permeability_tensor(const parameters& par, const 
     // solve linear system for K tensor
     dgesv(&n, &nrhs, mat, &n, ipiv, vel, &n, &info);
 
+    // determine porosity
+    double por;
+    int n_voxels = 0;
+    int n_void = 0;
+    for (int ii = 0; ii < par.voxel_geometry.size(); ii++) {
+      n_voxels++;
+      if (par.voxel_geometry[ii] == 0) n_void++;
+    }
+    por = (double)n_void / n_voxels;
+
     permeability.resize(4);
-    for (int ii = 0; ii < 4; ii++) permeability[ii] = vel[ii];
+    for (int ii = 0; ii < 4; ii++) permeability[ii] = por * vel[ii];
 
   }
+}
+
+double 
+hgf::multiscale::flow::compute_permeability_porenetwork_x(const parameters& par, \
+  const std::vector< degree_of_freedom >& pressure, \
+  const std::vector< double >& solution)
+{
+  double pn_epsilon = 1E-12;
+  double a, len;
+  int dir_in = 3;
+  if (par.dimension == 3) {
+    len = par.length;
+    a = par.width * par.height;
+  }
+  else {
+    len = par.length;
+    a = par.width;
+  }
+
+  std::vector<unsigned long> l_pores;
+  l_pores.reserve(pressure.size());
+  for (int ii = 0; ii < (int)pressure.size(); ii++) {
+
+  }
+
+  return 0;
+
+}
+
+double
+hgf::multiscale::flow::compute_permeability_porenetwork_y(const parameters& par, \
+  const std::vector< degree_of_freedom >& pressure, \
+  const std::vector< double >& solution)
+{
+
+  return 0;
+
+}
+
+double
+hgf::multiscale::flow::compute_permeability_porenetwork_z(const parameters& par, \
+  const std::vector< degree_of_freedom >& pressure, \
+  const std::vector< double >& solution)
+{
+
+  return 0;
+
 }

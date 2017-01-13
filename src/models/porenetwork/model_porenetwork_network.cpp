@@ -7,7 +7,7 @@
 #define idx3(i, j, k, ldi1, ldi2) (k + (ldi2 * (j + ldi1 * i)))
 
 void
-hgf::models::porenetwork::build_uniform_network(const parameters& par, int n_pores_x, int n_pores_y, int n_pores_z)
+hgf::models::uniform_porenetwork::build_uniform_network(const parameters& par, int n_pores_x, int n_pores_y, int n_pores_z)
 {
   if (par.dimension == 2) {
     double dx, dy;
@@ -64,8 +64,3 @@ hgf::models::porenetwork::build_uniform_network(const parameters& par, int n_por
 
 }
 
-void
-hgf::models::porenetwork::import_network(const parameters& par)
-{
-  // formatting not yet determined -- place holder for importing a porenetwork
-}
