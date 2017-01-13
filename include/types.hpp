@@ -16,6 +16,7 @@ struct parameters
   double height;
   std::vector< unsigned long > voxel_geometry;   // voxel geometry
   boost::filesystem::path problem_path;
+  int verbose;                                   // defaults to 0
 };
 
 // vertexs

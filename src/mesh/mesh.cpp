@@ -181,7 +181,7 @@ hgf::mesh::build_from_voxel_quad( parameters& par)
     { // various tasks that need to be performed serially
       gtlNode.resize(nNodes * 4);
       els.resize(nCells);
-      std::cout << "\nBuilding " << nCells << " quadrilateral element mesh from voxel data.\n\n";
+      if (par.verbose >= 1) std::cout << "\nBuilding " << nCells << " quadrilateral element mesh from voxel data.\n\n";
       int cell_num = -1;
       for (int cell = 0; cell < cell_numbers.size(); cell++) {
         if (cell_numbers[cell] != 1) {
@@ -625,7 +625,7 @@ hgf::mesh::build_from_voxel_hex(parameters& par)
     { // various tasks that need to be performed serially
       gtlNode.resize(nNodes * 8);
       els.resize(nCells);
-      std::cout << "\nBuilding " << nCells << " hexahedral cell mesh from voxel data.\n\n";
+      if (par.verbose >= 1) std::cout << "\nBuilding " << nCells << " hexahedral cell mesh from voxel data.\n\n";
       int cell_num = -1;
       for (int cell = 0; cell < cell_numbers.size(); cell++) {
         if (cell_numbers[cell] != 1) {

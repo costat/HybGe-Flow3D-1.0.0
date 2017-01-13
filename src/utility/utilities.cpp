@@ -21,7 +21,6 @@ void
 hgf::init_parameters(parameters& par, const std::string& problem_path)
 {
   par.problem_path = problem_path;
-  std::cout << "\nSolving problem in directory: \t " << par.problem_path << "\n";
   std::string param = "Parameters.dat";
   bfs::path Parameters;
   bool isParam = hgf::find_file(par.problem_path, param, Parameters);
@@ -31,7 +30,7 @@ hgf::init_parameters(parameters& par, const std::string& problem_path)
   }
   hgf::load_parameters(par, Parameters);
   hgf::import_voxel_geometry(par, par.problem_path);
-  hgf::print_parameters(par);
+  par.verbose = 0;
 }
 
 bool
@@ -101,6 +100,8 @@ hgf::print_parameters(parameters& par)
   std::cout << "Geometry length= " << par.length << "\n";
   std::cout << "Geometry width= " << par.width << "\n";
   std::cout << "Geometry height= " << par.height << "\n";
+  std::cout << "Verbose= " << par.verbose << "\n";
+  std::cout << "Problem path= " << par.problem_path.string() << "\n";
 }
 
 void
