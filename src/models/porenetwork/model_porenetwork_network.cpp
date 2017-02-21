@@ -6,6 +6,13 @@
 // 1d->3d index
 #define idx3(i, j, k, ldi1, ldi2) (k + (ldi2 * (j + ldi1 * i)))
 
+/** \brief hgf::models::uniform_porenetwork::build_uniform_network builds the degrees of freedom and initializes the peremability vector for a uniform porenetwork.
+ *
+ * @param[in] par - parameters struct containing problem information.
+ * @param[in] n_pores_x - number of pores in the x-direction.
+ * @param[in] n_pores_y - number of pores in the y-direction.
+ * @param[in] n_pores_z - number of pores in the z-direction.
+ */
 void
 hgf::models::uniform_porenetwork::build_uniform_network(const parameters& par, int n_pores_x, int n_pores_y, int n_pores_z)
 {

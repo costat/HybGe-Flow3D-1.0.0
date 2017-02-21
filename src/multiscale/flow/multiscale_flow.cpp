@@ -3,7 +3,9 @@
 // 1d->2d index
 #define idx2(i, j, ldi) ((i * ldi) + j)
 
-void 
+extern "C" void dgesv(int *N, int *NRHS, double *A, int *LDA, int *IPIV, double *B, int *LDB, int *INFO);
+
+void
 compute_averages_x(const parameters& par, const std::vector< degree_of_freedom >& velocity_u, \
                                           const std::vector< degree_of_freedom >& velocity_v, \
                                           const std::vector< degree_of_freedom >& velocity_w, \
@@ -324,6 +326,15 @@ compute_averages_z(const parameters& par, const std::vector< degree_of_freedom >
   g = (p1 - p2) / midrange_z;
 }
 
+
+/** \brief hgf::multiscale::flow::compute_permeability_x computes upscaled permeability in the x direction from a porescale flow solution.
+ *
+ * @param[in] par - parameters struct containing problem information.
+ * @param[in] velocity_u - Degrees of freedom for the x-component of the porescale velocity solution.
+ * @param[in] velocity_v - Degrees of freedom for the y-component of the porescale velocity solution.
+ * @param[in] velocity_w - Degrees of freedom for the z-component of the porescale velocity solution.
+ * @param[in] solution - Porescale flow solution.
+ */
 double
 hgf::multiscale::flow::compute_permeability_x(const parameters& par, const std::vector< degree_of_freedom >& velocity_u, \
                                                                      const std::vector< degree_of_freedom >& velocity_v, \
@@ -353,7 +364,15 @@ hgf::multiscale::flow::compute_permeability_x(const parameters& par, const std::
 
 }
 
-double 
+/** \brief hgf::multiscale::flow::compute_permeability_y computes upscaled permeability in the y direction from a porescale flow solution.
+ *
+ * @param[in] par - parameters struct containing problem information.
+ * @param[in] velocity_u - Degrees of freedom for the x-component of the porescale velocity solution.
+ * @param[in] velocity_v - Degrees of freedom for the y-component of the porescale velocity solution.
+ * @param[in] velocity_w - Degrees of freedom for the z-component of the porescale velocity solution.
+ * @param[in] solution - Porescale flow solution.
+ */
+double
 hgf::multiscale::flow::compute_permeability_y(const parameters& par, const std::vector< degree_of_freedom >& velocity_u, \
                                                      const std::vector< degree_of_freedom >& velocity_v, \
                                                      const std::vector< degree_of_freedom >& velocity_w, \
@@ -382,7 +401,15 @@ hgf::multiscale::flow::compute_permeability_y(const parameters& par, const std::
 
 }
 
-double 
+/** \brief hgf::multiscale::flow::compute_permeability_z computes upscaled permeability in the z direction from a porescale flow solution.
+ *
+ * @param[in] par - parameters struct containing problem information.
+ * @param[in] velocity_u - Degrees of freedom for the x-component of the porescale velocity solution.
+ * @param[in] velocity_v - Degrees of freedom for the y-component of the porescale velocity solution.
+ * @param[in] velocity_w - Degrees of freedom for the z-component of the porescale velocity solution.
+ * @param[in] solution - Porescale flow solution.
+ */
+double
 hgf::multiscale::flow::compute_permeability_z(const parameters& par, const std::vector< degree_of_freedom >& velocity_u, \
                                                      const std::vector< degree_of_freedom >& velocity_v, \
                                                      const std::vector< degree_of_freedom >& velocity_w, \
@@ -410,6 +437,17 @@ hgf::multiscale::flow::compute_permeability_z(const parameters& par, const std::
   return (v / g) * por;
 }
 
+/** \brief hgf::multiscale::flow::compute_permeability_tensor computes upscaled permeability tensor given flow solutions for flows in each principal axis direction.
+ *
+ * @param[in] par - parameters struct containing problem information.
+ * @param[in] velocity_u - Degrees of freedom for the x-component of the porescale velocity solution.
+ * @param[in] velocity_v - Degrees of freedom for the y-component of the porescale velocity solution.
+ * @param[in] velocity_w - Degrees of freedom for the z-component of the porescale velocity solution. Can be empty if par indicates a 2d flow.
+ * @param[in] solution_xflow - Solution of flow problem in x-axis direction.
+ * @param[in] solution_yflow - Solution of flow problem in y-axis direction.
+ * @param[in] solution_zflow - Solution of flow problem in z-axis direction. Can be empty if par indicates a 2d flow.
+ * @param[out] permeability - resulting 4x4 (2d flow) or 9x9 (3d flow) permeability tensor. 
+ */
 void
 hgf::multiscale::flow::compute_permeability_tensor(const parameters& par, const std::vector< degree_of_freedom >& velocity_u, \
                                                                           const std::vector< degree_of_freedom >& velocity_v, \
@@ -550,7 +588,13 @@ hgf::multiscale::flow::compute_permeability_tensor(const parameters& par, const 
   }
 }
 
-double 
+/** \brief hgf::multiscale::flow::compute_permeability_porenetwork_x computes upscaled permeability in the x direction from a porenetwork flow solution.
+ *
+ * @param[in] par - parameters struct containing problem information.
+ * @param[in] pressure - Pressure degrees of freedom in porenetwork model.
+ * @param[in] solution - Porenetwork flow solution.
+ */
+double
 hgf::multiscale::flow::compute_permeability_porenetwork_x(const parameters& par, \
   const std::vector< degree_of_freedom >& pressure, \
   const std::vector< double >& solution)
@@ -577,6 +621,12 @@ hgf::multiscale::flow::compute_permeability_porenetwork_x(const parameters& par,
 
 }
 
+/** \brief hgf::multiscale::flow::compute_permeability_porenetwork_y computes upscaled permeability in the y direction from a porenetwork flow solution.
+ *
+ * @param[in] par - parameters struct containing problem information.
+ * @param[in] pressure - Pressure degrees of freedom in porenetwork model.
+ * @param[in] solution - Porenetwork flow solution.
+ */
 double
 hgf::multiscale::flow::compute_permeability_porenetwork_y(const parameters& par, \
   const std::vector< degree_of_freedom >& pressure, \
@@ -587,6 +637,12 @@ hgf::multiscale::flow::compute_permeability_porenetwork_y(const parameters& par,
 
 }
 
+/** \brief hgf::multiscale::flow::compute_permeability_porenetwork_z computes upscaled permeability in the z direction from a porenetwork flow solution.
+ *
+ * @param[in] par - parameters struct containing problem information.
+ * @param[in] pressure - Pressure degrees of freedom in porenetwork model.
+ * @param[in] solution - Porenetwork flow solution.
+ */
 double
 hgf::multiscale::flow::compute_permeability_porenetwork_z(const parameters& par, \
   const std::vector< degree_of_freedom >& pressure, \

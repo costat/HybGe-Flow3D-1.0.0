@@ -8,6 +8,10 @@
 // 1d->2d index
 #define idx2(i, j, ldi) ((i * ldi) + j)
 
+/** \brief hgf::models::uniform_porenetwork::init_permeability_one sets permeability to 1 for all throats.
+ *
+ * @param[in] par - parameters struct containing problem information.
+ */
 void
 hgf::models::uniform_porenetwork::init_permeability_one(const parameters& par)
 {
@@ -21,6 +25,12 @@ hgf::models::uniform_porenetwork::init_permeability_one(const parameters& par)
   }
 }
 
+/** \brief hgf::models::uniform_porenetwork::init_permeability_one draws from a uniform distribution to set the permeability in each throat.
+ *
+ * @param[in] par - parameters struct containing problem information.
+ * @param[in] min - lower bound on range for permeability in each throat.
+ * @param[in] max - upper bound on range for permeability in each throat.
+ */
 void 
 hgf::models::uniform_porenetwork::init_permeability_random(const parameters& par, double min, double max)
 {

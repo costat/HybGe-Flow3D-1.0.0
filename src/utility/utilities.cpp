@@ -13,10 +13,16 @@
 // 1d->3d index
 #define idx3(i, j, k, ldi1, ldi2) (k + (ldi2 * (j + ldi1 * i)))
 
-#include "../../include/hgflow.hpp"
+#include "hgflow.hpp"
 
 namespace bfs = boost::filesystem;
 
+/** \brief Initializes a parameters struct from data in a problem directory.
+ * 
+ * @param[in,out] par - parameters struct initialized by this function.
+ * @param[in] problem_path - path to problem folder containing Parameters.dat and Geometry.dat files.
+ *
+ */
 void
 hgf::init_parameters(parameters& par, const std::string& problem_path)
 {
@@ -33,6 +39,13 @@ hgf::init_parameters(parameters& par, const std::string& problem_path)
   par.verbose = 0;
 }
 
+/** \brief Finds a file or returns false if the file does not exist.
+ * 
+ * @param[in] problem_path - path to problem folder containing Parameters.dat and Geometry.dat files.
+ * @param[in] file_name - name of the file being sought.
+ * @param[in,out] file_path - path to file found.
+ *
+ */
 bool
 hgf::find_file(const bfs::path& problem_path, \
   const std::string& file_name, \
@@ -52,6 +65,11 @@ hgf::find_file(const bfs::path& problem_path, \
   return false;
 }
 
+/** \brief Loads parameters into a parameters struct from Parameters.dat file.
+ *
+ * @param[in,out] par - parameters struct, parameters will be set from data in Parameters.dat located in problem_path.
+ * @param[in] problem_path - path containing Parameters.dat.
+ */
 void
 hgf::load_parameters(parameters& par, const bfs::path& problem_path)
 {
@@ -92,6 +110,10 @@ hgf::load_parameters(parameters& par, const bfs::path& problem_path)
   iheight >> str >> par.height;
 }
 
+/** \brief Prints parameters from par parameter.
+ *
+ * @param[in] par - parameters struct, function prints values from this struct.
+ */
 void
 hgf::print_parameters(parameters& par)
 {
@@ -104,6 +126,11 @@ hgf::print_parameters(parameters& par)
   std::cout << "Problem path= " << par.problem_path.string() << "\n";
 }
 
+/** \brief Imports voxel geometry from problem_path/Geometry.dat into par.voxel_geometry.
+ *
+ * @param[in,out] par - parameters struct containing problem information. Voxel info in Geometry.dat located in problem_path is loaded into par.voxel_geometry.
+ * @param[in] problem_path - path containing Parameters.dat and Geometry.dat for this problem.
+ */
 void
 hgf::import_voxel_geometry(parameters& par, const bfs::path& problem_path)
 {
@@ -195,6 +222,10 @@ hgf::import_voxel_geometry(parameters& par, const bfs::path& problem_path)
 
 }
 
+/** \brief Checks if a coordinate sparse matrix is symmetric. Returns 1 for symmetry and 0 for non-symmetry.
+ *
+ * @param[in] array - coordinate sparse matrix input that is checked for symmetry.
+ */
 bool
 hgf::check_symmetry(std::vector< array_coo >& array)
 {
@@ -213,7 +244,10 @@ hgf::check_symmetry(std::vector< array_coo >& array)
 
 }
 
-// sorts coo array by rows then by columns (j runs min to max within 1 i)
+/** \brief Sorts COO array by rows then by columns (j runs min to max within 1 i)
+ *
+ * @param[in,out] array - coordinate sparse matrix input that is sorted and returned.
+ */
 void
 hgf::sort_array(std::vector< array_coo >& array)
 {
@@ -222,7 +256,10 @@ hgf::sort_array(std::vector< array_coo >& array)
 
  }
 
-// create unique coo array. array sorted and then values associated to repeat indexes are summed, and extras removed
+/** \brief Create unique COO array. Array sorted and then values associated to repeat indexes are summed, and extras removed.
+ *
+ * @param[in,out] array - coordinate sparse matrix input that is unique'd and returned.
+ */
 void
 hgf::unique_array(std::vector< array_coo >& array)
 {
@@ -290,9 +327,12 @@ hgf::unique_array(std::vector< array_coo >& array)
   
 }
 
-// function removes cells that are boundaries in opposite directions
+/** \brief Function removes cells from a mesh that are boundaries in opposite directions. Returns number of cells removed.
+ *
+ * @param[in] par - parameters file containing mesh information.
+ */
 int 
-hgf::mesh_sanity(parameters& par)
+hgf::geo_sanity(parameters& par)
 {
   int totalChanged = 0;
   int nChanged;
@@ -443,6 +483,10 @@ cleanup:
   return totalChanged;
 }
 
+/** \brief Remove dead pores from a complex geometry. Returns number of pores removed.
+ *
+ * @param[in,out] par - parameters struct containing geometry information.
+ */
 int
 hgf::remove_dead_pores(parameters& par)
 {

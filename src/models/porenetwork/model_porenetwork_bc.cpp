@@ -6,6 +6,10 @@
 // 1d->2d index
 #define idx2(i, j, ldi) ((i * ldi) + j)
 
+/** \brief hgf::models::uniform_porenetwork::setup_xflow_bc sets boundary conditions in the linear system to induce flow in the x-direction.
+ *
+ * @param[in] par - parameters struct containing problem information.
+ */
 void
 hgf::models::uniform_porenetwork::setup_xflow_bc(const parameters& par)
 {
@@ -58,6 +62,10 @@ hgf::models::uniform_porenetwork::setup_xflow_bc(const parameters& par)
   }
 }
 
+/** \brief hgf::models::uniform_porenetwork::setup_yflow_bc sets boundary conditions in the linear system to induce flow in the y-direction.
+ *
+ * @param[in] par - parameters struct containing problem information.
+ */
 void
 hgf::models::uniform_porenetwork::setup_yflow_bc(const parameters& par)
 {
@@ -110,6 +118,10 @@ hgf::models::uniform_porenetwork::setup_yflow_bc(const parameters& par)
   }
 }
 
+/** \brief hgf::models::uniform_porenetwork::setup_zflow_bc sets boundary conditions in the linear system to induce flow in the z-direction.
+ *
+ * @param[in] par - parameters struct containing problem information.
+ */
 void
 hgf::models::uniform_porenetwork::setup_zflow_bc(const parameters& par)
 {

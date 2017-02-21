@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# bash script to set paths for boost and linear algebra libraries
-# set export appropriate root directories before sourcing
+# bash script to set paths for boost and linear algebra libraries in linux
+# set export appropriate root directories before sourcing (BOOST_ROOT, PARALUTION_ROOT)
 
 ## BOOST ##
 if [ -z "${BOOST_ROOT+xxx}" ]; then
@@ -38,23 +38,3 @@ else
 
   echo PARALUTION paths set
 fi
-
-## MKL, OPTIONAL ##
-if [ -z "${MKL_ROOT+xxx}" ]; then
-  echo MKL_ROOT is not set
-elif [ -z "${MKL_ROOT}" ] && [ "{PARALUTION_ROOT+xxx}" = "xxx" ]; then
-  echo MKL_ROOT is set but empty
-else
-  export LIBRARY_PATH=$LIBRARY_PATH:$MKL_ROOT/lib/intel64
-  export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$MKL_ROOT/lib/intel64
-  export CMAKE_LIBRARY_PATH=$CMAKE_LIBRARY_PATH:$MKL_ROOT/lib/intel64
-
-  export INCLUDE_PATH=$INCLUDE_PATH:$MKL_ROOT/include
-  export C_INCLUDE_PATH=$C_INCLUDE_PATH:$MKL_ROOT/include
-  export CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:$MKL_ROOT/include
-  export CMAKE_INCLUDE_PATH=$CMAKE_INCLUDE_PATH:$MKL_ROOT/include
-
-  export MKLROOT=$MKL_ROOT
-  echo MKL paths set
-fi
-

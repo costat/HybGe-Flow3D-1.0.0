@@ -6,6 +6,12 @@
 // 1d->2d index
 #define idx2(i, j, ldi) ((i * ldi) + j)
 
+/** \brief hgf::models::uniform_porenetwork::build builds the linear system for a uniform porenetwork.
+ *
+ * It is assumed that the P-N DOFs and permeabilities have already been set.
+ *
+ * @param[in] par - parameters struct containing problem information.
+ */
 void
 hgf::models::uniform_porenetwork::build(const parameters& par)
 {

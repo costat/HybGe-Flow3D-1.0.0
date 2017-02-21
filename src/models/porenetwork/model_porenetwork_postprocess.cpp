@@ -6,6 +6,10 @@
 // 1d->2d index
 #define idx2(i, j, ldi) ((i * ldi) + j)
 
+/** \brief hgf::models::uniform_porenetwork::output_vtk saves the solution to the porenetwork flow to a file for VTK visualiztion.
+ *
+ * @param[in] par - parameters struct containing problem information, including problem directory.
+ */
 void
 hgf::models::uniform_porenetwork::output_vtk(const parameters& par)
 {

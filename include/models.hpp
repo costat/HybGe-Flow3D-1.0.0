@@ -11,7 +11,7 @@
    and headers.*/
 
 // HGF ships with stationary Stokes and a simple PoreNetwork model
-#include "../src/models/stokes/model_stokes.hpp"
-#include "../src/models/porenetwork/model_porenetwork.hpp"
+#include "model_stokes.hpp"
+#include "model_porenetwork.hpp"
 
 #endif

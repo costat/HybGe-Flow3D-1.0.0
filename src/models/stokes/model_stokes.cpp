@@ -6,6 +6,12 @@
 // 1d->2d index
 #define idx2(i, j, ldi) ((i * ldi) + j)
 
+/** \brief hgf::models::stokes::build builds the degrees of freedom, initializes the solution and rhs vectors, and sets up the linear system for Stokes flow.
+ *
+ * Immersed boundary and boundary condition information are not set by this function.
+ * @param[in] par - parameters struct containing problem information.
+ * @param[in] msh - mesh object containing a quadrilateral or hexagonal representation of geometry from problem folder addressed in parameters& par.
+ */
 void
 hgf::models::stokes::build(const parameters& par, const hgf::mesh& msh)
 {
@@ -56,6 +62,12 @@ hgf::models::stokes::build(const parameters& par, const hgf::mesh& msh)
 #endif
 }
 
+/** \brief hgf::models::stokes::setup_xflow_bc setups up the boundary conditions for a problem with flow in the positive direction along the x-axis.
+ *
+ * Contributions to the linear system coo_array and the rhs vector are set by this function.
+ * @param[in] par - parameters struct containing problem information.
+ * @param[in] msh - mesh object containing a quadrilateral or hexagonal representation of geometry from problem folder addressed in parameters& par.
+ */
 void
 hgf::models::stokes::setup_xflow_bc(const parameters& par, const hgf::mesh& msh)
 {
@@ -65,6 +77,12 @@ hgf::models::stokes::setup_xflow_bc(const parameters& par, const hgf::mesh& msh)
 
 }
 
+/** \brief hgf::models::stokes::setup_yflow_bc setups up the boundary conditions for a problem with flow in the positive direction along the y-axis.
+ *
+ * Contributions to the linear system coo_array and the rhs vector are set by this function.
+ * @param[in] par - parameters struct containing problem information.
+ * @param[in] msh - mesh object containing a quadrilateral or hexagonal representation of geometry from problem folder addressed in parameters& par.
+ */
 void
 hgf::models::stokes::setup_yflow_bc(const parameters& par, const hgf::mesh& msh)
 {
@@ -74,6 +92,12 @@ hgf::models::stokes::setup_yflow_bc(const parameters& par, const hgf::mesh& msh)
 
 }
 
+/** \brief hgf::models::stokes::setup_zflow_bc setups up the boundary conditions for a problem with flow in the positive direction along the z-axis.
+ *
+ * Contributions to the linear system coo_array and the rhs vector are set by this function.
+ * @param[in] par - parameters struct containing problem information.
+ * @param[in] msh - mesh object containing a quadrilateral or hexagonal representation of geometry from problem folder addressed in parameters& par.
+ */
 void
 hgf::models::stokes::setup_zflow_bc(const parameters& par, const hgf::mesh& msh)
 {

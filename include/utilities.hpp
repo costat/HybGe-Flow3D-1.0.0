@@ -8,6 +8,9 @@
 
 namespace bfs = boost::filesystem;
 
+/** \brief HGF is a library designed to solve multiscale flow problems in complex domains.
+ * 
+ */
 namespace hgf
 {
   void
@@ -37,7 +40,7 @@ namespace hgf
   unique_array(std::vector< array_coo >& array);
 
   int
-  mesh_sanity(parameters& par);
+  geo_sanity(parameters& par);
 
   int
   remove_dead_pores(parameters& par);

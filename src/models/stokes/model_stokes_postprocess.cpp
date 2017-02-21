@@ -8,6 +8,9 @@
 
 // NOTE: flux inserts currently assume a cartesian grid, e.g. flux's can be computed using single component distances. This should be extended.
 
+/** \brief hgf::models::stokes::solution_build builds the solution vector using boundary information and the Stokes interior solution, solution_int.
+ *
+ */
 void
 hgf::models::stokes::solution_build(void)
 {
@@ -143,6 +146,12 @@ hgf::models::stokes::solution_build(void)
   }
 }
 
+/** \brief hgf::models::stokes::output_vtk saves the solution to the Stokes flow to a file for VTK visualiztion.
+ *
+ * @param[in] par - parameters struct containing problem information, including problem directory.
+ * @param[in] msh - mesh object containing a quadrilateral or hexagonal representation of geometry from problem folder addressed in parameters& par.
+ * @param[in,out] file_name - string used to name the output file, which is placed in the problem directory contained in parameters& par.
+ */
 void
 hgf::models::stokes::output_vtk(const parameters& par, const hgf::mesh& msh, std::string& file_name)
 {
