@@ -1,5 +1,11 @@
 # HybGe-Flow3D #
 
+### New Location ###
+
+Please note that active development of HybGe-Flow3D is now located at www.github.com/numsol/HybGe-Flow3D.
+
+### Overview ###
+
 HybGe-Flow3D is a multiscale solver for laminar fluid flow in complex, uncertain 3D and 2D geometries.
 
 This software was developed under the partial support of the National Science
